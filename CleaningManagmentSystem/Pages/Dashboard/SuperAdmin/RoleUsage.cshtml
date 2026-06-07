@@ -1,0 +1,258 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.SuperAdmin.RoleUsageModel
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userRole = HttpContext.Session.GetString("UserRole")?.ToLower();
+
+    if (userName == null)
+    {
+        Response.Redirect("/Login");
+        return;
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Role Usage & Permissions - Super Admin - Yeka Cleaning</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+</head>
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+    <!-- Desktop Navbar -->
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/Dashboard/SuperAdmin"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+            <div class="nav-user">
+                <span>Welcome, @userName</span>
+                <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Navbar -->
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top d-lg-none">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" onclick="toggleSidebar()">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/Dashboard/SuperAdmin"><i class="bi bi-droplet-fill"></i> Yeka</a>
+            <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i></a>
+        </div>
+    </nav>
+    <nav id="sidebarMenu" class="sidebar d-lg-none">
+        @await Html.PartialAsync("~/Pages/Dashboard/SuperAdmin/_Sidebar.cshtml")
+    </nav>
+    <nav class="col-md-3 col-lg-2 d-none d-md-block sidebar" style="transform: none; padding-top: 56px;">
+        @await Html.PartialAsync("~/Pages/Dashboard/SuperAdmin/_Sidebar.cshtml")
+    </nav>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 pt-lg-5">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Role Usage & Permissions</h1>
+            <span class="badge bg-danger">Super Admin</span>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>@Model.SuccessMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>@Model.ErrorMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="row g-4">
+            @foreach (var role in Model.RoleDefinitions)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card role-card h-100 border-0 shadow-sm">
+                        <div class="card-header bg-@(role.AccessLevel == 4 ? "danger" : role.AccessLevel == 3 ? "primary" : role.AccessLevel == 2 ? "warning" : "info") text-white">
+                            <h5 class="mb-0">@role.DisplayName</h5>
+                            <small class="text-white-50">@role.RoleName.ToUpper()</small>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text small">@role.Description</p>
+
+                            <div class="mb-3">
+                                <h6><i class="bi bi-info-circle me-1"></i>Usage Context</h6>
+                                <p class="small mb-1">@role.UsageContext</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6><i class="bi bi-list-check me-1"></i>Responsibilities</h6>
+                                <pre class="small mb-0">@role.PrimaryResponsibilities</pre>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6><i class="bi bi-calendar-day me-1"></i>Daily Activities</h6>
+                                <pre class="small mb-0">@role.DailyActivities</pre>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6><i class="bi bi-file-earmark-text me-1"></i>Reports Access</h6>
+                                <span class="badge bg-secondary">@role.ReportsAccess</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6><i class="bi bi-grid me-1"></i>Modules</h6>
+                                <span class="badge bg-primary permission-badge me-1 mb-1">@role.ModulesAccess</span>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted">Access Level: <strong>@role.AccessLevel</strong> / 4</small>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#editRoleModal" onclick="editRole(@role.Id, '@role.RoleName', '@role.DisplayName', '@role.Description', '@role.UsageContext', '@role.PrimaryResponsibilities', '@role.DailyActivities', '@role.ReportsAccess', '@role.ModulesAccess', @role.AccessLevel, @role.CanCreateUsers.ToString().ToLower(), @role.CanViewFinancials.ToString().ToLower(), @role.CanManageDispatch.ToString().ToLower(), @role.CanViewPayroll.ToString().ToLower(), @role.CanManageStaff.ToString().ToLower())">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="border-top pt-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-shield-check me-1"></i>
+                                    Create Users: @(role.CanCreateUsers ? "Yes" : "No") |
+                                    <i class="bi bi-cash me-1"></i>
+                                    View Financials: @(role.CanViewFinancials ? "Yes" : "No") |
+                                    <i class="bi bi-truck me-1"></i>
+                                    Manage Dispatch: @(role.CanManageDispatch ? "Yes" : "No")
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </main>
+
+    <!-- Edit Role Modal -->
+    <div class="modal fade" id="editRoleModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Role Definition</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post">
+                        <input type="hidden" asp-for="EditId" name="EditId" />
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Role Name (internal)</label>
+                                <input type="text" class="form-control" asp-for="RoleName" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Display Name *</label>
+                                <input type="text" class="form-control" asp-for="DisplayName" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" asp-for="Description" rows="2"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Usage Context</label>
+                                <textarea class="form-control" asp-for="UsageContext" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Primary Responsibilities (one per line)</label>
+                                <textarea class="form-control" asp-for="PrimaryResponsibilities" rows="4"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Daily Activities (one per line)</label>
+                                <textarea class="form-control" asp-for="DailyActivities" rows="4"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Reports Access</label>
+                                <input type="text" class="form-control" asp-for="ReportsAccess" placeholder="e.g., All Reports, Financial, Payroll">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Modules Access</label>
+                                <input type="text" class="form-control" asp-for="ModulesAccess" placeholder="e.g., Dashboard, Users, Reports">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Access Level (1-4)</label>
+                                <select class="form-select" asp-for="AccessLevel">
+                                    <option value="1">Level 1 - Basic</option>
+                                    <option value="2">Level 2 - Standard</option>
+                                    <option value="3">Level 3 - Manager</option>
+                                    <option value="4">Level 4 - Admin</option>
+                                </select>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" asp-for="CanCreateUsers">
+                                    <label class="form-check-label">Can Create Users</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" asp-for="CanViewFinancials">
+                                    <label class="form-check-label">Can View Financials</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" asp-for="CanManageDispatch">
+                                    <label class="form-check-label">Can Manage Dispatch</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" asp-for="CanViewPayroll">
+                                    <label class="form-check-label">Can View Payroll</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" asp-for="CanManageStaff">
+                                    <label class="form-check-label">Can Manage Staff</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary" asp-page-handler="Save">
+                                <i class="bi bi-check-circle me-1"></i>Save Changes
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('show');
+            document.getElementById('sidebarBackdrop').classList.toggle('show');
+        }
+        document.querySelectorAll('#sidebarMenu .nav-link').forEach(function(link) {
+            link.addEventListener('click', function() { if (window.innerWidth < 992) toggleSidebar(); });
+        });
+
+        function editRole(id, roleName, displayName, description, usageContext, primaryResp, dailyAct, reports, modules, accessLevel, canCreate, canFinancial, canDispatch, canPayroll, canStaff) {
+            document.querySelector('input[name="EditId"]').value = id;
+            document.querySelector('input[name="RoleName"]').value = roleName;
+            document.querySelector('input[name="DisplayName"]').value = displayName;
+            document.querySelector('textarea[name="Description"]').value = description;
+            document.querySelector('textarea[name="UsageContext"]').value = usageContext;
+            document.querySelector('textarea[name="PrimaryResponsibilities"]').value = primaryResp;
+            document.querySelector('textarea[name="DailyActivities"]').value = dailyAct;
+            document.querySelector('input[name="ReportsAccess"]').value = reports;
+            document.querySelector('input[name="ModulesAccess"]').value = modules;
+            document.querySelector('select[name="AccessLevel"]').value = accessLevel;
+            document.querySelector('input[name="CanCreateUsers"]').checked = canCreate;
+            document.querySelector('input[name="CanViewFinancials"]').checked = canFinancial;
+            document.querySelector('input[name="CanManageDispatch"]').checked = canDispatch;
+            document.querySelector('input[name="CanViewPayroll"]').checked = canPayroll;
+            document.querySelector('input[name="CanManageStaff"]').checked = canStaff;
+        }
+    </script>
+</body>
+</html>

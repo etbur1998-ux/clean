@@ -1,0 +1,253 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.SuperAdmin.TransportAdminModel
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    if (userName == null) { Response.Redirect("/Login"); return; }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transport Admin - Yeka Cleaning</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+    <style>
+        .status-badge{font-size:.75rem;padding:4px 10px;border-radius:20px;font-weight:600}
+        .status-PendingDispatcher{background:#fff3cd;color:#856404}
+        .status-DriverAssigned{background:#cfe2ff;color:#084298}
+        .status-DriverAccepted{background:#d1e7dd;color:#0a3622}
+        .status-PickedUp{background:#d0f0fd;color:#055160}
+        .status-MahberatApprovedPickup{background:#d1e7dd;color:#0a3622}
+        .status-ReceiptSubmitted{background:#e2d9f3;color:#432874}
+        .status-ReceiptVerified{background:#d1e7dd;color:#0a3622}
+        .status-StaffApproved{background:#d1e7dd;color:#0a3622}
+        .status-Paid{background:#198754;color:#fff}
+        .status-DispatcherRejected,.status-StaffRejected{background:#f8d7da;color:#842029}
+        .stat-card{border:none;border-radius:16px;padding:20px;text-align:center}
+    </style>
+</head>
+<body>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+<nav class="navbar navbar-dark dashboard-navbar fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/Dashboard/SuperAdmin"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+        <div class="nav-user">
+            <span>Welcome, @userName</span>
+            <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        </div>
+    </div>
+</nav>
+<nav class="navbar navbar-dark dashboard-navbar fixed-top d-lg-none">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" onclick="toggleSidebar()"><span class="navbar-toggler-icon"></span></button>
+        <a class="navbar-brand" href="/Dashboard/SuperAdmin"><i class="bi bi-droplet-fill"></i> Yeka</a>
+        <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i></a>
+    </div>
+</nav>
+<nav id="sidebarMenu" class="sidebar d-lg-none">
+    @await Html.PartialAsync("~/Pages/Dashboard/SuperAdmin/_Sidebar.cshtml")
+</nav>
+<nav class="col-md-3 col-lg-2 d-none d-md-block sidebar" style="transform:none;padding-top:56px;">
+    @await Html.PartialAsync("~/Pages/Dashboard/SuperAdmin/_Sidebar.cshtml")
+</nav>
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-truck me-2 text-primary"></i>Transport Request Management</h1>
+        <div class="btn-toolbar gap-2">
+            <select id="statusFilter" class="form-select form-select-sm" onchange="loadRequests()">
+                <option value="">All Statuses</option>
+                <option value="PendingDispatcher">Pending Dispatcher</option>
+                <option value="DriverAssigned">Driver Assigned</option>
+                <option value="DriverAccepted">Driver Accepted</option>
+                <option value="PickedUp">Picked Up</option>
+                <option value="MahberatApprovedPickup">Pickup Approved</option>
+                <option value="ReceiptSubmitted">Receipt Submitted</option>
+                <option value="ReceiptVerified">Receipt Verified</option>
+                <option value="StaffApproved">Staff Approved</option>
+                <option value="Paid">Paid</option>
+                <option value="DispatcherRejected">Dispatcher Rejected</option>
+                <option value="StaffRejected">Staff Rejected</option>
+            </select>
+            <button class="btn btn-sm btn-outline-secondary" onclick="exportCsv()"><i class="bi bi-download me-1"></i>Export</button>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-3 mb-4" id="statsRow">
+        <div class="col-6 col-md-2"><div class="stat-card shadow-sm bg-warning bg-opacity-10"><div class="fs-3 fw-bold text-warning" id="s0">-</div><small class="text-muted">Pending</small></div></div>
+        <div class="col-6 col-md-2"><div class="stat-card shadow-sm bg-primary bg-opacity-10"><div class="fs-3 fw-bold text-primary" id="s1">-</div><small class="text-muted">Assigned</small></div></div>
+        <div class="col-6 col-md-2"><div class="stat-card shadow-sm bg-info bg-opacity-10"><div class="fs-3 fw-bold text-info" id="s2">-</div><small class="text-muted">Active</small></div></div>
+        <div class="col-6 col-md-2"><div class="stat-card shadow-sm bg-purple bg-opacity-10"><div class="fs-3 fw-bold text-purple" id="s3" style="color:#6f42c1">-</div><small class="text-muted">Receipt</small></div></div>
+        <div class="col-6 col-md-2"><div class="stat-card shadow-sm bg-success bg-opacity-10"><div class="fs-3 fw-bold text-success" id="s4">-</div><small class="text-muted">Paid</small></div></div>
+        <div class="col-6 col-md-2"><div class="stat-card shadow-sm bg-secondary bg-opacity-10"><div class="fs-3 fw-bold text-secondary" id="s5">-</div><small class="text-muted">Total</small></div></div>
+    </div>
+
+    <!-- Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Request #</th><th>Requester</th><th>Mahberat</th>
+                            <th>Route</th><th>Date</th><th>Driver</th>
+                            <th>Cost</th><th>Status</th><th>Created</th><th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestsBody">
+                        <tr><td colspan="10" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Detail Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-info-circle me-2"></i>Request Details & Audit Log</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detailBody"></div>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API = '/api/transport';
+let allData = [];
+
+async function loadStats() {
+    const r = await fetch(`${API}/stats`);
+    const s = await r.json();
+    document.getElementById('s0').textContent = s.pending ?? 0;
+    document.getElementById('s1').textContent = s.assigned ?? 0;
+    document.getElementById('s2').textContent = (s.accepted ?? 0) + (s.pickedUp ?? 0);
+    document.getElementById('s3').textContent = (s.receiptSubmitted ?? 0) + (s.receiptVerified ?? 0);
+    document.getElementById('s4').textContent = s.paid ?? 0;
+    document.getElementById('s5').textContent = s.total ?? 0;
+}
+
+async function loadRequests() {
+    const status = document.getElementById('statusFilter').value;
+    const url = status ? `${API}/requests?status=${status}` : `${API}/requests`;
+    const r = await fetch(url);
+    allData = await r.json();
+    renderTable(allData);
+}
+
+function statusBadge(s) {
+    return `<span class="status-badge status-${s}">${s.replace(/([A-Z])/g,' $1').trim()}</span>`;
+}
+
+function renderTable(data) {
+    const tbody = document.getElementById('requestsBody');
+    if (!data.length) { tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-muted">No requests found</td></tr>'; return; }
+    tbody.innerHTML = data.map(r => `
+        <tr>
+            <td><strong class="text-primary">${r.request_number}</strong></td>
+            <td>${r.mahberat_user_name}</td>
+            <td><small>${r.mahberat_name ?? '-'}</small></td>
+            <td><small>${r.pickup_location}<br><span class="text-muted">→ ${r.destination}</span></small></td>
+            <td><small>${r.requested_date ? r.requested_date.substring(0,10) : ''}</small></td>
+            <td>${r.driver_name ?? '<span class="text-muted">-</span>'}</td>
+            <td>${r.transport_cost ? '<strong>ETB ' + parseFloat(r.transport_cost).toFixed(2) + '</strong>' : '-'}</td>
+            <td>${statusBadge(r.status)}</td>
+            <td><small class="text-muted">${new Date(r.created_at).toLocaleDateString()}</small></td>
+            <td><button class="btn btn-sm btn-outline-primary" onclick="showDetail(${r.id})"><i class="bi bi-eye"></i></button></td>
+        </tr>`).join('');
+}
+
+async function showDetail(id) {
+    document.getElementById('detailBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border"></div></div>';
+    new bootstrap.Modal(document.getElementById('detailModal')).show();
+    const r = await fetch(`${API}/requests/${id}`);
+    const data = await r.json();
+    const req = data.request;
+    const logs = data.logs;
+    document.getElementById('detailBody').innerHTML = `
+        <div class="row g-4">
+            <div class="col-md-5">
+                <h6 class="fw-bold text-primary border-bottom pb-2">Trip Information</h6>
+                <table class="table table-sm table-borderless"><tbody>
+                    <tr><th width="140">Request #</th><td><strong>${req.request_number}</strong></td></tr>
+                    <tr><th>Status</th><td>${statusBadge(req.status)}</td></tr>
+                    <tr><th>Requester</th><td>${req.mahberat_user_name}</td></tr>
+                    <tr><th>Mahberat</th><td>${req.mahberat_name ?? '-'}</td></tr>
+                    <tr><th>Pickup</th><td>${req.pickup_location}</td></tr>
+                    <tr><th>Destination</th><td>${req.destination}</td></tr>
+                    <tr><th>Date / Time</th><td>${req.requested_date ? req.requested_date.substring(0,10) : ''} ${req.requested_time ?? ''}</td></tr>
+                    <tr><th>Details</th><td>${req.passenger_item_details ?? '-'}</td></tr>
+                    <tr><th>Instructions</th><td>${req.special_instructions ?? '-'}</td></tr>
+                    <tr><th>Dispatcher</th><td>${req.dispatcher_name ?? '-'}</td></tr>
+                    <tr><th>Driver</th><td>${req.driver_name ?? '-'}</td></tr>
+                    <tr><th>Vehicle</th><td>${req.vehicle_plate ?? '-'}</td></tr>
+                    <tr><th>Cost</th><td>${req.transport_cost ? '<strong>ETB ' + parseFloat(req.transport_cost).toFixed(2) + '</strong>' : '-'}</td></tr>
+                    <tr><th>Transaction #</th><td>${req.transaction_number ?? '-'}</td></tr>
+                    <tr><th>Paid At</th><td>${req.paid_at ? new Date(req.paid_at).toLocaleString() : '-'}</td></tr>
+                </tbody></table>
+                ${req.receipt_photo_url ? `<div class="mt-2"><strong>Receipt Photo:</strong><br><img src="${req.receipt_photo_url}" class="img-fluid rounded mt-1" style="max-height:200px" /></div>` : ''}
+                ${req.payment_proof_url ? `<div class="mt-2"><strong>Payment Proof:</strong><br><img src="${req.payment_proof_url}" class="img-fluid rounded mt-1" style="max-height:200px" /></div>` : ''}
+            </div>
+            <div class="col-md-7">
+                <h6 class="fw-bold text-primary border-bottom pb-2">Full Audit Trail</h6>
+                <div class="timeline">
+                    ${logs.map((l, i) => `
+                        <div class="d-flex mb-3">
+                            <div class="me-3 text-center" style="min-width:40px">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px">${i+1}</div>
+                                ${i < logs.length-1 ? '<div class="border-start border-2 border-primary mx-auto" style="height:20px;width:1px;margin-top:4px"></div>' : ''}
+                            </div>
+                            <div class="flex-grow-1 bg-light rounded p-2">
+                                <div class="d-flex justify-content-between">
+                                    <strong>${l.actor_name ?? 'System'}</strong>
+                                    <small class="text-muted">${new Date(l.created_at).toLocaleString()}</small>
+                                </div>
+                                <small class="text-muted">${l.actor_role ?? ''}</small><br>
+                                <span class="badge bg-secondary me-1">${l.from_status || 'Start'}</span>
+                                <i class="bi bi-arrow-right text-muted"></i>
+                                <span class="badge bg-primary ms-1">${l.to_status}</span>
+                                ${l.notes ? `<div class="mt-1 text-muted small fst-italic">"${l.notes}"</div>` : ''}
+                            </div>
+                        </div>`).join('')}
+                </div>
+            </div>
+        </div>`;
+}
+
+function exportCsv() {
+    if (!allData.length) return;
+    const headers = ['Request #','Requester','Mahberat','Pickup','Destination','Date','Driver','Vehicle','Cost','Status','Created'];
+    const rows = allData.map(r => [
+        r.request_number, r.mahberat_user_name, r.mahberat_name ?? '',
+        r.pickup_location, r.destination,
+        r.requested_date ? r.requested_date.substring(0,10) : '',
+        r.driver_name ?? '', r.vehicle_plate ?? '',
+        r.transport_cost ?? '', r.status,
+        r.created_at ? new Date(r.created_at).toLocaleDateString() : ''
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `transport_requests_${new Date().toISOString().substring(0,10)}.csv`;
+    a.click();
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebarMenu').classList.toggle('show');
+    document.getElementById('sidebarBackdrop').classList.toggle('show');
+}
+
+loadStats();
+loadRequests();
+setInterval(() => { loadStats(); loadRequests(); }, 30000);
+</script>
+</body>
+</html>

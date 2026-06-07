@@ -1,0 +1,203 @@
+@page
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userRole = HttpContext.Session.GetString("UserRole");
+    
+    if (userName == null)
+    {
+        Response.Redirect("/Login");
+        return;
+    }
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+}
+
+<div class="main-content p-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-building me-2"></i>Wereda Officers</h1>
+        <button class="btn btn-primary btn-sm"><i class="bi bi-plus-circle me-2"></i>Add Officer</button>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-people display-4 text-primary"></i>
+                    <h4 class="mt-2">24</h4>
+                    <p class="text-muted mb-0">Total Officers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-geo-alt display-4 text-success"></i>
+                    <h4 class="mt-2">20</h4>
+                    <p class="text-muted mb-0">Weredas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle display-4 text-info"></i>
+                    <h4 class="mt-2">22</h4>
+                    <p class="text-muted mb-0">Active</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-clipboard-data display-4 text-warning"></i>
+                    <h4 class="mt-2">85</h4>
+                    <p class="text-muted mb-0">Reports This Month</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Wereda Officer Directory</h5>
+                    <input type="text" class="form-control form-control-sm w-25" placeholder="Search...">
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Wereda</th>
+                                    <th>Position</th>
+                                    <th>Phone</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                                <span class="text-white">YT</span>
+                                            </div>
+                                            <strong>Yordanos Teklu</strong>
+                                        </div>
+                                    </td>
+                                    <td>Wereda 01</td>
+                                    <td>Senior Officer</td>
+                                    <td>0911-111-222</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-info rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                                <span class="text-white">NH</span>
+                                            </div>
+                                            <strong>Nigisti Haile</strong>
+                                        </div>
+                                    </td>
+                                    <td>Wereda 02</td>
+                                    <td>Officer</td>
+                                    <td>0912-222-333</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-success rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                                <span class="text-white">AG</span>
+                                            </div>
+                                            <strong>Alemu Getahun</strong>
+                                        </div>
+                                    </td>
+                                    <td>Wereda 03</td>
+                                    <td>Senior Officer</td>
+                                    <td>0913-333-444</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-secondary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                                <span class="text-white">MT</span>
+                                            </div>
+                                            <strong>Mulu Tadesse</strong>
+                                        </div>
+                                    </td>
+                                    <td>Wereda 04</td>
+                                    <td>Officer</td>
+                                    <td>0911-444-555</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <i class="bi bi-people display-4 text-primary"></i>
+                    <h4 class="mt-2">22</h4>
+                    <p class="text-muted mb-0">Active Officers</p>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <i class="bi bi-geo-alt display-4 text-info"></i>
+                    <h4 class="mt-2">20</h4>
+                    <p class="text-muted mb-0">Weredas Covered</p>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Performance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Report Coverage</span>
+                        <span class="badge bg-success">98%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-success" style="width: 98%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Active Officers</span>
+                        <span class="badge bg-info">22</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-info" style="width: 100%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Reports Submitted</span>
+                        <span class="badge bg-primary">85</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" style="width: 90%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,974 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.Staff.AgencyReportModel
+@{
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+    ViewData["Title"] = "Agency Reports";
+}
+
+<div class="main-content p-4">
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="h4 mb-0">
+                    <i class="bi bi-file-earmark-text me-2"></i>Agency Reports
+                </h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="/Dashboard/Staff/Index">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Agency Reports</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <button class="btn btn-primary me-2" onclick="generateAgencyReport()"><i class="bi bi-search me-1"></i> Show Report</button>
+                <button class="btn btn-outline-secondary" onclick="clearReport()"><i class="bi bi-arrow-counterclockwise me-1"></i> Clear</button>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Column 1: Report List -->
+            <div class="col-lg-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="mb-0 fw-bold">Report List</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush" style="max-height: 500px; overflow-y: auto;">
+                            <label class="list-group-item border-0 d-flex align-items-center gap-2">
+                                <input class="form-check-input me-1" type="radio" name="reportList" value="Monthly Agency Overview" checked onchange="generateAgencyReport()">
+                                Monthly Agency Overview
+                            </label>
+                            <label class="list-group-item border-0 d-flex align-items-center gap-2">
+                                <input class="form-check-input me-1" type="radio" name="reportList" value="Quarterly Performance" onchange="generateAgencyReport()">
+                                Quarterly Performance
+                            </label>
+                            <label class="list-group-item border-0 d-flex align-items-center gap-2">
+                                <input class="form-check-input me-1" type="radio" name="reportList" value="Annual Agency Report" onchange="generateAgencyReport()">
+                                Annual Agency Report
+                            </label>
+                            <label class="list-group-item border-0 d-flex align-items-center gap-2">
+                                <input class="form-check-input me-1" type="radio" name="reportList" value="Incident Summary Report" onchange="generateAgencyReport()">
+                                Incident Summary Report
+                            </label>
+                            <label class="list-group-item border-0 d-flex align-items-center gap-2">
+                                <input class="form-check-input me-1" type="radio" name="reportList" value="Financial Report" onchange="generateAgencyReport()">
+                                Financial Report
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column 2: Report Types -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="mb-0 fw-bold">Report Types</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush" id="reportTypesList" style="max-height: 500px; overflow-y: auto;">
+                            <button class="list-group-item list-group-item-action border-0 d-flex align-items-center gap-2 active" onclick="selectType(this, 'agency')">
+                                <i class="bi bi-file-earmark-text"></i> Categorized By Agency
+                            </button>
+                            <button class="list-group-item list-group-item-action border-0 d-flex align-items-center gap-2" onclick="selectType(this, 'date')">
+                                <i class="bi bi-file-earmark-text text-muted"></i> Summarized By Date
+                            </button>
+                            <button class="list-group-item list-group-item-action border-0 d-flex align-items-center gap-2" onclick="selectType(this, 'status')">
+                                <i class="bi bi-file-earmark-text text-muted"></i> Summarized By Status
+                            </button>
+                            <button class="list-group-item list-group-item-action border-0 d-flex align-items-center gap-2" onclick="selectType(this, 'detailed')">
+                                <i class="bi bi-file-earmark-text text-muted"></i> Detailed List
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column 3: Report Criteria -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="mb-0 fw-bold">Report Criteria</h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="criteriaForm">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Date Criteria</label>
+                                <select class="form-select">
+                                    <option>By Date</option>
+                                    <option>By Month</option>
+                                    <option>By Year</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Date Range Option</label>
+                                <select class="form-select" onchange="toggleCustomDateRange(this)" id="dateRangeOption">
+                                    <option value="today">Today</option>
+                                    <option value="yesterday">Yesterday</option>
+                                    <option value="this-week">This Week</option>
+                                    <option value="this-month" selected>This Month</option>
+                                    <option value="this-year">This Year</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                            </div>
+                            <div class="mb-3 custom-date-range-container" style="display: none;">
+                                <label class="form-label text-muted small">Date Range</label>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" id="startDate" value="@DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd")">
+                                    <span class="input-group-text">-</span>
+                                    <input type="date" class="form-control" id="endDate" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Agency</label>
+                                <select class="form-select" id="agencySelect" onchange="generateAgencyReport()">
+                                    <option value="all">All Agencies</option>
+                                    <option value="bole">Bole Subcity Administration</option>
+                                    <option value="yeka">Yeka Health Center</option>
+                                    <option value="arada">Arada Youth Center</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Status</label>
+                                <select class="form-select" id="statusSelect" onchange="generateAgencyReport()">
+                                    <option value="all">All Statuses</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Premium ERP Printable Report Viewer -->
+        <div id="generatedReportSection" class="mt-5 fade-in-up" style="display: none;">
+            <div class="document-viewer" id="pdfViewerContainer">
+                <!-- Viewer Toolbar -->
+                <div class="viewer-toolbar d-flex flex-wrap gap-2 align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-light border" disabled><i class="bi bi-chevron-left"></i></button>
+                        <span class="small fw-semibold">1 of 1</span>
+                        <button class="btn btn-sm btn-light border" disabled><i class="bi bi-chevron-right"></i></button>
+                        <div class="vr mx-2"></div>
+                        <button class="btn btn-sm btn-light border"><i class="bi bi-columns-gap"></i></button>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-light border" onclick="changeZoom(-0.1)"><i class="bi bi-dash"></i></button>
+                        <select class="form-select form-select-sm py-0" id="zoomSelect" onchange="applyZoomPreset(this)" style="width: auto; height: 28px;">
+                            <option value="1.0">Whole Page</option>
+                            <option value="1.2">Page Width</option>
+                            <option value="0.8">80%</option>
+                            <option value="1.0" selected>100%</option>
+                            <option value="1.2">120%</option>
+                        </select>
+                        <button class="btn btn-sm btn-light border" onclick="changeZoom(0.1)"><i class="bi bi-plus"></i></button>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 ms-auto">
+                        <button class="btn btn-sm btn-light border" onclick="window.print()" title="Print Report"><i class="bi bi-printer text-dark"></i></button>
+                        <button class="btn btn-sm btn-light border" onclick="openReportInNewTab()" title="Open in New Tab"><i class="bi bi-box-arrow-up-right text-dark"></i></button>
+                        <button class="btn btn-sm btn-light border" onclick="exportReportToCSV()" title="Download CSV"><i class="bi bi-file-earmark-arrow-down text-dark"></i></button>
+                        <button class="btn btn-sm btn-light border" onclick="exportReportToCSV()" title="Export Excel"><i class="bi bi-file-earmark-excel text-success"></i></button>
+                        <div class="vr mx-1"></div>
+                        <div class="input-group input-group-sm d-none d-md-flex" style="width: 150px;">
+                            <input type="text" class="form-control" id="tableSearch" onkeyup="filterReportTable()" placeholder="Search on page...">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        </div>
+                        <button class="btn btn-sm btn-light border" onclick="toggleFullscreen()" title="Fullscreen"><i class="bi bi-fullscreen"></i></button>
+                    </div>
+                </div>
+
+                <!-- Scroll Wrapper for zoomable sheet -->
+                <div class="sheet-scroll-wrapper" style="overflow-x: auto; padding: 20px 0; background: #e9e9e9;">
+                    <!-- Printable A4 Document Sheet -->
+                    <div class="viewer-sheet" id="printableSheet">
+                        <!-- Top Header Row -->
+                        <div class="d-flex justify-content-between align-items-start border-bottom pb-2 mb-3">
+                            <div>
+                                <div class="sheet-header-title text-uppercase">YEKA CLEANING MANAGEMENT SYSTEM</div>
+                                <div class="sheet-meta-text" id="docCriteriaMeta">
+                                    Cleaning Report, Report filtered by data criteria: at the day of @DateTime.Now.ToString("MM/dd/yyyy"), Status = Approved, Void State = Active
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="sheet-header-date" id="docDateRight">@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</div>
+                                <div class="sheet-report-box mt-2 text-uppercase" id="docReportTypeBox">Categorized And Summarized By Agency</div>
+                            </div>
+                        </div>
+
+                        <!-- Structured grouped table layout matching Red Cloud invoice/reports style -->
+                        <table class="sheet-table" id="reportTableData">
+                            <thead id="tableReportHeader">
+                                <!-- Generated Dynamically -->
+                            </thead>
+                            <tbody id="tableReportBody">
+                                <!-- Generated Dynamically -->
+                            </tbody>
+                        </table>
+
+                        <!-- Summary Box matching exact bottom calculation grid -->
+                        <table class="sheet-summary-box" id="summaryBoxTable">
+                            <!-- Generated Dynamically -->
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let currentZoom = 1.0;
+    let selectedReportType = 'agency';
+
+    // Sample data structured by Subcities & Agencies
+    const agencyData = [
+        {
+            subcity: "BOLE SUB-CITY OFFICE",
+            hub: "Bole Administration Hub",
+            code: "HW.OIT.009",
+            service: "Deep commercial disinfection & cleaning schedule",
+            qty: 1,
+            rate: 49998.79,
+            agencyKey: "bole",
+            status: "Approved",
+            date: "@DateTime.Now.ToString("yyyy-MM-dd")"
+        },
+        {
+            subcity: "YEKA HEALTH CENTER",
+            hub: "Yeka Ward A",
+            code: "SR.SUP.03",
+            service: "Medical sanitization & clinical waste disposal service",
+            qty: 1,
+            rate: 4326.35,
+            agencyKey: "yeka",
+            status: "Approved",
+            date: "@DateTime.Now.ToString("yyyy-MM-dd")"
+        },
+        {
+            subcity: "ARADA YOUTH CENTER",
+            hub: "Arada Main Hub",
+            code: "SW.COM.06",
+            service: "Standard cleaning & floor polishing service",
+            qty: 2,
+            rate: 44672.00,
+            agencyKey: "arada",
+            status: "Pending",
+            date: "@DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd")"
+        },
+        {
+            subcity: "BOLE SUB-CITY OFFICE",
+            hub: "Bole Health Center",
+            code: "HW.OIT.012",
+            service: "Emergency clinical disinfection",
+            qty: 1,
+            rate: 15000.00,
+            agencyKey: "bole",
+            status: "Approved",
+            date: "@DateTime.Now.AddDays(-2).ToString("yyyy-MM-dd")"
+        },
+        {
+            subcity: "ARADA YOUTH CENTER",
+            hub: "Arada Gym Hub",
+            code: "SW.COM.08",
+            service: "Post-event deep sanitization program",
+            qty: 1,
+            rate: 22000.00,
+            agencyKey: "arada",
+            status: "Rejected",
+            date: "@DateTime.Now.AddDays(-3).ToString("yyyy-MM-dd")"
+        }
+    ];
+
+    function toggleCustomDateRange(selectElement) {
+        const container = selectElement.closest('form').querySelector('.custom-date-range-container');
+        if (selectElement.value === 'custom') {
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    function selectType(button, type) {
+        const list = button.parentElement;
+        list.querySelectorAll('button').forEach(btn => {
+            btn.classList.remove('active');
+            btn.querySelector('i').className = 'bi bi-file-earmark-text text-muted';
+        });
+        button.classList.add('active');
+        button.querySelector('i').className = 'bi bi-file-earmark-text';
+        selectedReportType = type;
+
+        // Auto-regenerate report section immediately!
+        generateAgencyReport();
+    }
+
+    function generateAgencyReport() {
+        const reportSection = document.getElementById('generatedReportSection');
+        reportSection.style.display = 'block';
+
+        // Retrieve active radio & criteria values
+        const selectedRadio = document.querySelector('input[name="reportList"]:checked');
+        const reportListName = selectedRadio ? selectedRadio.value : "Monthly Agency Overview";
+
+        const activeTypeButton = document.querySelector('#reportTypesList button.active');
+        const reportTypeName = activeTypeButton ? activeTypeButton.textContent.trim() : "Categorized By Agency";
+
+        const rangeOpt = document.getElementById('dateRangeOption');
+        const rangeText = rangeOpt.options[rangeOpt.selectedIndex].text;
+
+        const agencyVal = document.getElementById('agencySelect').value;
+        const statusVal = document.getElementById('statusSelect').value;
+
+        // Update headers dynamically
+        document.getElementById('docReportTypeBox').innerText = reportTypeName;
+        document.getElementById('docCriteriaMeta').innerText = `${reportListName}, Report filtered by data criteria: date range = ${rangeText}, Agency = ${agencyVal.toUpperCase()}, Status = ${statusVal}`;
+
+        // Dynamic Filtering
+        let filtered = agencyData;
+        if (agencyVal !== "all") {
+            filtered = filtered.filter(item => item.agencyKey === agencyVal);
+        }
+        if (statusVal !== "all") {
+            filtered = filtered.filter(item => item.status === statusVal);
+        }
+
+        const thead = document.getElementById('tableReportHeader');
+        const tbody = document.getElementById('tableReportBody');
+        thead.innerHTML = "";
+        tbody.innerHTML = "";
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No records matching the filter criteria were found.</td></tr>`;
+            document.getElementById('summaryBoxTable').innerHTML = "";
+            return;
+        }
+
+        let subtotalAccumulator = 0;
+
+        // SECTION CHANGE ENGINE: Structural updates depending on selectedReportType!
+        if (selectedReportType === 'agency') {
+            // 1. CATEGORIZED BY AGENCY
+            thead.innerHTML = `
+                <tr>
+                    <th style="width: 25%; text-align: left;">Category / Sub Category</th>
+                    <th style="width: 15%; text-align: left;">Service Code</th>
+                    <th style="width: 35%; text-align: left;">Service / Service Hub</th>
+                    <th style="width: 8%; text-align: center;">Qty</th>
+                    <th style="width: 8%; text-align: right;">Avg Rate</th>
+                    <th style="width: 9%; text-align: right;">Total Amount</th>
+                </tr>
+            `;
+
+            let categories = [...new Set(filtered.map(x => x.subcity))];
+            categories.forEach(cat => {
+                tbody.innerHTML += `
+                    <tr class="sheet-category-row">
+                        <td colspan="6" class="text-uppercase py-1 px-2">${cat}</td>
+                    </tr>
+                `;
+
+                let catItems = filtered.filter(x => x.subcity === cat);
+                let hubs = [...new Set(catItems.map(x => x.hub))];
+
+                let categorySum = 0;
+                let categoryQtySum = 0;
+
+                hubs.forEach(hub => {
+                    tbody.innerHTML += `
+                        <tr class="sheet-subcategory-row">
+                            <td colspan="6" class="py-1 px-3 text-uppercase">${hub}</td>
+                        </tr>
+                    `;
+
+                    let hubItems = catItems.filter(x => x.hub === hub);
+                    let hubSum = 0;
+                    let hubQtySum = 0;
+
+                    hubItems.forEach(item => {
+                        let totalAmount = item.qty * item.rate;
+                        hubSum += totalAmount;
+                        hubQtySum += item.qty;
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td></td>
+                                <td>${item.code}</td>
+                                <td>${item.service} <span class="badge ${item.status === 'Approved' ? 'bg-success' : item.status === 'Pending' ? 'bg-warning text-dark' : 'bg-danger'} ms-1" style="font-size:9px; padding:2px 4px;">${item.status}</span></td>
+                                <td class="text-center">${item.qty.toFixed(2)}</td>
+                                <td class="text-end">${item.rate.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="text-end">${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            </tr>
+                        `;
+                    });
+
+                    categorySum += hubSum;
+                    categoryQtySum += hubQtySum;
+
+                    tbody.innerHTML += `
+                        <tr class="sheet-total-row">
+                            <td colspan="3" class="text-end fw-bold">${hub} Total</td>
+                            <td class="text-center">${hubQtySum.toFixed(2)}</td>
+                            <td class="text-end">-</td>
+                            <td class="text-end">${hubSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        </tr>
+                    `;
+                });
+
+                subtotalAccumulator += categorySum;
+
+                tbody.innerHTML += `
+                    <tr class="sheet-total-row bg-light">
+                        <td colspan="3" class="text-end fw-bold text-teal">${cat} Total</td>
+                        <td class="text-center text-teal">${categoryQtySum.toFixed(2)}</td>
+                        <td class="text-end">-</td>
+                        <td class="text-end text-teal">${categorySum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+            });
+
+        } else if (selectedReportType === 'date') {
+            // 2. SUMMARIZED BY DATE
+            thead.innerHTML = `
+                <tr>
+                    <th style="width: 25%; text-align: left;">Date</th>
+                    <th style="width: 15%; text-align: left;">Service Code</th>
+                    <th style="width: 35%; text-align: left;">Service / Agency</th>
+                    <th style="width: 8%; text-align: center;">Qty</th>
+                    <th style="width: 8%; text-align: right;">Avg Rate</th>
+                    <th style="width: 9%; text-align: right;">Total Amount</th>
+                </tr>
+            `;
+
+            let dates = [...new Set(filtered.map(x => x.date))];
+            dates.forEach(d => {
+                tbody.innerHTML += `
+                    <tr class="sheet-category-row">
+                        <td colspan="6" class="text-uppercase py-1 px-2">DATE: ${d}</td>
+                    </tr>
+                `;
+
+                let dateItems = filtered.filter(x => x.date === d);
+                let dateSum = 0;
+                let dateQtySum = 0;
+
+                dateItems.forEach(item => {
+                    let totalAmount = item.qty * item.rate;
+                    dateSum += totalAmount;
+                    dateQtySum += item.qty;
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td></td>
+                            <td>${item.code}</td>
+                            <td>${item.service} <small class="text-muted">(${item.subcity})</small></td>
+                            <td class="text-center">${item.qty.toFixed(2)}</td>
+                            <td class="text-end">${item.rate.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="text-end">${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        </tr>
+                    `;
+                });
+
+                subtotalAccumulator += dateSum;
+
+                tbody.innerHTML += `
+                    <tr class="sheet-total-row">
+                        <td colspan="3" class="text-end fw-bold">Date ${d} Total</td>
+                        <td class="text-center">${dateQtySum.toFixed(2)}</td>
+                        <td class="text-end">-</td>
+                        <td class="text-end">${dateSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+            });
+
+        } else if (selectedReportType === 'status') {
+            // 3. SUMMARIZED BY STATUS
+            thead.innerHTML = `
+                <tr>
+                    <th style="width: 25%; text-align: left;">Status</th>
+                    <th style="width: 15%; text-align: left;">Service Code</th>
+                    <th style="width: 35%; text-align: left;">Service / Subcity</th>
+                    <th style="width: 8%; text-align: center;">Qty</th>
+                    <th style="width: 8%; text-align: right;">Avg Rate</th>
+                    <th style="width: 9%; text-align: right;">Total Amount</th>
+                </tr>
+            `;
+
+            let statuses = [...new Set(filtered.map(x => x.status))];
+            statuses.forEach(s => {
+                tbody.innerHTML += `
+                    <tr class="sheet-category-row">
+                        <td colspan="6" class="text-uppercase py-1 px-2">STATUS: ${s}</td>
+                    </tr>
+                `;
+
+                let statusItems = filtered.filter(x => x.status === s);
+                let statusSum = 0;
+                let statusQtySum = 0;
+
+                statusItems.forEach(item => {
+                    let totalAmount = item.qty * item.rate;
+                    statusSum += totalAmount;
+                    statusQtySum += item.qty;
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td></td>
+                            <td>${item.code}</td>
+                            <td>${item.service} <small class="text-muted">(${item.hub})</small></td>
+                            <td class="text-center">${item.qty.toFixed(2)}</td>
+                            <td class="text-end">${item.rate.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="text-end">${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        </tr>
+                    `;
+                });
+
+                subtotalAccumulator += statusSum;
+
+                tbody.innerHTML += `
+                    <tr class="sheet-total-row">
+                        <td colspan="3" class="text-end fw-bold">Status ${s} Total</td>
+                        <td class="text-center">${statusQtySum.toFixed(2)}</td>
+                        <td class="text-end">-</td>
+                        <td class="text-end">${statusSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+            });
+
+        } else if (selectedReportType === 'detailed') {
+            // 4. DETAILED LIST (FLAT TABLE)
+            thead.innerHTML = `
+                <tr>
+                    <th style="width: 15%; text-align: left;">Date</th>
+                    <th style="width: 15%; text-align: left;">Service Code</th>
+                    <th style="width: 30%; text-align: left;">Service Hub / Subcity</th>
+                    <th style="width: 10%; text-align: center;">Qty</th>
+                    <th style="width: 10%; text-align: right;">Avg Rate</th>
+                    <th style="width: 10%; text-align: center;">Status</th>
+                    <th style="width: 10%; text-align: right;">Total</th>
+                </tr>
+            `;
+
+            filtered.forEach(item => {
+                let totalAmount = item.qty * item.rate;
+                subtotalAccumulator += totalAmount;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.date}</td>
+                        <td>${item.code}</td>
+                        <td><strong>${item.hub}</strong><br><small class="text-muted">${item.subcity}</small></td>
+                        <td class="text-center">${item.qty.toFixed(2)}</td>
+                        <td class="text-end">${item.rate.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="text-center"><span class="badge ${item.status === 'Approved' ? 'bg-success' : item.status === 'Pending' ? 'bg-warning text-dark' : 'bg-danger'}">${item.status}</span></td>
+                        <td class="text-end fw-semibold">${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Compute bottom summary boxes
+        let tax = subtotalAccumulator * 0.15;
+        let grand = subtotalAccumulator + tax;
+
+        const summaryTable = document.getElementById('summaryBoxTable');
+        summaryTable.innerHTML = `
+            <tr>
+                <td class="text-muted">Sub Total</td>
+                <td class="text-end fw-bold">${subtotalAccumulator.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">Add. Charge</td>
+                <td class="text-end">0.00</td>
+            </tr>
+            <tr>
+                <td class="text-muted">Discount</td>
+                <td class="text-end">0.00</td>
+            </tr>
+            <tr>
+                <td class="text-muted">Total Tax (15% VAT)</td>
+                <td class="text-end">${tax.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            </tr>
+            <tr class="grand-total">
+                <td class="text-uppercase">Grand Total (ETB)</td>
+                <td class="text-end">${grand.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            </tr>
+        `;
+
+        reportSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function clearReport() {
+        document.getElementById('generatedReportSection').style.display = 'none';
+        document.getElementById('criteriaForm').reset();
+     }
+
+    function openReportInNewTab() {
+        const sheetHtml = document.getElementById('printableSheet').innerHTML;
+        const reportTitle = document.getElementById('docReportTypeBox').innerText || "Report";
+        const newTab = window.open('', '_blank');
+        newTab.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>${reportTitle}</title>
+                <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css">
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+                <style>
+                    body {
+                        background-color: #f8f9fa;
+                        padding: 40px 0;
+                        margin: 0;
+                    }
+                    .viewer-sheet {
+                        background: #fff;
+                        width: 100%;
+                        max-width: 1000px;
+                        margin: 0 auto;
+                        padding: 50px;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                        border: 1px solid #c8c8c8;
+                        box-sizing: border-box;
+                        font-family: 'Times New Roman', Times, serif;
+                    }
+                    .sheet-header-title {
+                        font-size: 16px;
+                        font-weight: bold;
+                        letter-spacing: 0.5px;
+                        color: #000;
+                    }
+                    .sheet-header-date {
+                        font-size: 12px;
+                        color: #333;
+                        font-weight: 500;
+                    }
+                    .sheet-report-box {
+                        border: 1px solid #000;
+                        padding: 4px 15px;
+                        font-weight: bold;
+                        display: inline-block;
+                        font-size: 11px;
+                        background-color: #fcfcfc;
+                    }
+                    .sheet-meta-text {
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 11px;
+                        color: #555;
+                        margin-top: 5px;
+                    }
+                    .sheet-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 12px;
+                        margin-top: 15px;
+                        color: #000;
+                    }
+                    .sheet-table th {
+                        border-bottom: 1px solid #000;
+                        border-top: 1px solid #000;
+                        padding: 6px 4px;
+                        font-weight: bold;
+                    }
+                    .sheet-table td {
+                        padding: 6px 4px;
+                    }
+                    .sheet-category-row {
+                        background-color: #5b9090;
+                        color: #fff !important;
+                        font-weight: bold;
+                    }
+                    .sheet-category-row td {
+                        color: #fff !important;
+                        padding: 6px 8px;
+                    }
+                    .sheet-subcategory-row {
+                        background-color: #e6f0f0;
+                        font-weight: bold;
+                    }
+                    .sheet-subcategory-row td {
+                        padding: 4px 12px;
+                    }
+                    .sheet-total-row {
+                        border-top: 1px solid #000;
+                        border-bottom: 3px double #000;
+                        font-weight: bold;
+                    }
+                    .sheet-summary-box {
+                        width: 250px;
+                        margin-left: auto;
+                        font-size: 12px;
+                        border-collapse: collapse;
+                        margin-top: 30px;
+                        color: #000;
+                    }
+                    .sheet-summary-box td {
+                        padding: 4px;
+                    }
+                    .sheet-summary-box tr.grand-total {
+                        font-weight: bold;
+                        border-top: 1px solid #000;
+                        border-bottom: 3px double #000;
+                    }
+                    @@media print {
+                        body {
+                            background-color: #fff;
+                            padding: 0;
+                        }
+                        .viewer-sheet {
+                            box-shadow: none !important;
+                            border: none !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            max-width: 100% !important;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="viewer-sheet">
+                    ${sheetHtml}
+                </div>
+                <script>
+                    window.onload = function() {
+                        window.print();
+                    };
+                <\/script>
+            </body>
+            </html>
+        `);
+        newTab.document.close();
+    }
+
+    // Zoom Functions
+    function changeZoom(factor) {
+        currentZoom = Math.max(0.6, Math.min(1.5, currentZoom + factor));
+        document.getElementById('zoomSelect').value = currentZoom.toFixed(1);
+        applyZoom();
+    }
+
+    function applyZoomPreset(select) {
+        currentZoom = parseFloat(select.value);
+        applyZoom();
+    }
+
+    function applyZoom() {
+        const sheet = document.getElementById('printableSheet');
+        sheet.style.transform = `scale(${currentZoom})`;
+        sheet.style.transformOrigin = `top center`;
+        if (currentZoom > 1.0) {
+            sheet.parentElement.style.paddingBottom = `${(currentZoom - 1.0) * 1000}px`;
+        } else {
+            sheet.parentElement.style.paddingBottom = `20px`;
+        }
+    }
+
+    // Table Search
+    function filterReportTable() {
+        const query = document.getElementById('tableSearch').value.toLowerCase();
+        const rows = document.querySelectorAll('#tableReportBody tr');
+        rows.forEach(row => {
+            if (row.classList.contains('sheet-category-row') || row.classList.contains('sheet-subcategory-row') || row.classList.contains('sheet-total-row')) {
+                return;
+            }
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(query) ? "" : "none";
+        });
+    }
+
+    // CSV Exporter
+    function exportReportToCSV() {
+        let csv = [];
+        const rows = document.querySelectorAll("#reportTableData tr");
+        rows.forEach(row => {
+            let cols = row.querySelectorAll("td, th");
+            let rowData = [];
+            cols.forEach(col => {
+                let text = col.innerText.replace(/"/g, '""');
+                rowData.push(`"${text}"`);
+            });
+            csv.push(rowData.join(","));
+        });
+        const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+        const downloadLink = document.createElement("a");
+        downloadLink.download = `AgencyReport_${new Date().toISOString().slice(0,10)}.csv`;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+
+    // Fullscreen Toggle
+    function toggleFullscreen() {
+        const viewer = document.getElementById('pdfViewerContainer');
+        if (!document.fullscreenElement) {
+            viewer.requestFullscreen().catch(err => {
+                alert(`Error: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    }
+</script>
+
+<style>
+    .list-group-item-action.active {
+        background-color: #008080;
+        border-color: #008080;
+    }
+    .list-group-item {
+        padding: 12px 15px;
+    }
+    .card {
+        border-radius: 10px;
+    }
+
+    /* Premium Document Viewer Styling matching Red Cloud ERP style */
+    .document-viewer {
+        background-color: #e9e9e9;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #ccc;
+        box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .viewer-toolbar {
+        background-color: #f3f3f3;
+        border-bottom: 1px solid #d3d3d3;
+        padding: 8px 15px;
+        font-size: 13px;
+        color: #444;
+    }
+    .viewer-sheet {
+        background: #fff;
+        width: 100%;
+        max-width: 1000px;
+        margin: 30px auto;
+        padding: 50px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        border: 1px solid #c8c8c8;
+        box-sizing: border-box;
+        font-family: 'Times New Roman', Times, serif;
+        transition: transform 0.2s ease-out;
+    }
+    .sheet-header-title {
+        font-size: 16px;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+        color: #000;
+    }
+    .sheet-header-date {
+        font-size: 12px;
+        color: #333;
+        font-weight: 500;
+    }
+    .sheet-report-box {
+        border: 1px solid #000;
+        padding: 4px 15px;
+        font-weight: bold;
+        display: inline-block;
+        font-size: 11px;
+        background-color: #fcfcfc;
+    }
+    .sheet-meta-text {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 11px;
+        color: #555;
+        margin-top: 5px;
+    }
+    .sheet-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        margin-top: 15px;
+        color: #000;
+    }
+    .sheet-table th {
+        border-bottom: 1px solid #000;
+        border-top: 1px solid #000;
+        padding: 6px 4px;
+        font-weight: bold;
+    }
+    .sheet-table td {
+        padding: 6px 4px;
+    }
+    .sheet-category-row {
+        background-color: #5b9090;
+        color: #fff !important;
+        font-weight: bold;
+    }
+    .sheet-category-row td {
+        color: #fff !important;
+        padding: 6px 8px;
+    }
+    .sheet-subcategory-row {
+        background-color: #e6f0f0;
+        font-weight: bold;
+    }
+    .sheet-subcategory-row td {
+        padding: 4px 12px;
+    }
+    .sheet-total-row {
+        border-top: 1px solid #000;
+        border-bottom: 3px double #000;
+        font-weight: bold;
+    }
+    .sheet-summary-box {
+        width: 250px;
+        margin-left: auto;
+        font-size: 12px;
+        border-collapse: collapse;
+        margin-top: 30px;
+        color: #000;
+    }
+    .sheet-summary-box td {
+        padding: 4px;
+    }
+    .sheet-summary-box tr.grand-total {
+        font-weight: bold;
+        border-top: 1px solid #000;
+        border-bottom: 3px double #000;
+    }
+
+    /* Print Stylesheet Overrides */
+    @@media print {
+        body * {
+            visibility: hidden;
+        }
+        #printableSheet, #printableSheet * {
+            visibility: visible;
+        }
+        #printableSheet {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-shadow: none !important;
+            border: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            transform: none !important;
+        }
+        .main-content {
+            padding: 0 !important;
+        }
+    }
+    
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .fade-in-up {
+        animation: fadeInUp 0.4s ease-out forwards;
+    }
+</style>

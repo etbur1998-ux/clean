@@ -1,0 +1,64 @@
+@{
+    var currentPath = Context.Request.Path.Value ?? "";
+    bool IsActive(string path, bool exact = false)
+    {
+        if (exact) return currentPath.Equals(path, StringComparison.OrdinalIgnoreCase);
+        return currentPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+    }
+}
+<button class="sidebar-toggle-btn d-none d-md-flex" id="sidebarToggleBtn" onclick="toggleSidebarCollapse()" title="Expand / Collapse">
+    <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+</button>
+<div class="sidebar-scroll pt-3" style="height:100%">
+    <div class="sidebar-logo-area pb-3 mb-3 border-bottom d-flex align-items-center gap-2 px-3" style="min-height:54px">
+        <i class="bi bi-droplet-fill text-info fs-5 flex-shrink-0"></i>
+        <div class="sidebar-brand-text">
+            <div class="text-white fw-bold" style="font-size:.95rem;line-height:1.2">Yeka Cleaning</div>
+            <div class="text-white-50" style="font-size:.68rem">Super Admin</div>
+        </div>
+    </div>
+    <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/SuperAdmin",true)?"active":"")" href="/Dashboard/SuperAdmin" title="Home"><i class="bi bi-speedometer2 flex-shrink-0"></i><span class="nav-label ms-2">Home</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/SuperAdmin/Users")?"active":"")" href="/Dashboard/SuperAdmin/Users" title="Users"><i class="bi bi-people flex-shrink-0"></i><span class="nav-label ms-2">Users</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/SuperAdmin/RoleUsage")?"active":"")" href="/Dashboard/SuperAdmin/RoleUsage" title="Role Usage"><i class="bi bi-shield-lock flex-shrink-0"></i><span class="nav-label ms-2">Role Usage</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/SuperAdmin/Checklist")?"active":"")" href="/Dashboard/SuperAdmin/Checklist" title="Checklist"><i class="bi bi-check-square flex-shrink-0"></i><span class="nav-label ms-2">Checklist</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/SuperAdmin/RegisterReceipt")?"active":"")" href="/Dashboard/SuperAdmin/RegisterReceipt" title="Register Receipt"><i class="bi bi-receipt flex-shrink-0"></i><span class="nav-label ms-2">Register Receipt</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/SuperAdmin/OutsourceCompany")?"active":"")" href="/Dashboard/SuperAdmin/OutsourceCompany" title="Outsource Company"><i class="bi bi-building flex-shrink-0"></i><span class="nav-label ms-2">Outsource Company</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/SuperAdmin/PrivateCleaningCompany")?"active":"")" href="/Dashboard/SuperAdmin/PrivateCleaningCompany" title="Private Cleaning Co."><i class="bi bi-briefcase flex-shrink-0"></i><span class="nav-label ms-2">Private Cleaning Co.</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/SuperAdmin/Capital")?"active":"")" href="/Dashboard/SuperAdmin/Capital" title="Capital"><i class="bi bi-bank flex-shrink-0"></i><span class="nav-label ms-2">Capital</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/SuperAdmin/ReceiptPayroll")?"active":"")" href="/Dashboard/SuperAdmin/ReceiptPayroll" title="Receipt & Payroll"><i class="bi bi-cash-stack flex-shrink-0"></i><span class="nav-label ms-2">Receipt &amp; Payroll</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/SuperAdmin/PdfReports")?"active":"")" href="/Dashboard/SuperAdmin/PdfReports" title="PDF Reports"><i class="bi bi-file-earmark-pdf flex-shrink-0"></i><span class="nav-label ms-2">All PDF Report</span></a></li>
+        <li class="nav-item">
+            <a class="nav-link @(IsActive("/Dashboard/SuperAdmin/Post")?"active":"")" data-bs-toggle="collapse" href="#postCollapse" role="button" aria-expanded="@(IsActive("/Dashboard/SuperAdmin/Post")?"true":"false")" title="Post">
+                <i class="bi bi-postcard flex-shrink-0"></i>
+                <span class="nav-label ms-2 d-flex align-items-center justify-content-between w-100">Post <i class="bi bi-chevron-down"></i></span>
+            </a>
+            <div class="collapse @(IsActive("/Dashboard/SuperAdmin/Post")?"show":"")" id="postCollapse">
+                <ul class="nav flex-column ms-3">
+                    <li class="nav-item"><a class="nav-link" href="/Dashboard/SuperAdmin/Post?FilterCategory=Training"><i class="bi bi-mortarboard flex-shrink-0"></i><span class="nav-label ms-2">Training Posts</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="/Dashboard/SuperAdmin/Post?FilterCategory=Notes"><i class="bi bi-journal-text flex-shrink-0"></i><span class="nav-label ms-2">Notes</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="/Dashboard/SuperAdmin/Post?FilterCategory=Other"><i class="bi bi-collection flex-shrink-0"></i><span class="nav-label ms-2">Other</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="/Dashboard/SuperAdmin/Post"><i class="bi bi-list flex-shrink-0"></i><span class="nav-label ms-2">All Posts</span></a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/SuperAdmin/Training")?"active":"")" href="/Dashboard/SuperAdmin/Training" title="Training"><i class="bi bi-mortarboard flex-shrink-0"></i><span class="nav-label ms-2">Training</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/SuperAdmin/TransportAdmin")?"active":"")" href="/Dashboard/SuperAdmin/TransportAdmin" title="Transport Requests"><i class="bi bi-truck flex-shrink-0"></i><span class="nav-label ms-2">Transport Requests</span></a></li>
+        <li class="nav-item mt-3"><a class="nav-link text-warning fw-semibold" href="/Login?logout=1" title="Logout"><i class="bi bi-box-arrow-left flex-shrink-0"></i><span class="nav-label ms-2">Logout</span></a></li>
+    </ul>
+</div>
+<script>
+(function(){
+    var collapsed = localStorage.getItem('sidebarCollapsed')==='1';
+    if(collapsed) _applyCollapse(true);
+    function _applyCollapse(c){
+        var b=document.body, ic=document.getElementById('sidebarToggleIcon');
+        c ? b.classList.add('sidebar-collapsed') : b.classList.remove('sidebar-collapsed');
+        if(ic){ ic.className = c ? 'bi bi-chevron-right' : 'bi bi-chevron-left'; }
+    }
+    window.toggleSidebarCollapse=function(){
+        var c=!document.body.classList.contains('sidebar-collapsed');
+        _applyCollapse(c); localStorage.setItem('sidebarCollapsed',c?'1':'0');
+    };
+})();
+</script>

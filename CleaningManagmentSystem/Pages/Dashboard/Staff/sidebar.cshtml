@@ -1,0 +1,275 @@
+@{
+    var currentPath = Context.Request.Path.Value ?? "";
+    
+    bool IsActive(string path, bool exact = false)
+    {
+        if (exact)
+        {
+            return currentPath.Equals(path, StringComparison.OrdinalIgnoreCase);
+        }
+        return currentPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+    }
+}
+<!-- Staff Dashboard Sidebar Content -->
+<button class="sidebar-toggle-btn d-none d-md-flex" id="sidebarToggleBtn" onclick="toggleSidebarCollapse()" title="Expand / Collapse">
+    <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+</button>
+<div class="sidebar-scroll pt-3" style="height: 100%;">
+    <div class="sidebar-logo-area pb-3 mb-3 border-bottom d-flex align-items-center gap-2 px-3" style="min-height:54px">
+        <i class="bi bi-droplet-fill text-info fs-5 flex-shrink-0"></i>
+        <div class="sidebar-brand-text">
+            <div class="text-white fw-bold" style="font-size:.95rem;line-height:1.2">Yeka Cleaning</div>
+            <div class="text-white-50" style="font-size:.68rem">Staff Dashboard</div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav mt-3">
+        <ul class="nav flex-column">
+            <!-- Main Navigation -->
+            <li class="nav-item px-3 py-2 mt-2">
+                <small class="text-uppercase text-muted fw-bold">Navigation</small>
+            </li>
+
+            <li class="nav-item">
+                <a href="/Dashboard/Staff/Index" class="nav-link @(IsActive("/Dashboard/Staff/Index", true) || IsActive("/Dashboard/Staff/", true) ? "active" : "")">
+                    <i class="bi bi-grid me-2"></i> Dashboard
+                </a>
+            </li>
+
+            <!-- Receipts Section -->
+            @{
+                bool isReceiptsActive = IsActive("/Dashboard/Staff/RegisterReceipt")
+                                     || IsActive("/Dashboard/Staff/OutsourceReceipt")
+                                     || IsActive("/Dashboard/Staff/PrivateCompanyReceipt");
+            }
+            <li class="nav-item">
+                <a class="nav-link @(isReceiptsActive ? "active" : "")" data-bs-toggle="collapse" href="#receiptsCollapse" role="button" aria-expanded="@(isReceiptsActive ? "true" : "false")" aria-controls="receiptsCollapse">
+                    <i class="bi bi-journal-plus me-2"></i> Register Receipt <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse @(isReceiptsActive ? "show" : "")" id="receiptsCollapse">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/RegisterReceipt" class="nav-link @(IsActive("/Dashboard/Staff/RegisterReceipt") ? "active" : "")">
+                                <i class="bi bi-circle me-2" style="font-size: 0.5rem;"></i> Mahberat Receipt
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/OutsourceReceipt" class="nav-link @(IsActive("/Dashboard/Staff/OutsourceReceipt") ? "active" : "")">
+                                <i class="bi bi-circle me-2" style="font-size: 0.5rem;"></i> Outsource Receipt
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/PrivateCompanyReceipt" class="nav-link @(IsActive("/Dashboard/Staff/PrivateCompanyReceipt") ? "active" : "")">
+                                <i class="bi bi-circle me-2" style="font-size: 0.5rem;"></i> Private Company Receipt
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a href="/Dashboard/Staff/Approvals" class="nav-link @(IsActive("/Dashboard/Staff/Approvals") ? "active" : "")">
+                    <i class="bi bi-check2-square me-2"></i> Approvals
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/Dashboard/Staff/TransportPayments" class="nav-link @(IsActive("/Dashboard/Staff/TransportPayments") ? "active" : "")">
+                    <i class="bi bi-truck me-2"></i> Transport Payments
+                </a>
+            </li>
+
+            <!-- Reports Section -->
+            @{
+                bool isReportsActive = IsActive("/Dashboard/Staff/AgencyReport") || 
+                                     IsActive("/Dashboard/Staff/StaffReport") || 
+                                     IsActive("/Dashboard/Staff/Checklist") || 
+                                     IsActive("/Dashboard/Staff/YakaReport");
+            }
+            <li class="nav-item">
+                <a class="nav-link @(isReportsActive ? "active" : "")" data-bs-toggle="collapse" href="#reportsCollapse" role="button" aria-expanded="@(isReportsActive ? "true" : "false")" aria-controls="reportsCollapse">
+                    <i class="bi bi-file-earmark-text me-2"></i> Reports <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse @(isReportsActive ? "show" : "")" id="reportsCollapse">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/AgencyReport" class="nav-link @(IsActive("/Dashboard/Staff/AgencyReport") ? "active" : "")">
+                                <i class="bi bi-file-earmark-text me-2"></i> Agency Report
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/StaffReport" class="nav-link @(IsActive("/Dashboard/Staff/StaffReport") ? "active" : "")">
+                                <i class="bi bi-file-earmark-bar-graph me-2"></i> Staff Report
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/Checklist" class="nav-link @(IsActive("/Dashboard/Staff/Checklist") ? "active" : "")">
+                                <i class="bi bi-check-square me-2"></i> Checklist
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/YakaReport" class="nav-link @(IsActive("/Dashboard/Staff/YakaReport") ? "active" : "")">
+                                <i class="bi bi-file-earmark me-2"></i> Yaka Report
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <!-- Personnel Section -->
+            @{
+                bool isPersonnelActive = IsActive("/Dashboard/Staff/SubcityOfficer") || 
+                                        IsActive("/Dashboard/Staff/WeredaOfficer") || 
+                                        IsActive("/Dashboard/Staff/SubcityDriver");
+            }
+            <li class="nav-item">
+                <a class="nav-link @(isPersonnelActive ? "active" : "")" data-bs-toggle="collapse" href="#personnelCollapse" role="button" aria-expanded="@(isPersonnelActive ? "true" : "false")" aria-controls="personnelCollapse">
+                    <i class="bi bi-people me-2"></i> Personnel <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse @(isPersonnelActive ? "show" : "")" id="personnelCollapse">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/SubcityOfficer" class="nav-link @(IsActive("/Dashboard/Staff/SubcityOfficer") ? "active" : "")">
+                                <i class="bi bi-person-badge me-2"></i> Subcity Officer
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/WeredaOfficer" class="nav-link @(IsActive("/Dashboard/Staff/WeredaOfficer") ? "active" : "")">
+                                <i class="bi bi-person-rolodex me-2"></i> Wereda Mahberat
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/SubcityDriver" class="nav-link @(IsActive("/Dashboard/Staff/SubcityDriver") ? "active" : "")">
+                                <i class="bi bi-person-badge me-2"></i> Subcity Driver
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <!-- Operations Section -->
+            @{
+                bool isOperationsActive = IsActive("/Dashboard/Staff/DispatchSchedule");
+            }
+            <li class="nav-item">
+                <a class="nav-link @(isOperationsActive ? "active" : "")" data-bs-toggle="collapse" href="#operationsCollapse" role="button" aria-expanded="@(isOperationsActive ? "true" : "false")" aria-controls="operationsCollapse">
+                    <i class="bi bi-gear me-2"></i> Operations <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse @(isOperationsActive ? "show" : "")" id="operationsCollapse">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/DispatchSchedule" class="nav-link @(IsActive("/Dashboard/Staff/DispatchSchedule") ? "active" : "")">
+                                <i class="bi bi-calendar-check me-2"></i> Dispatch Schedule
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <!-- Resources Section -->
+            @{
+                bool isResourcesActive = IsActive("/Dashboard/Staff/Service") || 
+                                        IsActive("/Dashboard/Staff/Training") || 
+                                        IsActive("/Dashboard/Staff/Post") || 
+                                        IsActive("/Dashboard/Staff/Library") || 
+                                        IsActive("/Dashboard/Staff/OfficePlan") || 
+                                        IsActive("/Dashboard/Staff/OfficeRecognition");
+            }
+            <li class="nav-item">
+                <a class="nav-link @(isResourcesActive ? "active" : "")" data-bs-toggle="collapse" href="#resourcesCollapse" role="button" aria-expanded="@(isResourcesActive ? "true" : "false")" aria-controls="resourcesCollapse">
+                    <i class="bi bi-box me-2"></i> Resources <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse @(isResourcesActive ? "show" : "")" id="resourcesCollapse">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/Service" class="nav-link @(IsActive("/Dashboard/Staff/Service") ? "active" : "")">
+                                <i class="bi bi-briefcase me-2"></i> Services
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/Training" class="nav-link @(IsActive("/Dashboard/Staff/Training") ? "active" : "")">
+                                <i class="bi bi-mortarboard me-2"></i> Training
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/Post" class="nav-link @(IsActive("/Dashboard/Staff/Post") ? "active" : "")">
+                                <i class="bi bi-postcard me-2"></i> Posts
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/Library" class="nav-link @(IsActive("/Dashboard/Staff/Library") ? "active" : "")">
+                                <i class="bi bi-book me-2"></i> Library
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/OfficePlan" class="nav-link @(IsActive("/Dashboard/Staff/OfficePlan") ? "active" : "")">
+                                <i class="bi bi-building me-2"></i> Office Plan
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Dashboard/Staff/OfficeRecognition" class="nav-link @(IsActive("/Dashboard/Staff/OfficeRecognition") ? "active" : "")">
+                                <i class="bi bi-award me-2"></i> Office Recognition
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a href="/Dashboard/Staff/Gallery" class="nav-link @(IsActive("/Dashboard/Staff/Gallery") ? "active" : "")">
+                    <i class="bi bi-images me-2"></i> Gallery
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="/Dashboard/Staff/Contact" class="nav-link @(IsActive("/Dashboard/Staff/Contact") ? "active" : "")">
+                    <i class="bi bi-envelope me-2"></i> Contact
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="/Dashboard/Staff/Setting" class="nav-link @(IsActive("/Dashboard/Staff/Setting") ? "active" : "")">
+                    <i class="bi bi-gear me-2"></i> Settings
+                </a>
+            </li>
+
+            <li class="nav-item mt-4">
+                <a href="/Login?logout=1" class="nav-link text-warning fw-semibold">
+                    <i class="bi bi-box-arrow-left me-2"></i> Logout
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Auto-close sidebar dropdowns when clicking other links -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const navLinks = document.querySelectorAll('.sidebar .nav-link:not([data-bs-toggle="collapse"])');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                const collapses = document.querySelectorAll('.sidebar .collapse.show');
+                collapses.forEach(c => {
+                    if (!c.contains(link)) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(c);
+                        if (bsCollapse) bsCollapse.hide();
+                    }
+                });
+            });
+        });
+    });
+
+    // Sidebar collapse/expand
+    (function(){
+        var collapsed = localStorage.getItem('sidebarCollapsed')==='1';
+        if(collapsed) _applyCollapse(true);
+        function _applyCollapse(c){
+            var b=document.body, ic=document.getElementById('sidebarToggleIcon');
+            c ? b.classList.add('sidebar-collapsed') : b.classList.remove('sidebar-collapsed');
+            if(ic){ ic.className = c ? 'bi bi-chevron-right' : 'bi bi-chevron-left'; }
+        }
+        window.toggleSidebarCollapse=function(){
+            var c=!document.body.classList.contains('sidebar-collapsed');
+            _applyCollapse(c); localStorage.setItem('sidebarCollapsed',c?'1':'0');
+        };
+    })();
+</script>

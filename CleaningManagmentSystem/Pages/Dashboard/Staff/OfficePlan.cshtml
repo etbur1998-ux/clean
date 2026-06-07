@@ -1,0 +1,164 @@
+@page
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userRole = HttpContext.Session.GetString("UserRole");
+    
+    if (userName == null)
+    {
+        Response.Redirect("/Login");
+        return;
+    }
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+}
+
+<div class="main-content p-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-calendar-week me-2"></i>Office Plan & Schedule</h1>
+        <span class="badge bg-primary">@userRole</span>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-month display-4 text-primary"></i>
+                    <h4 class="mt-2">Today</h4>
+                    <p class="text-muted mb-0">April 21, 2026</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-clipboard-check display-4 text-success"></i>
+                    <h4 class="mt-2">8</h4>
+                    <p class="text-muted mb-0">Tasks Scheduled</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-people display-4 text-info"></i>
+                    <h4 class="mt-2">5</h4>
+                    <p class="text-muted mb-0">Staff On Duty</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-grid-3x3-gap me-2"></i>Weekly Schedule</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary"><i class="bi bi-chevron-left"></i></button>
+                        <button class="btn btn-primary">This Week</button>
+                        <button class="btn btn-outline-secondary"><i class="bi bi-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Monday</th>
+                                    <th>Tuesday</th>
+                                    <th>Wednesday</th>
+                                    <th>Thursday</th>
+                                    <th>Friday</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold">08:00</td>
+                                    <td><span class="badge bg-primary">Team Meeting</span></td>
+                                    <td><span class="badge bg-success">Client A</span></td>
+                                    <td><span class="badge bg-success">Client B</span></td>
+                                    <td><span class="badge bg-warning">Training</span></td>
+                                    <td><span class="badge bg-info">Client C</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">10:00</td>
+                                    <td><span class="badge bg-success">Client D</span></td>
+                                    <td><span class="badge bg-success">Client E</span></td>
+                                    <td><span class="badge bg-secondary">Admin Work</span></td>
+                                    <td><span class="badge bg-success">Client F</span></td>
+                                    <td><span class="badge bg-success">Client G</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">12:00</td>
+                                    <td colspan="5" class="text-center bg-light">Lunch Break</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">13:00</td>
+                                    <td><span class="badge bg-success">Client H</span></td>
+                                    <td><span class="badge bg-info">Client I</span></td>
+                                    <td><span class="badge bg-success">Client J</span></td>
+                                    <td><span class="badge bg-success">Client K</span></td>
+                                    <td><span class="badge bg-secondary">Reports</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">15:00</td>
+                                    <td><span class="badge bg-secondary">Documentation</span></td>
+                                    <td><span class="badge bg-warning">Training</span></td>
+                                    <td><span class="badge bg-success">Client L</span></td>
+                                    <td><span class="badge bg-info">Client M</span></td>
+                                    <td class="text-center text-muted">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-card-checklist me-2"></i>To-Do List</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="todo1" checked>
+                        <label class="form-check-label" for="todo1">Prepare weekly report</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="todo2" checked>
+                        <label class="form-check-label" for="todo2">Review cleaning schedules</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="todo3">
+                        <label class="form-check-label" for="todo3">Update inventory</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="todo4">
+                        <label class="form-check-label" for="todo4">Staff meeting prep</label>
+                    </div>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Upcoming Events</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Annual Conference</h6>
+                            <small>May 15</small>
+                        </div>
+                        <p class="mb-1">Convention Center</p>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Safety Training</h6>
+                            <small>May 20</small>
+                        </div>
+                        <p class="mb-1">Main Office</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

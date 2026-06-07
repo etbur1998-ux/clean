@@ -1,0 +1,102 @@
+@page
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userRole = HttpContext.Session.GetString("UserRole")?.ToLower();
+    if (userName == null) { Response.Redirect("/Login"); return; }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Receipt & Payroll - Super Admin - Yeka Cleaning</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+</head>
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+    <!-- Desktop Navbar -->
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/Dashboard/SuperAdmin"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+            <div class="nav-user">
+                <span>Welcome, @userName</span>
+                <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Navbar -->
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top d-lg-none">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" onclick="toggleSidebar()">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/Dashboard/SuperAdmin"><i class="bi bi-droplet-fill"></i> Yeka</a>
+            <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i></a>
+        </div>
+    </nav>
+    <nav id="sidebarMenu" class="sidebar d-lg-none">
+        @await Html.PartialAsync("~/Pages/Dashboard/SuperAdmin/_Sidebar.cshtml")
+    </nav>
+    <nav class="col-md-3 col-lg-2 d-none d-md-block sidebar" style="transform: none; padding-top: 56px;">
+        @await Html.PartialAsync("~/Pages/Dashboard/SuperAdmin/_Sidebar.cshtml")
+    </nav>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 pt-lg-5">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Receipt & Payroll</h1>
+            <span class="badge bg-danger">Super Admin</span>
+        </div>
+
+        <ul class="nav nav-tabs mb-4">
+            <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#receipts">Receipts</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#payroll">Payroll</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="receipts">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5>Recent Receipts</h5>
+                        <table class="table table-striped">
+                            <thead><tr><th>Receipt No</th><th>Client</th><th>Service</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+                            <tbody>
+                                <tr><td>REC-001</td><td>Client A</td><td>Residential</td><td>ETB 5,000</td><td>2026-04-19</td><td><span class="badge bg-success">Paid</span></td></tr>
+                                <tr><td>REC-002</td><td>Client B</td><td>Deep Cleaning</td><td>ETB 8,000</td><td>2026-04-18</td><td><span class="badge bg-warning">Pending</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="payroll">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5>Payroll Summary</h5>
+                        <table class="table table-striped">
+                            <thead><tr><th>Employee</th><th>Role</th><th>Month</th><th>Salary</th><th>Status</th></tr></thead>
+                            <tbody>
+                                <tr><td>Abebe Kebede</td><td>Wereda Mahberat</td><td>April 2026</td><td>ETB 15,000</td><td><span class="badge bg-success">Paid</span></td></tr>
+                                <tr><td>Kebede Alemu</td><td>Dispatch Officer</td><td>April 2026</td><td>ETB 12,000</td><td><span class="badge bg-warning">Processing</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('show');
+            document.getElementById('sidebarBackdrop').classList.toggle('show');
+        }
+        document.querySelectorAll('#sidebarMenu .nav-link').forEach(function(link) {
+            link.addEventListener('click', function() { if (window.innerWidth < 992) toggleSidebar(); });
+        });
+    </script>
+</body>
+</html>

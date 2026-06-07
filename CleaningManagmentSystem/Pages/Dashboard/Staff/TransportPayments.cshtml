@@ -1,0 +1,607 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.Staff.TransportPaymentsModel
+@{
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+    var userId = HttpContext.Session.GetInt32("UserId") ?? 0;
+    var userName = HttpContext.Session.GetString("UserName") ?? "";
+    if (userName == "") { Response.Redirect("/Login"); return; }
+}
+<style>
+/* ══ MODERN TRANSPORT PAYMENTS UI ══════════════════════════════════════════ */
+:root {
+    --tp-primary: #4f46e5;
+    --tp-success: #10b981;
+    --tp-warning: #f59e0b;
+    --tp-danger:  #ef4444;
+    --tp-info:    #3b82f6;
+    --tp-muted:   #6b7280;
+    --tp-bg:      #f8fafc;
+    --tp-card:    #ffffff;
+    --tp-border:  #e2e8f0;
+    --tp-radius:  14px;
+    --tp-shadow:  0 1px 3px rgba(0,0,0,.07), 0 4px 16px rgba(0,0,0,.04);
+}
+.tp-page { background: var(--tp-bg); min-height: 100vh; padding-bottom: 40px; }
+.tp-header { background: linear-gradient(135deg, var(--tp-primary) 0%, #7c3aed 100%);
+    padding: 28px 32px 80px; color: #fff; border-radius: 0 0 32px 32px; margin-bottom: -54px; }
+.tp-header h1 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+.tp-header p { opacity: .75; font-size: .875rem; margin: 4px 0 0; }
+
+/* stat cards */
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
+.stat-card { background: var(--tp-card); border-radius: var(--tp-radius); padding: 18px 20px;
+    box-shadow: var(--tp-shadow); border: 1px solid var(--tp-border); position: relative; overflow: hidden; }
+.stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background: var(--c,#4f46e5); }
+.stat-card .val { font-size: 2rem; font-weight: 800; line-height: 1; color: var(--c,#4f46e5); }
+.stat-card .lbl { font-size: .75rem; color: var(--tp-muted); margin-top: 4px; }
+.stat-card .ico { position:absolute; right:16px; top:16px; font-size:1.6rem; opacity:.12; }
+@@media(max-width:640px){ .stat-grid{grid-template-columns:repeat(2,1fr);} }
+
+/* filter bar */
+.filter-bar { display:flex; align-items:center; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
+.filter-pill { padding:6px 16px; border-radius:20px; border:1.5px solid var(--tp-border);
+    background:#fff; font-size:.8rem; font-weight:600; cursor:pointer;
+    color:var(--tp-muted); transition:all .18s; }
+.filter-pill.active { background:var(--tp-primary); border-color:var(--tp-primary); color:#fff; }
+.filter-pill:hover:not(.active) { border-color:var(--tp-primary); color:var(--tp-primary); }
+.refresh-btn { margin-left:auto; background:none; border:1.5px solid var(--tp-border);
+    border-radius:10px; padding:6px 14px; font-size:.8rem; color:var(--tp-muted);
+    cursor:pointer; transition:all .18s; display:flex; align-items:center; gap:5px; }
+.refresh-btn:hover { border-color:var(--tp-primary); color:var(--tp-primary); }
+
+/* request cards */
+.req-card { background: var(--tp-card); border-radius: var(--tp-radius); border: 1px solid var(--tp-border);
+    box-shadow: var(--tp-shadow); margin-bottom: 14px; overflow: hidden; transition: box-shadow .2s; }
+.req-card:hover { box-shadow: 0 4px 20px rgba(79,70,229,.12); }
+.req-card-header { padding: 14px 18px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--tp-border); }
+.req-num { font-weight: 800; font-size: .85rem; color: var(--tp-primary); font-family: monospace; }
+.req-meta { flex:1; }
+.req-route { font-size:.82rem; color:var(--tp-muted); display:flex; align-items:center; gap:5px; }
+.req-driver { font-size:.78rem; margin-top:2px; color:#374151; }
+.req-card-body { padding: 12px 18px; }
+.req-info-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:12px; }
+.req-info-item { background:#f8fafc; border-radius:10px; padding:10px 14px; text-align:center; }
+.req-info-item .riv { font-size:1.05rem; font-weight:700; color:#1e293b; }
+.req-info-item .ril { font-size:.72rem; color:var(--tp-muted); margin-top:2px; }
+.req-actions { display:flex; gap:8px; justify-content:flex-end; padding-top:10px; border-top:1px solid var(--tp-border); }
+@@media(max-width:640px){ .req-info-grid{grid-template-columns:repeat(2,1fr);} }
+
+/* status badges */
+.sb { display:inline-flex; align-items:center; gap:5px; padding:4px 11px;
+    border-radius:20px; font-size:.72rem; font-weight:700; white-space:nowrap; }
+.sb-pending   { background:#fef3c7; color:#92400e; }
+.sb-active    { background:#dbeafe; color:#1e40af; }
+.sb-verified  { background:#ede9fe; color:#4c1d95; }
+.sb-approved  { background:#d1fae5; color:#064e3b; }
+.sb-paid      { background:#10b981; color:#fff; }
+.sb-rejected  { background:#fee2e2; color:#7f1d1d; }
+.sb-default   { background:#f1f5f9; color:#475569; }
+
+/* progress tracker */
+.prog-wrap { padding: 14px 2px 6px; }
+.prog-track { display:flex; align-items:flex-start; position:relative; }
+.prog-track::before { content:''; position:absolute; top:14px; left:14px;
+    right:14px; height:2px; background:var(--tp-border); z-index:0; }
+.prog-step { flex:1; display:flex; flex-direction:column; align-items:center;
+    position:relative; z-index:1; }
+.prog-dot { width:28px; height:28px; border-radius:50%; border:2.5px solid var(--tp-border);
+    background:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:800; color:#94a3b8; transition:all .3s; }
+.prog-step.done .prog-dot  { background:var(--tp-primary); border-color:var(--tp-primary); color:#fff; }
+.prog-step.active .prog-dot { background:#fff; border-color:var(--tp-primary); color:var(--tp-primary);
+    box-shadow:0 0 0 4px rgba(79,70,229,.15); }
+.prog-step.rejected .prog-dot { background:var(--tp-danger); border-color:var(--tp-danger); color:#fff; }
+.prog-lbl { font-size:.65rem; text-align:center; margin-top:5px; color:#94a3b8;
+    max-width:70px; line-height:1.2; }
+.prog-step.done .prog-lbl,
+.prog-step.active .prog-lbl { color:var(--tp-primary); font-weight:700; }
+.prog-step.rejected .prog-lbl { color:var(--tp-danger); font-weight:700; }
+.prog-actor { font-size:.6rem; color:#cbd5e1; text-align:center; max-width:70px; }
+
+/* action buttons */
+.btn-tp { padding:7px 16px; border-radius:9px; border:none; font-size:.8rem;
+    font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+    transition:all .18s; }
+.btn-tp-primary { background:var(--tp-primary); color:#fff; }
+.btn-tp-primary:hover { background:#4338ca; }
+.btn-tp-success { background:var(--tp-success); color:#fff; }
+.btn-tp-success:hover { background:#059669; }
+.btn-tp-danger  { background:var(--tp-danger); color:#fff; }
+.btn-tp-danger:hover  { background:#dc2626; }
+.btn-tp-outline { background:#fff; color:var(--tp-muted); border:1.5px solid var(--tp-border); }
+.btn-tp-outline:hover { border-color:var(--tp-primary); color:var(--tp-primary); }
+.btn-tp-pay { background:linear-gradient(135deg,var(--tp-primary),#7c3aed); color:#fff; }
+.btn-tp-pay:hover { opacity:.9; }
+
+/* empty state */
+.empty-state { text-align:center; padding:48px 20px; color:var(--tp-muted); }
+.empty-state .ei { font-size:3rem; margin-bottom:12px; opacity:.3; }
+
+/* modals modern */
+.tp-modal .modal-content { border:none; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.18); }
+.tp-modal .modal-header  { border-radius:20px 20px 0 0; border:none; padding:20px 24px; }
+.tp-modal .modal-body    { padding:24px; }
+.tp-modal .modal-footer  { border:none; padding:16px 24px; border-radius:0 0 20px 20px; }
+.tp-form-group { margin-bottom:16px; }
+.tp-form-group label { font-size:.82rem; font-weight:600; color:#374151; margin-bottom:6px; display:block; }
+.tp-form-group input, .tp-form-group textarea, .tp-form-group select {
+    width:100%; padding:10px 14px; border:1.5px solid var(--tp-border);
+    border-radius:10px; font-size:.875rem; outline:none; transition:border-color .18s; }
+.tp-form-group input:focus, .tp-form-group textarea:focus, .tp-form-group select:focus
+    { border-color:var(--tp-primary); box-shadow:0 0 0 3px rgba(79,70,229,.1); }
+
+/* detail sections */
+.detail-section { background:#f8fafc; border-radius:12px; padding:16px; margin-bottom:14px; }
+.detail-section h6 { font-size:.8rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:.05em; color:var(--tp-primary); margin-bottom:12px; }
+.detail-row { display:flex; justify-content:space-between; padding:5px 0;
+    border-bottom:1px dashed var(--tp-border); font-size:.85rem; }
+.detail-row:last-child { border:none; }
+.detail-row .dk { color:var(--tp-muted); }
+.detail-row .dv { font-weight:600; color:#1e293b; }
+.log-item { display:flex; gap:10px; margin-bottom:12px; }
+.log-dot { width:32px; height:32px; border-radius:50%; background:var(--tp-primary);
+    color:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; flex-shrink:0; }
+.log-content { background:#fff; border:1px solid var(--tp-border); border-radius:10px;
+    padding:10px 14px; flex:1; }
+.log-content .lt { font-size:.7rem; color:var(--tp-muted); }
+.log-content .la { font-size:.82rem; font-weight:700; }
+.log-content .ln { font-size:.78rem; color:#64748b; font-style:italic; margin-top:3px; }
+
+/* toast */
+.tp-toast { position:fixed; bottom:24px; right:24px; z-index:9999;
+    padding:14px 20px; border-radius:12px; font-size:.85rem; font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,.15); transform:translateY(20px); opacity:0;
+    transition:all .3s; display:flex; align-items:center; gap:8px; }
+.tp-toast.show { transform:translateY(0); opacity:1; }
+.tp-toast.success { background:#10b981; color:#fff; }
+.tp-toast.warning { background:#f59e0b; color:#fff; }
+.tp-toast.danger  { background:#ef4444; color:#fff; }
+</style>
+
+<div class="tp-page">
+  <!-- header banner -->
+  <div class="tp-header">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:10px 14px;font-size:1.5rem">
+        <i class="bi bi-truck"></i>
+      </div>
+      <div>
+        <h1><i class="bi bi-cash-coin me-2"></i>Transport Payments</h1>
+        <p>Review receipts, approve costs and process payments</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:0 20px;position:relative;z-index:2">
+    <!-- stat cards -->
+    <div class="stat-grid">
+      <div class="stat-card" style="--c:#f59e0b">
+        <i class="bi bi-hourglass-split ico"></i>
+        <div class="val" id="statPending">-</div>
+        <div class="lbl">Awaiting Approval</div>
+      </div>
+      <div class="stat-card" style="--c:#10b981">
+        <i class="bi bi-check-circle ico"></i>
+        <div class="val" id="statApproved">-</div>
+        <div class="lbl">Approved</div>
+      </div>
+      <div class="stat-card" style="--c:#3b82f6">
+        <i class="bi bi-cash-coin ico"></i>
+        <div class="val" id="statPaid">-</div>
+        <div class="lbl">Paid</div>
+      </div>
+      <div class="stat-card" style="--c:#ef4444">
+        <i class="bi bi-x-circle ico"></i>
+        <div class="val" id="statRejected">-</div>
+        <div class="lbl">Rejected</div>
+      </div>
+    </div>
+
+    <!-- filter bar -->
+    <div class="filter-bar">
+      <span class="filter-pill active" onclick="setFilter('ReceiptVerified',this)">Awaiting Approval</span>
+      <span class="filter-pill" onclick="setFilter('StaffApproved',this)">Approved</span>
+      <span class="filter-pill" onclick="setFilter('Paid',this)">Paid</span>
+      <span class="filter-pill" onclick="setFilter('StaffRejected',this)">Rejected</span>
+      <span class="filter-pill" onclick="setFilter('',this)">All</span>
+      <button class="refresh-btn" onclick="loadAll()">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+      </button>
+    </div>
+
+    <!-- cards list -->
+    <div id="cardsContainer">
+      <div class="empty-state"><div class="ei"><i class="bi bi-truck"></i></div>Loading...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Approve Modal ────────────────────────────────────────────── -->
+<div class="modal fade tp-modal" id="approveModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff">
+        <h5 class="modal-title"><i class="bi bi-check-circle me-2"></i>Approve Payment</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="approveId"/>
+        <div class="tp-form-group">
+          <label>Transport Cost (ETB) <span style="color:red">*</span></label>
+          <input type="number" id="approveCost" min="0" step="0.01" placeholder="0.00"/>
+        </div>
+        <div class="tp-form-group">
+          <label>Notes</label>
+          <textarea id="approveNotes" rows="2" placeholder="Optional notes..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="background:#f8fafc">
+        <button class="btn-tp btn-tp-outline" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn-tp btn-tp-success" onclick="submitApprove()">
+          <i class="bi bi-check-circle"></i> Approve
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Reject Modal ─────────────────────────────────────────────── -->
+<div class="modal fade tp-modal" id="rejectModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff">
+        <h5 class="modal-title"><i class="bi bi-x-circle me-2"></i>Reject Payment</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="rejectId"/>
+        <div class="tp-form-group">
+          <label>Reason <span style="color:red">*</span></label>
+          <textarea id="rejectNotes" rows="3" placeholder="Explain why..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="background:#f8fafc">
+        <button class="btn-tp btn-tp-outline" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn-tp btn-tp-danger" onclick="submitReject()">
+          <i class="bi bi-x-circle"></i> Reject
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Payment Modal ────────────────────────────────────────────── -->
+<div class="modal fade tp-modal" id="paymentModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff">
+        <h5 class="modal-title"><i class="bi bi-cash-coin me-2"></i>Process Payment</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="paymentId"/>
+        <div class="tp-form-group">
+          <label>Transaction Number <span style="color:red">*</span></label>
+          <input type="text" id="txNumber" placeholder="e.g. TXN-2024-001"/>
+        </div>
+        <div class="tp-form-group">
+          <label>Payment Proof (optional)</label>
+          <input type="file" id="paymentProof" accept="image/*,.pdf"/>
+        </div>
+        <div class="tp-form-group">
+          <label>Notes</label>
+          <textarea id="paymentNotes" rows="2" placeholder="Optional..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="background:#f8fafc">
+        <button class="btn-tp btn-tp-outline" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn-tp btn-tp-pay" onclick="submitPayment()">
+          <i class="bi bi-cash-coin"></i> Process Payment
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Detail Modal ─────────────────────────────────────────────── -->
+<div class="modal fade tp-modal" id="detailModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" style="background:#1e293b;color:#fff">
+        <h5 class="modal-title"><i class="bi bi-file-earmark-text me-2"></i>Request Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="detailBody">
+        <div class="empty-state"><div class="ei"><i class="bi bi-hourglass-split"></i></div>Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tp-toast" id="tpToast"></div>
+
+<script>
+const API = '/api/transport';
+const staffId   = @userId;
+const staffName = '@Html.Raw(userName)';
+let _currentFilter = 'ReceiptVerified';
+
+const STEPS = [
+  {key:'PendingDispatcher',      lbl:'Submitted',      actor:'Mahberat'},
+  {key:'DriverAssigned',         lbl:'Driver Assigned', actor:'Dispatcher'},
+  {key:'DriverAccepted',         lbl:'Driver Accepted', actor:'Driver'},
+  {key:'PickedUp',               lbl:'Pickup',          actor:'Driver'},
+  {key:'MahberatApprovedPickup', lbl:'Pickup OK',       actor:'Mahberat'},
+  {key:'ReceiptSubmitted',       lbl:'Receipt',         actor:'Driver'},
+  {key:'ReceiptVerified',        lbl:'Verified',        actor:'Mahberat'},
+  {key:'StaffApproved',          lbl:'Approved',        actor:'You'},
+  {key:'Paid',                   lbl:'Paid',            actor:'You'},
+];
+const REJECTED = ['DispatcherRejected','DriverRejected','StaffRejected'];
+
+function statusBadge(s) {
+  const map = {
+    PendingDispatcher:'sb-pending', DriverAssigned:'sb-active', DriverAccepted:'sb-active',
+    PickedUp:'sb-active', MahberatApprovedPickup:'sb-active', ReceiptSubmitted:'sb-verified',
+    ReceiptVerified:'sb-verified', StaffApproved:'sb-approved', Paid:'sb-paid',
+    DispatcherRejected:'sb-rejected', DriverRejected:'sb-rejected', StaffRejected:'sb-rejected'
+  };
+  const label = s.replace(/([A-Z])/g,' $1').trim();
+  return `<span class="sb ${map[s]||'sb-default'}">${label}</span>`;
+}
+
+// Terminal statuses — no tracker needed
+const TERMINAL = ['Paid','StaffApproved','DispatcherRejected','DriverRejected','StaffRejected'];
+
+function buildTracker(status) {
+  // Rejected — small badge only
+  if (REJECTED.includes(status))
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0">
+      <span class="sb sb-rejected"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+      <span style="font-size:.73rem;color:#94a3b8">${status.replace('Rejected','').replace(/([A-Z])/g,' $1').trim()} rejected this request.</span></div>`;
+  // Paid / completed — hide tracker completely
+  if (TERMINAL.includes(status)) return '';
+  // Active — full progress tracker
+  const idx = STEPS.findIndex(s => s.key === status);
+  return `<div class="prog-wrap"><div class="prog-track">
+    ${STEPS.map((s,i) => {
+      const cls = i<idx?'done': i===idx?'active':'';
+      const icon = i<idx ? '<i class="bi bi-check-lg"></i>' : (i+1);
+      return `<div class="prog-step ${cls}">
+        <div class="prog-dot">${icon}</div>
+        <div class="prog-lbl">${s.lbl}</div>
+        <div class="prog-actor">${s.actor}</div>
+      </div>`;
+    }).join('')}
+  </div></div>`;
+}
+
+function setFilter(val, el) {
+  _currentFilter = val;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  loadRequests();
+}
+
+async function loadAll() { await Promise.all([loadStats(), loadRequests()]); }
+
+async function loadStats() {
+  const r = await fetch(`${API}/stats`);
+  const s = await r.json();
+  document.getElementById('statPending').textContent  = s.receiptVerified ?? 0;
+  document.getElementById('statApproved').textContent = s.staffApproved ?? 0;
+  document.getElementById('statPaid').textContent     = s.paid ?? 0;
+  document.getElementById('statRejected').textContent = s.rejected ?? 0;
+}
+
+async function loadRequests() {
+  const url = _currentFilter ? `${API}/requests?status=${_currentFilter}` : `${API}/requests`;
+  const r = await fetch(url);
+  const data = await r.json();
+  renderCards(data);
+}
+
+function renderCards(data) {
+  const el = document.getElementById('cardsContainer');
+  if (!data.length) {
+    el.innerHTML = `<div class="empty-state"><div class="ei"><i class="bi bi-inbox"></i></div>No requests found for this filter.</div>`;
+    return;
+  }
+  el.innerHTML = data.map(r => {
+    const cost = r.transport_cost ? `ETB ${parseFloat(r.transport_cost).toFixed(2)}` : '—';
+    const date = r.requested_date ? r.requested_date.substring(0,10) : '—';
+    return `
+    <div class="req-card">
+      <div class="req-card-header">
+        <div>
+          <div class="req-num">${r.request_number}</div>
+          <div class="req-route">
+            <i class="bi bi-geo-alt" style="color:#4f46e5"></i>${r.pickup_location}
+            <i class="bi bi-arrow-right" style="opacity:.5"></i>
+            <i class="bi bi-flag" style="color:#10b981"></i>${r.destination}
+          </div>
+          <div class="req-driver"><i class="bi bi-person-circle me-1" style="opacity:.5"></i>${r.mahberat_user_name ?? '—'}</div>
+        </div>
+        <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          ${statusBadge(r.status)}
+          <span style="font-size:.72rem;color:#94a3b8"><i class="bi bi-calendar3 me-1"></i>${date}</span>
+        </div>
+      </div>
+      <div class="req-card-body">
+        <div class="req-info-grid">
+          <div class="req-info-item">
+            <div class="riv"><i class="bi bi-person-badge" style="color:#4f46e5"></i> ${r.driver_name ?? '—'}</div>
+            <div class="ril">Driver</div>
+          </div>
+          <div class="req-info-item">
+            <div class="riv">${r.vehicle_plate ?? '—'}</div>
+            <div class="ril">Vehicle</div>
+          </div>
+          <div class="req-info-item">
+            <div class="riv" style="color:#10b981">${cost}</div>
+            <div class="ril">Transport Cost</div>
+          </div>
+        </div>
+        ${buildTracker(r.status)}
+        <div class="req-actions">
+          <button class="btn-tp btn-tp-outline" onclick="showDetail(${r.id})">
+            <i class="bi bi-eye"></i> Details
+          </button>
+          ${r.status==='ReceiptVerified' ? `
+          <button class="btn-tp btn-tp-danger" onclick="openReject(${r.id})">
+            <i class="bi bi-x-circle"></i> Reject
+          </button>
+          <button class="btn-tp btn-tp-success" onclick="openApprove(${r.id})">
+            <i class="bi bi-check-circle"></i> Approve
+          </button>` : ''}
+          ${r.status==='StaffApproved' ? `
+          <button class="btn-tp btn-tp-pay" onclick="openPayment(${r.id})">
+            <i class="bi bi-cash-coin"></i> Process Payment
+          </button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openApprove(id) {
+  document.getElementById('approveId').value = id;
+  document.getElementById('approveCost').value = '';
+  document.getElementById('approveNotes').value = '';
+  new bootstrap.Modal(document.getElementById('approveModal')).show();
+}
+function openReject(id) {
+  document.getElementById('rejectId').value = id;
+  document.getElementById('rejectNotes').value = '';
+  new bootstrap.Modal(document.getElementById('rejectModal')).show();
+}
+function openPayment(id) {
+  document.getElementById('paymentId').value = id;
+  document.getElementById('txNumber').value = '';
+  document.getElementById('paymentNotes').value = '';
+  new bootstrap.Modal(document.getElementById('paymentModal')).show();
+}
+
+async function submitApprove() {
+  const id   = document.getElementById('approveId').value;
+  const cost = document.getElementById('approveCost').value;
+  if (!cost) { toast('Enter transport cost', 'danger'); return; }
+  const r = await fetch(`${API}/requests/${id}/staff-action`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({staffId, staffName, action:'Approve',
+      transportCost: parseFloat(cost), notes: document.getElementById('approveNotes').value})
+  });
+  const d = await r.json();
+  if (d.success) {
+    bootstrap.Modal.getInstance(document.getElementById('approveModal')).hide();
+    toast('Payment approved successfully!', 'success');
+    loadAll();
+  } else toast(d.message || 'Error', 'danger');
+}
+
+async function submitReject() {
+  const id    = document.getElementById('rejectId').value;
+  const notes = document.getElementById('rejectNotes').value;
+  if (!notes.trim()) { toast('Please provide a reason', 'danger'); return; }
+  const r = await fetch(`${API}/requests/${id}/staff-action`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({staffId, staffName, action:'Reject', notes})
+  });
+  const d = await r.json();
+  if (d.success) {
+    bootstrap.Modal.getInstance(document.getElementById('rejectModal')).hide();
+    toast('Request rejected.', 'warning');
+    loadAll();
+  } else toast(d.message || 'Error', 'danger');
+}
+
+async function submitPayment() {
+  const id  = document.getElementById('paymentId').value;
+  const txn = document.getElementById('txNumber').value.trim();
+  if (!txn) { toast('Enter transaction number', 'danger'); return; }
+  let proofUrl = null;
+  const file = document.getElementById('paymentProof').files[0];
+  if (file) {
+    const fd = new FormData(); fd.append('file', file);
+    const up = await fetch(`${API}/upload`, {method:'POST', body: fd});
+    const ud = await up.json();
+    proofUrl = ud.url;
+  }
+  const r = await fetch(`${API}/requests/${id}/process-payment`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({financeStaffId:staffId, financeStaffName:staffName,
+      transactionNumber:txn, paymentProofUrl:proofUrl,
+      notes: document.getElementById('paymentNotes').value})
+  });
+  const d = await r.json();
+  if (d.success) {
+    bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+    toast('Payment processed!', 'success');
+    loadAll();
+  } else toast(d.message || 'Error', 'danger');
+}
+
+async function showDetail(id) {
+  document.getElementById('detailBody').innerHTML =
+    '<div class="empty-state"><div class="ei"><i class="bi bi-hourglass-split"></i></div>Loading...</div>';
+  new bootstrap.Modal(document.getElementById('detailModal')).show();
+  const r   = await fetch(`${API}/requests/${id}`);
+  const data = await r.json();
+  const req  = data.request;
+  const logs = data.logs ?? [];
+  const fdt  = v => v ? new Date(v).toLocaleString() : '—';
+  document.getElementById('detailBody').innerHTML = `
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="detail-section">
+          <h6><i class="bi bi-info-circle me-2"></i>Trip Details</h6>
+          <div class="detail-row"><span class="dk">Request #</span><span class="dv">${req.request_number}</span></div>
+          <div class="detail-row"><span class="dk">Requester</span><span class="dv">${req.mahberat_user_name ?? '—'}</span></div>
+          <div class="detail-row"><span class="dk">Pickup</span><span class="dv">${req.pickup_location}</span></div>
+          <div class="detail-row"><span class="dk">Destination</span><span class="dv">${req.destination}</span></div>
+          <div class="detail-row"><span class="dk">Date</span><span class="dv">${req.requested_date ? req.requested_date.substring(0,10) : '—'}</span></div>
+          <div class="detail-row"><span class="dk">Driver</span><span class="dv">${req.driver_name ?? '—'}</span></div>
+          <div class="detail-row"><span class="dk">Vehicle</span><span class="dv">${req.vehicle_plate ?? '—'}</span></div>
+          <div class="detail-row"><span class="dk">KG</span><span class="dv">${req.actual_kilogram ?? '—'}</span></div>
+          <div class="detail-row"><span class="dk">Cost</span><span class="dv" style="color:#10b981">${req.transport_cost ? 'ETB '+req.transport_cost : '—'}</span></div>
+          <div class="detail-row"><span class="dk">Status</span><span class="dv">${statusBadge(req.status)}</span></div>
+          <div class="detail-row"><span class="dk">Tx #</span><span class="dv">${req.transaction_number ?? '—'}</span></div>
+        </div>
+        ${req.receipt_photo_url ? `<div class="detail-section"><h6><i class="bi bi-image me-2"></i>Receipt Photo</h6>
+          <img src="${req.receipt_photo_url}" style="max-width:100%;border-radius:10px;border:1px solid var(--tp-border)"/></div>` : ''}
+      </div>
+      <div class="col-md-6">
+        <div class="detail-section"><h6><i class="bi bi-diagram-3 me-2"></i>Progress</h6>${buildTracker(req.status)}</div>
+        <div class="detail-section"><h6><i class="bi bi-clock-history me-2"></i>Activity Log</h6>
+          ${logs.length ? logs.map((l,i) => `
+            <div class="log-item">
+              <div class="log-dot">${i+1}</div>
+              <div class="log-content">
+                <div class="lt">${fdt(l.created_at)}</div>
+                <div class="la">${l.actor_name ?? 'System'}
+                  <span style="font-weight:400;color:#94a3b8"> → </span>
+                  <span style="color:#4f46e5">${l.to_status}</span>
+                </div>
+                ${l.notes ? `<div class="ln">"${l.notes}"</div>` : ''}
+              </div>
+            </div>`).join('')
+          : '<p style="color:#94a3b8;font-size:.85rem">No activity yet.</p>'}
+        </div>
+      </div>
+    </div>`;
+}
+
+function toast(msg, type='success') {
+  const el = document.getElementById('tpToast');
+  const icons = {success:'bi-check-circle-fill', warning:'bi-exclamation-triangle-fill', danger:'bi-x-circle-fill'};
+  el.className = `tp-toast ${type}`;
+  el.innerHTML = `<i class="bi ${icons[type]||'bi-info-circle-fill'}"></i> ${msg}`;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+loadAll();
+setInterval(loadAll, 30000);
+</script>

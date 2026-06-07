@@ -1,0 +1,148 @@
+@page
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userRole = HttpContext.Session.GetString("UserRole")?.ToLower() ?? "wereda_mahberat";
+
+    if (userName == null)
+    {
+        Response.Redirect("/Login");
+        return;
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact - Wereda Mahberat - Yeka Cleaning</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 200;
+            width: 250px;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            background: linear-gradient(180deg, #2E86AB, #A23B72);
+            padding-top: 56px;
+        }
+        .sidebar.show { transform: translateX(0); }
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 150;
+        }
+        .sidebar-backdrop.show { display: block; }
+        .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; }
+        .nav-link:hover, .nav-link.active { color: #fff; background: rgba(255,255,255,0.15); }
+    </style>
+</head>
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+    <!-- Desktop Navbar -->
+    <nav class="navbar navbar-dark bg-dark navbar-expand-lg d-none d-lg-flex fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/Dashboard/WeredaMahberat"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3">Welcome, @userName</span>
+                <a class="btn btn-outline-light btn-sm" href="/Login?logout=1">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Navbar -->
+    <nav class="navbar navbar-dark d-lg-none" style="background: linear-gradient(135deg, #2E86AB, #A23B72);">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" onclick="toggleSidebar()">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/Dashboard/WeredaMahberat"><i class="bi bi-droplet-fill"></i> Yeka</a>
+            <a class="btn btn-sm btn-outline-light" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i></a>
+        </div>
+    </nav>
+
+    <nav id="sidebarMenu" class="sidebar d-lg-none">
+        @await Html.PartialAsync("~/Pages/Dashboard/WeredaMahberat/_Sidebar.cshtml")
+    </nav>
+    <nav class="col-md-3 col-lg-2 d-none d-md-block sidebar" style="transform: none; padding-top: 56px;">
+        @await Html.PartialAsync("~/Pages/Dashboard/WeredaMahberat/_Sidebar.cshtml")
+    </nav>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 pt-lg-5">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Contact Information</h1>
+            <span class="badge bg-warning">Wereda Mahberat</span>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-geo-alt display-4 text-primary"></i>
+                        <h5 class="mt-2">Wereda Mahberat</h5>
+                        <p>Addis Ababa, Ethiopia</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-telephone display-4 text-success"></i>
+                        <h5 class="mt-2">+251 11 123 4567</h5>
+                        <p>Main Office</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-envelope display-4 text-info"></i>
+                        <h5 class="mt-2">info@yekacleaning.et</h5>
+                        <p>Email Address</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h4>Recent Contact Submissions</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr><th>Submission ID</th><th>Name</th><th>Email</th><th>Subject</th><th>Date</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>CS-045</td><td>Kebede Mengistu</td><td>kebede@email.com</td><td>Service Inquiry</td><td>2026-04-15</td><td><span class="badge bg-success">Replied</span></td></tr>
+                    <tr><td>CS-044</td><td>Hanna Tesfaye</td><td>hanna@email.com</td><td> quotation Request</td><td>2026-04-14</td><td><span class="badge bg-warning">Pending</span></td></tr>
+                    <tr><td>CS-043</td><td>Yohannes Alemu</td><td>yohannes@email.com</td><td>Feedback</td><td>2026-04-12</td><td><span class="badge bg-success">Replied</span></td></tr>
+                    <tr><td>CS-042</td><td>Selamawit Tilahun</td><td>selam@email.com</td><td>Complaint</td><td>2026-04-10</td><td><span class="badge bg-danger"> urgent</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('show');
+            document.getElementById('sidebarBackdrop').classList.toggle('show');
+        }
+        document.querySelectorAll('#sidebarMenu .nav-link').forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (window.innerWidth < 992) toggleSidebar();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+@{
+    var currentPath = Context.Request.Path.Value ?? "";
+
+    bool IsActive(string path, bool exact = false)
+    {
+        if (exact) return currentPath.Equals(path, StringComparison.OrdinalIgnoreCase);
+        return currentPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+    }
+}
+
+<!-- Expand / Collapse toggle button (desktop only) -->
+<button class="sidebar-toggle-btn d-none d-md-flex" id="sidebarToggleBtn" onclick="toggleSidebarCollapse()" title="Expand / Collapse sidebar">
+    <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+</button>
+
+<div class="sidebar-scroll pt-3" style="height:100%">
+
+    <!-- Brand -->
+    <div class="sidebar-logo-area pb-3 mb-3 border-bottom d-flex align-items-center gap-2 px-3" style="min-height:54px">
+        <i class="bi bi-droplet-fill text-info fs-5 flex-shrink-0"></i>
+        <div class="sidebar-brand-text">
+            <div class="text-white fw-bold" style="font-size:.95rem;line-height:1.2">Yeka Cleaning</div>
+            <div class="text-white-50" style="font-size:.68rem">Wereda Mahberat</div>
+        </div>
+    </div>
+
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link @(IsActive("/Dashboard/WeredaMahberat", true) ? "active" : "")" href="/Dashboard/WeredaMahberat" title="Dashboard">
+                <i class="bi bi-speedometer2 flex-shrink-0"></i>
+                <span class="nav-label ms-2">Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(IsActive("/Dashboard/WeredaMahberat/PayrollReport") ? "active" : "")" href="/Dashboard/WeredaMahberat/PayrollReport" title="Payroll Report">
+                <i class="bi bi-cash-stack flex-shrink-0"></i>
+                <span class="nav-label ms-2">Payroll Report</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(IsActive("/Dashboard/WeredaMahberat/Capital") ? "active" : "")" href="/Dashboard/WeredaMahberat/Capital" title="Capital">
+                <i class="bi bi-bank flex-shrink-0"></i>
+                <span class="nav-label ms-2">Capital</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(IsActive("/Dashboard/WeredaMahberat/Gallery") ? "active" : "")" href="/Dashboard/WeredaMahberat/Gallery" title="Gallery">
+                <i class="bi bi-images flex-shrink-0"></i>
+                <span class="nav-label ms-2">Gallery</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(IsActive("/Dashboard/WeredaMahberat/Contact") ? "active" : "")" href="/Dashboard/WeredaMahberat/Contact" title="Contact">
+                <i class="bi bi-envelope flex-shrink-0"></i>
+                <span class="nav-label ms-2">Contact</span>
+            </a>
+        </li>
+
+        <!-- Divider -->
+        <li class="nav-item">
+            <div style="border-top:1px solid rgba(255,255,255,.15);margin:6px 12px"></div>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link @(IsActive("/Dashboard/WeredaMahberat/TransportRequests") ? "active" : "")" href="/Dashboard/WeredaMahberat/TransportRequests" title="Transport Requests">
+                <i class="bi bi-truck flex-shrink-0"></i>
+                <span class="nav-label ms-2">Transport Requests</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(IsActive("/Dashboard/WeredaMahberat/MonthlyReceipt") ? "active" : "")" href="/Dashboard/WeredaMahberat/MonthlyReceipt"
+               style="border-left:3px solid #10b981;margin-left:4px;padding-left:12px" title="Monthly Receipt">
+                <i class="bi bi-receipt-cutoff flex-shrink-0 text-success"></i>
+                <span class="nav-label ms-2">
+                    <span class="text-success fw-semibold">Monthly Receipt</span>
+                    <span style="background:#10b981;color:#fff;font-size:.58rem;padding:1px 5px;border-radius:8px;margin-left:4px;font-weight:700">Paid</span>
+                </span>
+            </a>
+        </li>
+
+        <li class="nav-item mt-3">
+            <a class="nav-link text-warning fw-semibold" href="/Login?logout=1" title="Logout">
+                <i class="bi bi-box-arrow-left flex-shrink-0"></i>
+                <span class="nav-label ms-2">Logout</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<script>
+(function() {
+    // Restore collapse state from localStorage
+    var collapsed = localStorage.getItem('sidebarCollapsed') === '1';
+    if (collapsed) _applySidebarCollapse(true, false);
+
+    function _applySidebarCollapse(isCollapsed, animate) {
+        var body = document.body;
+        var icon = document.getElementById('sidebarToggleIcon');
+        if (isCollapsed) {
+            body.classList.add('sidebar-collapsed');
+            if (icon) { icon.classList.remove('bi-chevron-left'); icon.classList.add('bi-chevron-right'); }
+        } else {
+            body.classList.remove('sidebar-collapsed');
+            if (icon) { icon.classList.remove('bi-chevron-right'); icon.classList.add('bi-chevron-left'); }
+        }
+    }
+
+    window.toggleSidebarCollapse = function() {
+        var isNowCollapsed = !document.body.classList.contains('sidebar-collapsed');
+        _applySidebarCollapse(isNowCollapsed, true);
+        localStorage.setItem('sidebarCollapsed', isNowCollapsed ? '1' : '0');
+    };
+})();
+</script>

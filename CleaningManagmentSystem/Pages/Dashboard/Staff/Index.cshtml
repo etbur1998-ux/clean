@@ -1,0 +1,176 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.Staff.IndexModel
+@{
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+    ViewData["Title"] = "Staff Dashboard";
+}
+
+<div class="main-content p-4">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+            <h1 class="h2">
+                <i class="bi bi-speedometer2 me-2"></i>Staff Dashboard
+            </h1>
+            <span class="badge bg-primary">Staff</span>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.Message))
+        {
+            <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show" role="alert">
+                @Model.Message
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Quick Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="display-6 text-primary mb-2">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+                        <h6 class="card-title">Weredas</h6>
+                        <p class="h3 fw-bold text-primary">@Model.Weredas.Count</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="display-6 text-success mb-2">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <h6 class="card-title">Mahberats</h6>
+                        <p class="h3 fw-bold text-success">@Model.Mahberats.Count</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="display-6 text-warning mb-2">
+                            <i class="bi bi-truck"></i>
+                        </div>
+                        <h6 class="card-title">Vehicles</h6>
+                        <p class="h3 fw-bold text-warning">@Model.Vehicles.Count</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="display-6 text-info mb-2">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <h6 class="card-title">Drivers</h6>
+                        <p class="h3 fw-bold text-info">@Model.Drivers.Count</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <div class="col-lg-6 mb-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Receipts by Wereda</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="weredaChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Kilogram Trend</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var weredaCtx = document.getElementById('weredaChart').getContext('2d');
+            new Chart(weredaCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(Model.ChartLabels)),
+                    datasets: [{
+                        data: @Html.Raw(Json.Serialize(Model.ChartValues)),
+                        backgroundColor: ['#008080', '#006666', '#009999', '#00cccc', '#339999', '#66cccc']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            var trendCtx = document.getElementById('trendChart').getContext('2d');
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(Model.TrendLabels)),
+                    datasets: [{
+                        label: 'Kilograms',
+                        data: @Html.Raw(Json.Serialize(Model.TrendValues)),
+                        borderColor: '#008080',
+                        tension: 0.1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}
+
+<style>
+    .form-select:focus, .form-control:focus {
+        border-color: #008080;
+        box-shadow: 0 0 0 0.25rem rgba(0, 128, 128, 0.25);
+    }
+    
+    .btn-primary {
+        background-color: #008080;
+        border-color: #008080;
+    }
+    
+    .btn-primary:hover {
+        background-color: #006666;
+        border-color: #006666;
+    }
+    
+    .chart-container canvas {
+        max-height: 280px;
+    }
+    
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    }
+</style>

@@ -1,0 +1,207 @@
+@page "{id:int}"
+@model CleaningManagmentSystem.Pages.BlogPostModel
+@{
+    Layout = null;
+    ViewData["Title"] = Model.Post.Title;
+    var serverBase = $"{Request.Scheme}://{Request.Host}";
+    string ImgSrc(string? url) {
+        if (string.IsNullOrEmpty(url)) return "";
+        return url.StartsWith("http") ? url : serverBase + url;
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-i18n-title="blogpost_page_title">@ViewData["Title"] - Yeka Cleaning Services</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <style>
+        .blog-hero {
+            background: linear-gradient(135deg, #1e3a8a, #0d9488);
+            color: #ffffff;
+            padding: 80px 0 60px 0;
+            margin-top: 56px;
+            border-bottom: 5px solid #0f766e;
+        }
+        .article-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            background: #ffffff;
+            overflow: hidden;
+            margin-top: -40px;
+        }
+        .sidebar-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            background: #ffffff;
+            margin-bottom: 24px;
+        }
+        .recent-post-link {
+            text-decoration: none;
+            color: #1e293b;
+            transition: color 0.2s ease;
+        }
+        .recent-post-link:hover {
+            color: #0d9488;
+        }
+        .breadcrumb-light .breadcrumb-item, .breadcrumb-light .breadcrumb-item a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+        }
+        .breadcrumb-light .breadcrumb-item.active {
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color: #0f172a; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div class="container">
+            <a class="navbar-brand" asp-page="/Index" data-i18n="nav_brand"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item"><a class="nav-link" asp-page="/Index" data-i18n="nav_home"><i class="bi bi-house-door"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Gallery" data-i18n="nav_gallery"><i class="bi bi-images"></i> Gallery</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Services" data-i18n="nav_services"><i class="bi bi-briefcase"></i> Services</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/About" data-i18n="nav_about"><i class="bi bi-people"></i> About Us</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Contact" data-i18n="nav_contact"><i class="bi bi-envelope"></i> Contact Us</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-page="/Blog" data-i18n="nav_blog"><i class="bi bi-journal-text"></i> Blog</a></li>
+                    <li class="nav-item ms-lg-3"><a class="login-btn" asp-page="/Login" data-i18n="nav_login">Login</a></li>
+                    <li class="nav-item ms-lg-3">
+                        <select id="languageSelect" class="form-select form-select-sm border-light text-dark"></select>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="blog-hero">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <nav aria-label="breadcrumb" class="breadcrumb-light mb-3">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-page="/Index" data-i18n="blogpost_breadcrumb_home">Home</a></li>
+                        <li class="breadcrumb-item"><a asp-page="/Blog" data-i18n="blogpost_breadcrumb_blog">Blog</a></li>
+                        <li class="breadcrumb-item active" aria-current="page" data-i18n="blogpost_breadcrumb_article">Article</li>
+                    </ol>
+                </nav>
+                <span class="badge bg-info text-dark mb-2 text-uppercase">@Model.Post.Category</span>
+                <h1 class="display-5 fw-bold text-white mb-3">@Model.Post.Title</h1>
+                <span class="text-muted"><i class="bi bi-calendar-event me-2"></i><span data-i18n="blogpost_published_on">Published on</span> @Model.Post.CreatedAt?.ToString("MMMM dd, yyyy")</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Main Article Content -->
+        <div class="col-lg-8">
+            <div class="card article-card">
+                @if (string.IsNullOrEmpty(Model.Post.ImageUrl))
+                {
+                    <div class="d-flex align-items-center justify-content-center bg-light"
+                         style="height:300px">
+                        <i class="bi bi-image display-1 text-muted"></i>
+                    </div>
+                }
+                else
+                {
+                    <img src="@ImgSrc(Model.Post.ImageUrl)"
+                         class="card-img-top"
+                         alt="@Model.Post.Title"
+                         style="max-height:400px;object-fit:cover">
+                }
+                <div class="card-body p-4 p-md-5">
+                    <div style="font-size: 1.15rem; line-height: 1.8; color: #334155; white-space: pre-wrap;">@Model.Post.Content</div>
+                    
+                    <hr class="my-5" />
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-page="/Blog" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-1"></i><span data-i18n="blogpost_back_to_blog">Back to Blog</span></a>
+                        <span class="text-muted"><i class="bi bi-person-fill me-1"></i>Yeka Editorial Team</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Widgets -->
+        <div class="col-lg-4">
+            <!-- Recent Posts Widget -->
+            <div class="card sidebar-card">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold border-bottom pb-2 mb-3"><i class="bi bi-journal-text me-2 text-primary"></i><span data-i18n="blogpost_recent_articles">Recent Articles</span></h5>
+                    @if (Model.RecentPosts != null && Model.RecentPosts.Any())
+                    {
+                        @foreach (var post in Model.RecentPosts)
+                        {
+                            <div class="d-flex mb-3 align-items-center">
+                                <div class="flex-shrink-0" style="width:70px;height:50px;overflow:hidden;border-radius:6px;background:#f1f5f9">
+                                    @if (!string.IsNullOrEmpty(post.ImageUrl))
+                                    {
+                                        <img src="@ImgSrc(post.ImageUrl)"
+                                             style="width:100%;height:100%;object-fit:cover"
+                                             alt="@post.Title">
+                                    }
+                                    else
+                                    {
+                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-image text-muted small"></i>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0 fw-bold" style="font-size: 0.9rem;">
+                                        <a href="/BlogPost/@post.Id" class="recent-post-link">@post.Title</a>
+                                    </h6>
+                                    <small class="text-muted" style="font-size: 0.8rem;">@post.CreatedAt?.ToString("MMM dd, yyyy")</small>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted small mb-0">No other recent articles found.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Ad/Promo Widget -->
+            <div class="card sidebar-card bg-primary text-white">
+                <div class="card-body p-4 text-center">
+                    <i class="bi bi-telephone-outbound display-5 mb-3 text-warning"></i>
+                    <h5 class="fw-bold" data-i18n="blogpost_need_premium_cleaning">Need Premium Cleaning?</h5>
+                    <p class="small text-white-50" data-i18n="blogpost_promo_copy">Book a highly professional cleaner today and enjoy a clean, pristine workspace or home.</p>
+                    <a asp-page="/Services" class="btn btn-warning btn-sm w-100 fw-semibold" data-i18n="blogpost_view_services">View Our Services</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4"><h5><i class="bi bi-droplet-fill"></i> <span data-i18n="footer_brand">Yeka Cleaning</span></h5><p data-i18n="about_footer_desc">Your trusted cleaning partner.</p></div>
+            <div class="col-md-4 mb-4"><h5 data-i18n="footer_quicklinks">Quick Links</h5><ul class="list-unstyled"><li><a asp-page="/Services" data-i18n="footer_link_services">Services</a></li><li><a asp-page="/About" data-i18n="footer_link_about">About Us</a></li><li><a asp-page="/Contact" data-i18n="footer_link_contact">Contact Us</a></li></ul></div>
+            <div class="col-md-4 mb-4"><h5 data-i18n="footer_contact_title">Contact</h5><p><span data-i18n="footer_phone">(555) 123-4567</span></p></div>
+        </div>
+        <div class="text-center border-top pt-3"><p class="mb-0" data-i18n="footer_copyright">&copy; 2026 Yeka Cleaning.</p></div>
+    </div>
+</footer>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/translation.js"></script>
+</body>
+</html>

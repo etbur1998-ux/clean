@@ -1,0 +1,65 @@
+# Home - Yeka Cleaning Services
+
+[Yeka Cleaning](http://localhost:5000/)
+- [Home](http://localhost:5000/)
+- [Gallery](http://localhost:5000/Gallery)
+- [Services](http://localhost:5000/Services)
+- [About Us](http://localhost:5000/About)
+- [Contact Us](http://localhost:5000/Contact)
+- [Blog](http://localhost:5000/Blog)
+- [Login](http://localhost:5000/Login)
+[Home](http://localhost:5000/)
+[Gallery](http://localhost:5000/Gallery)
+[Services](http://localhost:5000/Services)
+[About Us](http://localhost:5000/About)
+[Contact Us](http://localhost:5000/Contact)
+[Blog](http://localhost:5000/Blog)
+[Login](http://localhost:5000/Login)
+
+# Professional Cleaning Services for Your Home & Office
+Experience the difference with our expert cleaning team. We bring cleanliness to perfection.
+[Explore Our Services](http://localhost:5000#services)
+
+## Why Choose Us
+
+#### Expert Team
+Our certified cleaning professionals deliver exceptional results.
+
+#### Trusted & Secure
+Fully vetted staff. Your property is in safe hands.
+
+#### Flexible Schedule
+We work around your schedule. Same-day service!
+
+## Our Services
+
+##### Residential Cleaning
+Regular house cleaning, deep cleaning
+
+##### Commercial Cleaning
+Office, retail, restaurants
+
+##### Deep Cleaning
+Thorough top-to-bottom cleaning
+
+##### Special Services
+Carpet, window, upholstery
+[View All Services](http://localhost:5000/Services)
+
+##### Yeka Cleaning
+Your trusted partner for professional cleaning services.
+
+##### Quick Links
+- [Services](http://localhost:5000/Services)
+- [About Us](http://localhost:5000/About)
+- [Contact](http://localhost:5000/Contact)
+- [Blog](http://localhost:5000/Blog)
+[Services](http://localhost:5000/Services)
+[About Us](http://localhost:5000/About)
+[Contact](http://localhost:5000/Contact)
+[Blog](http://localhost:5000/Blog)
+
+##### Contact Us
+(555) 123-4567
+info@yeka-cleaning.com
+© 2026 Yeka Cleaning Services. All rights reserved.

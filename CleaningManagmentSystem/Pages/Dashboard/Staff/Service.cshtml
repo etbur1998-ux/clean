@@ -1,0 +1,269 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.Staff.ServiceModel
+@{
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+    ViewData["Title"] = "Staff Dashboard - Services";
+}
+
+<div class="main-content p-4">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+            <h1 class="h2">
+                <i class="bi bi-briefcase me-2"></i>Cleaning Services Management
+            </h1>
+            <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#addServiceCard">
+                <i class="bi bi-plus-circle me-2"></i>Add New Service
+            </button>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @Model.ErrorMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Add/Edit Service Form -->
+        <div class="card border-0 shadow-sm mb-4 collapse @(Model.Id > 0 || Model.Services.Count == 0 ? "show" : "")" id="addServiceCard">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">
+                    <i class="bi bi-pencil-square me-2"></i>
+                    @(Model.Id > 0 ? "Edit Service" : "Add New Service")
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" asp-page-handler="@(Model.Id > 0 ? "Update" : "Add")">
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="row g-3">
+                        <!-- Service Name -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Service Name</label>
+                            <input type="text" class="form-control" asp-for="ServiceName" placeholder="e.g., Office Cleaning" required />
+                            <span asp-validation-for="ServiceName" class="text-danger"></span>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Price (ETB)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">ETB</span>
+                                <input type="number" class="form-control" asp-for="Price" placeholder="0.00" step="0.01" min="0" required />
+                            </div>
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Description</label>
+                            <textarea class="form-control" asp-for="Description" rows="3" placeholder="Describe the service..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <!-- Active Status -->
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" asp-for="IsActive">
+                                        <label class="form-check-label fw-bold">Service Active</label>
+                                    </div>
+                                    <small class="text-muted">Inactive services won't be available for selection</small>
+                                </div>
+
+                        <!-- Submit Button -->
+                        <div class="col-12 mt-4">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    @(Model.Id > 0 ? "Update Service" : "Add Service")
+                                </button>
+                                @if (Model.Id > 0)
+                                {
+                                    <a href="/Dashboard/Staff/Service" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle me-2"></i>Cancel
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Services List -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-ul me-2"></i>Existing Services
+                    <span class="badge bg-secondary ms-2">@Model.Services.Count</span>
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 5%;">#</th>
+                                <th>Service Name</th>
+                                <th>Description</th>
+                                <th style="width: 15%;">Price</th>
+                                <th style="width: 10%;">Status</th>
+                                <th style="width: 20%;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Services != null && Model.Services.Any())
+                            {
+                                int i = 1;
+                                foreach (var s in Model.Services)
+                                {
+                                    <tr>
+                                        <td>@i</td>
+                                        <td>
+                                            <strong>@s.ServiceName</strong>
+                                        </td>
+                                        <td>
+                                            @if (string.IsNullOrEmpty(s.Description))
+                                            {
+                                                <em class="text-muted">No description</em>
+                                            }
+                                            else
+                                            {
+                                                @s.Description
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success fs-6">@s.Price.ToString("N2") ETB</span>
+                                        </td>
+                                        <td>
+                                            @if (s.IsActive)
+                                            {
+                                                <span class="badge bg-success">Active</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Inactive</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="/Dashboard/Staff/Service?id=@s.Id"
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                                        title="Delete"
+                                                        data-id="@s.Id"
+                                                        data-name="@s.ServiceName"
+                                                        onclick="confirmDelete(this)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    i++;
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                                        No services found. Click "Add New Service" to create one.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete service "<span id="deleteServiceName" class="fw-bold"></span>"?
+                <input type="hidden" id="deleteServiceId" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" asp-page-handler="Delete" id="deleteForm">
+                    <input type="hidden" name="id" id="deleteIdInput" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(button) {
+            var id = button.getAttribute('data-id');
+            var name = button.getAttribute('data-name');
+            document.getElementById('deleteServiceName').textContent = name;
+            document.getElementById('deleteServiceId').value = id;
+            document.getElementById('deleteIdInput').value = id;
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+
+        // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
+}
+
+<style>
+    .form-select:focus, .form-control:focus {
+        border-color: #008080;
+        box-shadow: 0 0 0 0.25rem rgba(0, 128, 128, 0.25);
+    }
+
+    .btn-primary {
+        background-color: #008080;
+        border-color: #008080;
+    }
+
+    .btn-primary:hover {
+        background-color: #006666;
+        border-color: #006666;
+    }
+
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important;
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(0, 128, 128, 0.05);
+    }
+
+    .badge.bg-success {
+        background-color: #008080 !important;
+    }
+
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+</style>

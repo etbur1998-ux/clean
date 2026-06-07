@@ -1,0 +1,150 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.Staff.CreateFormsModel
+@{
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+    ViewData["Title"] = "Create Forms";
+}
+
+<div class="main-content p-4">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-file-earmark-text me-2"></i>Create Forms
+                    </h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="/Dashboard/Staff/Index">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Create Forms</li>
+                        </ol>
+                    </nav>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Message))
+                {
+                    <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show" role="alert">
+                        @Model.Message
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <!-- Quick Actions -->
+                <div class="row mb-4">
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center">
+                                <div class="display-6 text-primary mb-3">
+                                    <i class="bi bi-receipt"></i>
+                                </div>
+                                <h5 class="card-title">Receipt Form</h5>
+                                <p class="card-text text-muted">Create new cleaning service receipt</p>
+                                <a href="/Dashboard/Staff/RegisterReceiptStandalone" class="btn btn-primary">
+                                    <i class="bi bi-plus-circle me-2"></i>Create Receipt
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center">
+                                <div class="display-6 text-success mb-3">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                </div>
+                                <h5 class="card-title">Agency Report</h5>
+                                <p class="card-text text-muted">Generate agency activity report</p>
+                                <a href="/Dashboard/Staff/AgencyReport" class="btn btn-success">
+                                    <i class="bi bi-file-earmark-text me-2"></i>Create Report
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center">
+                                <div class="display-6 text-warning mb-3">
+                                    <i class="bi bi-truck"></i>
+                                </div>
+                                <h5 class="card-title">Dispatch Schedule</h5>
+                                <p class="card-text text-muted">Create vehicle dispatch schedule</p>
+                                <a href="/Dashboard/Staff/DispatchSchedule" class="btn btn-warning">
+                                    <i class="bi bi-calendar-check me-2"></i>Create Schedule
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Forms -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-clock-history me-2"></i>
+                            Recent Forms Created
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Form Type</th>
+                                        <th>Title</th>
+                                        <th>Created Date</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.RecentForms != null && Model.RecentForms.Any())
+                                    {
+                                        foreach (var form in Model.RecentForms)
+                                        {
+                                            <tr>
+                                                <td><span class="badge bg-info">@form.FormType</span></td>
+                                                <td>@form.Title</td>
+                                                <td>@form.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                                <td><span class="badge @(form.Status == "Active" ? "bg-success" : "bg-secondary")">@form.Status</span></td>
+                                                <td>
+                                                    <a href="@form.EditUrl" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-pencil"></i> Edit
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted py-4">
+                                                No forms created yet. Start by creating a new form above.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    }
+    
+    .display-6 {
+        font-size: 2.5rem;
+    }
+</style>
+

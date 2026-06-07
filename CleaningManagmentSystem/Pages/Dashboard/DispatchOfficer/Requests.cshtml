@@ -1,0 +1,249 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.DispatchOfficer.RequestsModel
+@{
+    ViewData["Title"] = "WMRAS Requests - Dispatcher";
+    Layout = "_Layout";
+}
+
+<!-- Custom Dashboard Styles -->
+<link href="~/css/dashboard.css" rel="stylesheet" />
+
+<div class="dashboard-container">
+    @await Html.PartialAsync("Dashboard/DispatchOfficer/_Sidebar")
+    
+    <main class="dashboard-main">
+        <header class="dashboard-header">
+            <div class="header-content">
+                <h1>Manage Requests (WMRAS)</h1>
+                <p>Review and assign drivers to pending requests</p>
+            </div>
+        </header>
+
+        <div class="dashboard-content">
+            <div class="card fade-in">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-clipboard-list text-primary me-2"></i> Pending Requests</h5>
+                    <div class="input-group" style="width: 250px;">
+                        <input type="text" class="form-control" placeholder="Search requests...">
+                        <button class="btn btn-outline-secondary" type="button"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Request #</th>
+                                    <th>Requestor</th>
+                                    <th>Type</th>
+                                    <th>Urgency</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.PendingRequests == null || !Model.PendingRequests.Any())
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4 text-muted">
+                                            No pending requests found.
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    foreach (var req in Model.PendingRequests)
+                                    {
+                                        string avatarInitials = string.IsNullOrWhiteSpace(req.RequestorName) ? "NA" : 
+                                            req.RequestorName.Length > 2 ? req.RequestorName.Substring(0, 2).ToUpper() : req.RequestorName.ToUpper();
+                                        
+                                        string urgencyBadge = req.Urgency switch {
+                                            "High" or "Critical" => "bg-danger",
+                                            "Medium" => "bg-info text-dark",
+                                            _ => "bg-success"
+                                        };
+
+                                        <tr>
+                                            <td><strong>REQ-@req.Id.ToString("D3")</strong></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar bg-primary text-white me-2">@avatarInitials</div>
+                                                    <div>
+                                                        <h6 class="mb-0">@req.RequestorName</h6>
+                                                        <small class="text-muted">@req.RequestorRole</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><span class="badge bg-secondary">@req.RequestType</span></td>
+                                            <td><span class="badge @urgencyBadge">@req.Urgency</span></td>
+                                            <td><span class="badge bg-warning text-dark">@req.ExecutionStatus</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-info me-1" onclick="viewRequestForm(@req.Id)">
+                                                    <i class="fas fa-file-alt"></i> Form
+                                                </button>
+                                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignModal" onclick="document.getElementById('assignModal').dataset.requestId = @req.Id;">
+                                                    <i class="fas fa-user-plus me-1"></i> Assign
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Assign Driver Modal (Mock UI) -->
+<div class="modal fade" id="assignModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-truck text-primary me-2"></i> Assign Request to Driver</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Select a driver and vehicle for this request.</p>
+                <div class="mb-3">
+                    <label class="form-label">Available Drivers</label>
+                    <select class="form-select">
+                        <option>Driver - Vehicle 01</option>
+                        <option>Test Driver</option>
+                        <option>Driver - Transport 01</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Dispatcher Notes</label>
+                    <textarea class="form-control" rows="3" placeholder="Enter instructions for the driver..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger me-auto">Reject Request</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="alert('Driver Assigned! (Mock)')">Assign Driver</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+</style>
+
+<!-- Request File Form Modal -->
+<div class="modal fade" id="requestFormModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white text-center">
+                <h5 class="modal-title w-100 text-uppercase fw-bold ls-1"><i class="fas fa-file-invoice me-2"></i> Request File Form</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 bg-light" id="requestFormBody">
+                <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary"><i class="fas fa-print me-1"></i> Print Form</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function viewRequestForm(id) {
+    document.getElementById('requestFormBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    new bootstrap.Modal(document.getElementById('requestFormModal')).show();
+    
+    try {
+        const r = await fetch(`/api/request/${id}`);
+        if (!r.ok) throw new Error('Failed to fetch request details');
+        const req = await r.json();
+        
+        let dateObj = new Date(req.created_at);
+        let dateStr = dateObj.toLocaleDateString();
+        let preferredDateStr = req.requested_date_time ? new Date(req.requested_date_time).toLocaleString() : 'Not Specified';
+        
+        const html = `
+        <div class="border border-2 border-dark bg-white p-4 shadow-sm mb-0" style="font-family: 'Courier New', Courier, monospace; font-size: 0.95rem;">
+            
+            <div class="fw-bold bg-dark text-white p-2 mb-3 text-uppercase">Section A: Requestor Information</div>
+            <div class="row mb-4">
+                <div class="col-6"><strong>Requestor Name:</strong> ${req.RequestorName || 'N/A'}</div>
+                <div class="col-6"><strong>Role:</strong> [✓] ${req.requestor_role || 'N/A'}</div>
+                <div class="col-6 mt-2"><strong>Date of Request:</strong> ${dateStr}</div>
+                <div class="col-6 mt-2"><strong>Request ID:</strong> REQ-${req.id.toString().padStart(4, '0')}</div>
+            </div>
+
+            <div class="fw-bold bg-dark text-white p-2 mb-3 text-uppercase">Section B: Purpose of Request</div>
+            <div class="mb-4">
+                <div>[✓] <strong>${req.request_type || 'Unknown'}</strong></div>
+            </div>
+
+            <div class="fw-bold bg-dark text-white p-2 mb-3 text-uppercase">Section C: Request Details</div>
+            <div class="row mb-4">
+                <div class="col-12"><strong>Description:</strong> ${req.description || 'No description provided.'}</div>
+                <div class="col-12 mt-2"><strong>Quantity:</strong> ${req.quantity || 'N/A'}</div>
+                <div class="col-12 mt-2"><strong>Preferred Date & Time:</strong> ${preferredDateStr}</div>
+                <div class="col-12 mt-2"><strong>Urgency:</strong> [✓] ${req.urgency || 'Normal'}</div>
+            </div>
+
+            <div class="fw-bold bg-dark text-white p-2 mb-3 text-uppercase">Section D: Attachments</div>
+            <div class="mb-4">
+                <div>${req.attachment_path ? '[✓] ' + req.attachment_path : '[ ] No attachments provided.'}</div>
+            </div>
+
+            <div class="fw-bold bg-dark text-white p-2 mb-3 text-uppercase">Section E: Approval Tracking</div>
+            <div class="table-responsive mb-4 border border-dark">
+                <table class="table table-sm table-bordered border-dark mb-0">
+                    <thead class="table-active border-dark">
+                        <tr><th>Level</th><th>Role</th><th>Status</th><th>Comments</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td><td>Dispatch Officer</td>
+                            <td>${req.level_1_status === 'Approved' ? '[✓]' : '[ ]'} ${req.level_1_status || 'Pending'}</td>
+                            <td>${req.level_1_comments || ''}</td>
+                        </tr>
+                        <tr>
+                            <td>2</td><td>Staff</td>
+                            <td>${req.level_2_status === 'Approved' ? '[✓]' : '[ ]'} ${req.level_2_status || 'Pending'}</td>
+                            <td>${req.level_2_comments || ''}</td>
+                        </tr>
+                        <tr>
+                            <td>3</td><td>Manager</td>
+                            <td>${req.level_3_status === 'Approved' ? '[✓]' : '[ ]'} ${req.level_3_status || 'Pending'}</td>
+                            <td>${req.level_3_comments || ''}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="fw-bold bg-dark text-white p-2 mb-3 text-uppercase">Section F: Execution Tracking</div>
+            <div class="row mb-4">
+                <div class="col-6"><strong>Status:</strong> ${req.execution_status === 'Completed' ? '[✓]' : '[ ]'} ${req.execution_status || 'Pending'}</div>
+                <div class="col-6"><strong>Assigned Driver:</strong> ${req.driver_name || 'N/A'}</div>
+            </div>
+            
+            <div class="fw-bold bg-dark text-white p-2 mb-3 text-uppercase">Section G: Final Closure</div>
+            <div class="row mb-2">
+                <div class="col-6"><strong>Request Status:</strong> ${req.is_closed ? '[✓] Closed' : '[ ] Open'}</div>
+            </div>
+        </div>
+        `;
+        document.getElementById('requestFormBody').innerHTML = html;
+    } catch(err) {
+        document.getElementById('requestFormBody').innerHTML = `<div class="alert alert-danger">Error loading form: ${err.message}</div>`;
+    }
+}
+</script>

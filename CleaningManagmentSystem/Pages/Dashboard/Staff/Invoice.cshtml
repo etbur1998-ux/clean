@@ -1,0 +1,166 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.Staff.InvoiceModel
+@{
+    Layout = null; // No layout for print version
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invoice - Cleaning Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            color: #333;
+        }
+        .invoice-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .invoice-header {
+            border-bottom: 2px solid #008080;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .invoice-title {
+            color: #008080;
+            font-weight: bold;
+        }
+        .table th {
+            background-color: #f1f8f8;
+            color: #008080;
+        }
+        .total-row {
+            background-color: #e6f2f2 !important;
+            font-weight: bold;
+        }
+        @@media print {
+            body { background-color: #fff; }
+            .invoice-container { box-shadow: none; margin: 0; padding: 20px; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text-end mt-4 no-print">
+            <a href="/Dashboard/Staff/@(Model.ReceiptType == "Outsource" ? "OutsourceReceipt" : "RegisterReceipt")" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </a>
+            @if (Model.IsPreview)
+            {
+                <form method="post" asp-page-handler="ConfirmBill" class="d-inline">
+                    <input type="hidden" name="ids" value="@Model.Ids" />
+                    <input type="hidden" name="type" value="@Model.ReceiptType" />
+                    <button type="submit" class="btn btn-success" onclick="return confirm('Confirm and generate final bill?');">
+                        <i class="bi bi-check-circle me-1"></i> Confirm & Bill
+                    </button>
+                </form>
+            }
+            else
+            {
+                <button onclick="window.print()" class="btn btn-primary" style="background-color: #008080; border-color: #008080;">
+                    <i class="bi bi-printer me-1"></i> Print Invoice
+                </button>
+            }
+        </div>
+
+        <div class="invoice-container">
+            <div class="invoice-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="invoice-title mb-0">BILLING STATEMENT</h2>
+                    <p class="text-muted mb-0">Cleaning Management System</p>
+                </div>
+                <div class="text-end">
+                    <p class="mb-0 fw-bold">Date: @DateTime.Now.ToString("MMMM dd, yyyy")</p>
+                    <p class="mb-0 text-muted">Invoice #: INV-@DateTime.Now.Ticks.ToString().Substring(8)</p>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-sm-6">
+                    <h6 class="text-muted text-uppercase fw-bold mb-3">Billed To (@Model.ReceiptType)</h6>
+                    @if (Model.Receipts.Any())
+                    {
+                        var first = Model.Receipts.First();
+                        <h5 class="mb-1">@first.entity_name</h5>
+                        <p class="mb-1">Wereda: @first.wereda_name</p>
+                    }
+                </div>
+                <div class="col-sm-6 text-sm-end">
+                    <h6 class="text-muted text-uppercase fw-bold mb-3">Status</h6>
+                    @if (Model.IsPreview)
+                    {
+                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning px-3 py-2 fs-6">PREVIEW</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 fs-6">BILLED</span>
+                    }
+                </div>
+            </div>
+
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Receipt ID</th>
+                            <th>Date</th>
+                            <th>Vehicle Plate</th>
+                            <th>Driver</th>
+                            <th class="text-end">Kilogram</th>
+                            <th class="text-end">Price (ETB/kg)</th>
+                            <th class="text-end">Amount (ETB)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in Model.Receipts)
+                        {
+                            <tr>
+                                <td>#@r.id</td>
+                                <td>@(((DateTime)r.receipt_date).ToString("yyyy-MM-dd"))</td>
+                                <td>@r.plate_number</td>
+                                <td>@r.driver_name</td>
+                                <td class="text-end">@(((decimal)r.kilogram).ToString("N2"))</td>
+                                <td class="text-end">@(((decimal)r.price).ToString("N2"))</td>
+                                <td class="text-end fw-bold">@(((decimal)r.total_price).ToString("N2"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="4" class="text-end">Grand Total</td>
+                            <td class="text-end">@Model.TotalKilogram.ToString("N2") kg</td>
+                            <td></td>
+                            <td class="text-end">@Model.TotalAmount.ToString("N2") ETB</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-6">
+                    <p class="text-muted small">
+                        <strong>Terms & Conditions</strong><br />
+                        Please make payment within 30 days. Thank you for your business.
+                    </p>
+                </div>
+                <div class="col-6 text-end mt-4">
+                    <div style="border-top: 1px solid #ccc; width: 200px; float: right; padding-top: 10px;">
+                        <span class="text-muted">Authorized Signature</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

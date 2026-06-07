@@ -1,0 +1,379 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.DispatchOfficer.TransportRequestsModel
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    if (userName == null) { Response.Redirect("/Login"); return; }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transport Requests - Dispatcher</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+    <style>
+        .status-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+        .status-PendingDispatcher { background:#fff3cd;color:#856404; }
+        .status-DriverAssigned { background:#cfe2ff;color:#084298; }
+        .status-DriverAccepted { background:#d1e7dd;color:#0a3622; }
+        .status-PickedUp { background:#d0f0fd;color:#055160; }
+        .status-ReceiptSubmitted { background:#e2d9f3;color:#432874; }
+        .status-ReceiptVerified { background:#d1e7dd;color:#0a3622; }
+        .status-StaffApproved { background:#d1e7dd;color:#0a3622; }
+        .status-Paid { background:#198754;color:#fff; }
+        .status-DispatcherRejected,.status-StaffRejected { background:#f8d7da;color:#842029; }
+        .timeline-dot { width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:6px; }
+
+        /* ── 9-Step Progress Tracker ── */
+        .step-flow{display:flex;align-items:flex-start;overflow-x:auto;padding:10px 0;gap:0}
+        .step-item{display:flex;flex-direction:column;align-items:center;min-width:80px;position:relative;flex:1}
+        .step-item:not(:last-child)::after{content:'';position:absolute;top:16px;left:calc(50% + 16px);right:calc(-50% + 16px);height:3px;background:#dee2e6;z-index:0}
+        .step-item:not(:last-child).step-done::after{background:#0d6efd}
+        .step-item:not(:last-child).step-active::after{background:linear-gradient(90deg,#0d6efd 50%,#dee2e6 50%)}
+        .step-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;z-index:1;position:relative;border:3px solid #dee2e6;background:#fff;color:#adb5bd}
+        .step-done .step-circle{background:#0d6efd;border-color:#0d6efd;color:#fff}
+        .step-active .step-circle{background:#fff;border-color:#0d6efd;color:#0d6efd;box-shadow:0 0 0 4px rgba(13,110,253,.15)}
+        .step-rejected .step-circle{background:#dc3545;border-color:#dc3545;color:#fff}
+        .step-label{font-size:10px;text-align:center;margin-top:5px;line-height:1.3;color:#6c757d;max-width:76px}
+        .step-done .step-label,.step-active .step-label{color:#0d6efd;font-weight:600}
+        .step-rejected .step-label{color:#dc3545;font-weight:600}
+        .step-actor{font-size:9px;text-align:center;color:#adb5bd;max-width:76px;margin-top:2px}
+    </style>
+</head>
+<body>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+<nav class="navbar navbar-dark dashboard-navbar fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/Dashboard/DispatchOfficer"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+        <div class="nav-user">
+            <span>Welcome, @userName</span>
+            <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        </div>
+    </div>
+</nav>
+<nav class="navbar navbar-dark dashboard-navbar fixed-top d-lg-none">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" onclick="toggleSidebar()"><span class="navbar-toggler-icon"></span></button>
+        <a class="navbar-brand" href="/Dashboard/DispatchOfficer"><i class="bi bi-droplet-fill"></i> Yeka</a>
+        <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i></a>
+    </div>
+</nav>
+<nav id="sidebarMenu" class="sidebar d-lg-none">
+    @await Html.PartialAsync("~/Pages/Dashboard/DispatchOfficer/_Sidebar.cshtml")
+</nav>
+<nav class="col-md-3 col-lg-2 d-none d-md-block sidebar" style="transform:none;padding-top:56px;">
+    @await Html.PartialAsync("~/Pages/Dashboard/DispatchOfficer/_Sidebar.cshtml")
+</nav>
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-truck me-2 text-primary"></i>Transport Requests</h1>
+        <div class="btn-toolbar gap-2">
+            <select id="statusFilter" class="form-select form-select-sm" onchange="filterRequests()">
+                <option value="">All Statuses</option>
+                <option value="PendingDispatcher">Pending Review</option>
+                <option value="DriverAssigned">Driver Assigned</option>
+                <option value="DriverAccepted">Driver Accepted</option>
+                <option value="PickedUp">Picked Up</option>
+                <option value="ReceiptSubmitted">Receipt Submitted</option>
+                <option value="ReceiptVerified">Receipt Verified</option>
+                <option value="StaffApproved">Staff Approved</option>
+                <option value="Paid">Paid</option>
+                <option value="DispatcherRejected">Rejected</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-3 mb-4" id="statsRow">
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm text-center p-3"><div class="fs-2 fw-bold text-warning" id="statPending">-</div><small class="text-muted">Pending Review</small></div></div>
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm text-center p-3"><div class="fs-2 fw-bold text-primary" id="statAssigned">-</div><small class="text-muted">Driver Assigned</small></div></div>
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm text-center p-3"><div class="fs-2 fw-bold text-success" id="statActive">-</div><small class="text-muted">Active Trips</small></div></div>
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm text-center p-3"><div class="fs-2 fw-bold text-info" id="statTotal">-</div><small class="text-muted">Total</small></div></div>
+    </div>
+
+    <!-- Requests Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="requestsTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Request #</th><th>Mahberat</th><th>Pickup</th><th>Destination</th>
+                            <th>Date</th><th>Driver</th><th>Status</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestsBody">
+                        <tr><td colspan="8" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Approve Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-check-circle me-2"></i>Approve & Assign Driver</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="approveRequestId" />
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Select Driver <span class="text-danger">*</span></label>
+                    <select class="form-select" id="driverSelect"><option value="">Loading drivers...</option></select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Vehicle (auto-filled from driver)</label>
+                    <input type="text" class="form-control" id="vehicleDisplay" readonly placeholder="Select a driver first" />
+                    <input type="hidden" id="vehicleIdHidden" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Notes</label>
+                    <textarea class="form-control" id="approveNotes" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-success" onclick="submitApprove()"><i class="bi bi-check-circle me-1"></i>Approve & Assign</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-x-circle me-2"></i>Reject Request</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="rejectRequestId" />
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Reason for Rejection <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="rejectNotes" rows="3" placeholder="Provide a reason..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" onclick="submitReject()"><i class="bi bi-x-circle me-1"></i>Reject</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-info-circle me-2"></i>Request Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detailBody"><div class="text-center py-4"><div class="spinner-border"></div></div></div>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API = '/api/transport';
+const userId = @(HttpContext.Session.GetInt32("UserId") ?? 0);
+const userName = '@(HttpContext.Session.GetString("UserName") ?? "")';
+let allRequests = [];
+let drivers = [];
+
+async function loadStats() {
+    const r = await fetch(`${API}/stats`);
+    const s = await r.json();
+    document.getElementById('statPending').textContent = s.pending ?? 0;
+    document.getElementById('statAssigned').textContent = s.assigned ?? 0;
+    document.getElementById('statActive').textContent = (s.accepted ?? 0) + (s.pickedUp ?? 0);
+    document.getElementById('statTotal').textContent = s.total ?? 0;
+}
+
+async function loadRequests() {
+    const status = document.getElementById('statusFilter').value;
+    const url = status ? `${API}/requests?status=${status}` : `${API}/requests`;
+    const r = await fetch(url);
+    allRequests = await r.json();
+    renderTable(allRequests);
+}
+
+function filterRequests() { loadRequests(); }
+
+function statusBadge(s) {
+    return `<span class="status-badge status-${s}">${s.replace(/([A-Z])/g,' $1').trim()}</span>`;
+}
+
+function renderTable(data) {
+    const tbody = document.getElementById('requestsBody');
+    if (!data.length) { tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">No requests found</td></tr>'; return; }
+    tbody.innerHTML = data.map(r => `
+        <tr>
+            <td><strong>${r.request_number}</strong></td>
+            <td>${r.mahberat_user_name}<br><small class="text-muted">${r.mahberat_name ?? ''}</small></td>
+            <td><small>${r.pickup_location}</small></td>
+            <td><small>${r.destination}</small></td>
+            <td><small>${r.requested_date ? r.requested_date.substring(0,10) : ''}</small></td>
+            <td>${r.driver_name ?? '<span class="text-muted">Unassigned</span>'}</td>
+            <td>${statusBadge(r.status)}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="showDetail(${r.id})"><i class="bi bi-eye"></i></button>
+                ${r.status === 'PendingDispatcher' ? `
+                    <button class="btn btn-sm btn-success me-1" onclick="openApprove(${r.id})"><i class="bi bi-check"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="openReject(${r.id})"><i class="bi bi-x"></i></button>
+                ` : ''}
+            </td>
+        </tr>
+        <tr class="bg-light">
+            <td colspan="8" class="px-3 py-2">${stepTracker(r.status)}</td>
+        </tr>`).join('');
+}
+
+async function loadDrivers() {
+    const r = await fetch(`${API}/drivers/available`);
+    drivers = await r.json();
+    const sel = document.getElementById('driverSelect');
+    sel.innerHTML = '<option value="">-- Select Driver --</option>' +
+        drivers.map(d => `<option value="${d.id}" data-vehicle-id="${d.vehicleId ?? ''}" data-vehicle-plate="${d.vehiclePlate ?? ''}">${d.name} ${d.vehiclePlate ? '— ' + d.vehiclePlate : ''}</option>`).join('');
+    sel.onchange = function() {
+        const opt = sel.options[sel.selectedIndex];
+        document.getElementById('vehicleDisplay').value = opt.dataset.vehiclePlate || '';
+        document.getElementById('vehicleIdHidden').value = opt.dataset.vehicleId || '';
+    };
+}
+
+function openApprove(id) {
+    document.getElementById('approveRequestId').value = id;
+    document.getElementById('approveNotes').value = '';
+    document.getElementById('vehicleDisplay').value = '';
+    document.getElementById('vehicleIdHidden').value = '';
+    loadDrivers();
+    new bootstrap.Modal(document.getElementById('approveModal')).show();
+}
+
+function openReject(id) {
+    document.getElementById('rejectRequestId').value = id;
+    document.getElementById('rejectNotes').value = '';
+    new bootstrap.Modal(document.getElementById('rejectModal')).show();
+}
+
+async function submitApprove() {
+    const id = document.getElementById('approveRequestId').value;
+    const driverId = document.getElementById('driverSelect').value;
+    if (!driverId) { alert('Please select a driver.'); return; }
+    const vehicleId = document.getElementById('vehicleIdHidden').value || null;
+    const notes = document.getElementById('approveNotes').value;
+    const r = await fetch(`${API}/requests/${id}/dispatcher-action`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ dispatcherId: userId, dispatcherName: userName, action: 'Approve', driverId: parseInt(driverId), vehicleId: vehicleId ? parseInt(vehicleId) : null, notes })
+    });
+    const data = await r.json();
+    if (data.success) { bootstrap.Modal.getInstance(document.getElementById('approveModal')).hide(); loadRequests(); loadStats(); }
+    else alert(data.message || 'Error');
+}
+
+async function submitReject() {
+    const id = document.getElementById('rejectRequestId').value;
+    const notes = document.getElementById('rejectNotes').value;
+    if (!notes.trim()) { alert('Please provide a reason.'); return; }
+    const r = await fetch(`${API}/requests/${id}/dispatcher-action`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ dispatcherId: userId, dispatcherName: userName, action: 'Reject', notes })
+    });
+    const data = await r.json();
+    if (data.success) { bootstrap.Modal.getInstance(document.getElementById('rejectModal')).hide(); loadRequests(); loadStats(); }
+    else alert(data.message || 'Error');
+}
+
+async function showDetail(id) {
+    document.getElementById('detailBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border"></div></div>';
+    new bootstrap.Modal(document.getElementById('detailModal')).show();
+    const r = await fetch(`${API}/requests/${id}`);
+    const data = await r.json();
+    const req = data.request;
+    const logs = data.logs;
+    document.getElementById('detailBody').innerHTML = `
+        <div class="row g-3">
+            <div class="col-md-6">
+                <h6 class="fw-bold text-primary">Trip Details</h6>
+                <table class="table table-sm"><tbody>
+                    <tr><th>Request #</th><td>${req.request_number}</td></tr>
+                    <tr><th>Requester</th><td>${req.mahberat_user_name}</td></tr>
+                    <tr><th>Mahberat</th><td>${req.mahberat_name ?? '-'}</td></tr>
+                    <tr><th>Pickup</th><td>${req.pickup_location}</td></tr>
+                    <tr><th>Destination</th><td>${req.destination}</td></tr>
+                    <tr><th>Date/Time</th><td>${req.requested_date ? req.requested_date.substring(0,10) : ''} ${req.requested_time ?? ''}</td></tr>
+                    <tr><th>Details</th><td>${req.passenger_item_details ?? '-'}</td></tr>
+                    <tr><th>Instructions</th><td>${req.special_instructions ?? '-'}</td></tr>
+                    <tr><th>Status</th><td>${statusBadge(req.status)}</td></tr>
+                    <tr><th>Driver</th><td>${req.driver_name ?? '-'}</td></tr>
+                    <tr><th>Vehicle</th><td>${req.vehicle_plate ?? '-'}</td></tr>
+                    <tr><th>Cost</th><td>${req.transport_cost ? 'ETB ' + req.transport_cost : '-'}</td></tr>
+                    <tr><th>Tx #</th><td>${req.transaction_number ?? '-'}</td></tr>
+                </tbody></table>
+            </div>
+            <div class="col-md-6">
+                <h6 class="fw-bold text-primary">Activity Log</h6>
+                <div class="timeline">
+                    ${logs.map(l => `<div class="d-flex mb-2"><span class="timeline-dot bg-primary mt-1"></span><div><small class="text-muted">${new Date(l.created_at).toLocaleString()}</small><br><strong>${l.actor_name}</strong> (${l.actor_role})<br><span class="badge bg-secondary">${l.from_status || 'Start'}</span> → <span class="badge bg-primary">${l.to_status}</span>${l.notes ? '<br><small>' + l.notes + '</small>' : ''}</div></div>`).join('')}
+                </div>
+            </div>
+        </div>`;
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebarMenu').classList.toggle('show');
+    document.getElementById('sidebarBackdrop').classList.toggle('show');
+}
+
+// ── 9-Step Progress Tracker ──────────────────────────────────
+const STEPS = [
+    { key: 'PendingDispatcher',      label: 'Submitted',         actor: 'Mahberat' },
+    { key: 'DriverAssigned',         label: 'Driver Assigned',   actor: 'You' },
+    { key: 'DriverAccepted',         label: 'Driver Accepted',   actor: 'Driver' },
+    { key: 'PickedUp',               label: 'Pickup Confirmed',  actor: 'Driver' },
+    { key: 'MahberatApprovedPickup', label: 'Pickup Approved',   actor: 'Mahberat' },
+    { key: 'ReceiptSubmitted',       label: 'Receipt Submitted', actor: 'Driver' },
+    { key: 'ReceiptVerified',        label: 'Receipt Verified',  actor: 'Mahberat' },
+    { key: 'StaffApproved',          label: 'Staff Approved',    actor: 'Staff' },
+    { key: 'Paid',                   label: 'Payment Done',      actor: 'Finance' },
+];
+const REJECTED = ['DispatcherRejected','DriverRejected','StaffRejected'];
+
+function stepTracker(currentStatus) {
+    if (REJECTED.includes(currentStatus)) {
+        return `<div class="d-flex align-items-center gap-2 py-1">
+            <span class="badge bg-danger px-3 py-2"><i class="bi bi-x-circle me-1"></i>Rejected — ${currentStatus.replace('Rejected','').replace(/([A-Z])/g,' $1').trim()}</span>
+            <small class="text-muted">This request was rejected and closed.</small>
+        </div>`;
+    }
+    const currentIdx = STEPS.findIndex(s => s.key === currentStatus);
+    return `<div class="step-flow">
+        ${STEPS.map((s, i) => {
+            let cls = '';
+            if (i < currentIdx)        cls = 'step-done';
+            else if (i === currentIdx) cls = 'step-active';
+            const icon = i < currentIdx ? '✓' : (i + 1);
+            return `<div class="step-item ${cls}">
+                <div class="step-circle">${icon}</div>
+                <div class="step-label">${s.label}</div>
+                <div class="step-actor">${s.actor}</div>
+            </div>`;
+        }).join('')}
+    </div>`;
+}
+
+loadStats();
+loadRequests();
+setInterval(() => { loadStats(); loadRequests(); }, 30000);
+</script>
+</body>
+</html>

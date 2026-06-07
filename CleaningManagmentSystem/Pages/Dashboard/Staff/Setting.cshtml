@@ -1,0 +1,236 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.Staff.SettingModel
+@{
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+    ViewData["Title"] = "Staff Dashboard - Settings";
+}
+
+<div class="main-content p-4">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+            <h1 class="h2">
+                <i class="bi bi-gear me-2"></i>Account Settings
+            </h1>
+            <span class="badge bg-primary">@HttpContext.Session.GetString("UserRole")</span>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>@Model.SuccessMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>@Model.ErrorMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="row g-4">
+            <!-- Profile Settings -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-person me-2"></i>Profile Information
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post" asp-page-handler="UpdateProfile">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">Full Name</label>
+                                    <input type="text" class="form-control" asp-for="Name" placeholder="Enter your full name" required />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">Email Address</label>
+                                    <input type="email" class="form-control" asp-for="Email" placeholder="Enter your email" readonly />
+                                    <small class="text-muted">Email cannot be changed. Contact admin for updates.</small>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">Phone Number</label>
+                                    <input type="tel" class="form-control" asp-for="Phone" placeholder="+251 XXX XXX XXX" />
+                                    <span asp-validation-for="Phone" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-12 mt-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save me-2"></i>Save Profile
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Change Password -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-key me-2"></i>Change Password
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post" asp-page-handler="ChangePassword">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">Current Password</label>
+                                    <input type="password" class="form-control" asp-for="CurrentPassword" placeholder="Enter current password" required />
+                                    <span asp-validation-for="CurrentPassword" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">New Password</label>
+                                    <input type="password" class="form-control" asp-for="NewPassword" placeholder="Enter new password" required />
+                                    <span asp-validation-for="NewPassword" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">Confirm New Password</label>
+                                    <input type="password" class="form-control" asp-for="ConfirmPassword" placeholder="Confirm new password" required />
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-12 mt-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-lock me-2"></i>Change Password
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Preferences -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-bell me-2"></i>Notifications
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post" asp-page-handler="UpdateNotifications">
+                            <div class="mb-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" asp-for="EmailNotifications" id="emailNotifications">
+                                    <label class="form-check-label fw-bold" for="emailNotifications">
+                                        Email Notifications
+                                    </label>
+                                </div>
+                                <small class="text-muted d-block mt-1">Receive updates via email</small>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" asp-for="SmsNotifications" id="smsNotifications">
+                                    <label class="form-check-label fw-bold" for="smsNotifications">
+                                        SMS Notifications
+                                    </label>
+                                </div>
+                                <small class="text-muted d-block mt-1">Receive updates via SMS</small>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-save me-2"></i>Save Preferences
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Account Info -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i>Account Info
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <strong><i class="bi bi-person-badge me-2"></i>User ID:</strong><br>
+                                <span class="text-muted">@Model.UserId</span>
+                            </li>
+                            <li class="mb-2">
+                                <strong><i class="bi bi-envelope me-2"></i>Email:</strong><br>
+                                <span class="text-muted">@Model.Email</span>
+                            </li>
+                            <li>
+                                <strong><i class="bi bi-clock me-2"></i>Member Since:</strong><br>
+                                <span class="text-muted">@DateTime.Now.ToString("MMMM yyyy")</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+
+        // Password confirmation validation
+        document.querySelector('form[asp-page-handler="ChangePassword"]')?.addEventListener('submit', function(e) {
+            var newPass = document.getElementById('NewPassword').value;
+            var confirmPass = document.getElementById('ConfirmPassword').value;
+            if (newPass !== confirmPass) {
+                e.preventDefault();
+                alert('New passwords do not match!');
+            }
+        });
+    </script>
+}
+
+<style>
+    .form-select:focus, .form-control:focus {
+        border-color: #008080;
+        box-shadow: 0 0 0 0.25rem rgba(0, 128, 128, 0.25);
+    }
+
+    .btn-primary {
+        background-color: #008080;
+        border-color: #008080;
+    }
+
+    .btn-primary:hover {
+        background-color: #006666;
+        border-color: #006666;
+    }
+
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important;
+    }
+
+    .form-check-input:checked {
+        background-color: #008080;
+        border-color: #008080;
+    }
+
+    .badge.bg-primary {
+        background-color: #008080 !important;
+    }
+</style>

@@ -1,0 +1,382 @@
+@page
+@{
+    Layout = null;
+    ViewData["Title"] = "Home";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-i18n-title="home_page_title">@ViewData["Title"] - Yeka Cleaning Services</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <style>
+        .chat-window {
+            position: fixed;
+            bottom: 110px;
+            right: 30px;
+            width: 380px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-window.active {
+            display: flex;
+        }
+        .chat-header {
+            background: linear-gradient(135deg, #2E86AB, #A23B72);
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+        .bot-message {
+            background: #2E86AB;
+            color: white;
+            border-bottom-left-radius: 3px;
+        }
+        .user-message {
+            background: #F18F01;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 3px;
+        }
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 25px;
+            outline: none;
+        }
+        .chat-input input:focus {
+            border-color: #2E86AB;
+        }
+        .chat-input button {
+            background: #2E86AB;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .chat-input button:hover {
+            background: #A23B72;
+        }
+        .contact-card {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        .contact-card i {
+            color: #2E86AB;
+            margin-right: 5px;
+        }
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .quick-reply {
+            background: white;
+            border: 1px solid #2E86AB;
+            color: #2E86AB;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .quick-reply:hover {
+            background: #2E86AB;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" asp-area="" asp-page="/Index" data-i18n="nav_brand"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/Index" data-i18n="nav_home"><i class="bi bi-house-door"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/Gallery" data-i18n="nav_gallery"><i class="bi bi-images"></i> Gallery</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/Services" data-i18n="nav_services"><i class="bi bi-briefcase"></i> Services</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/About" data-i18n="nav_about"><i class="bi bi-people"></i> About Us</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/Contact" data-i18n="nav_contact"><i class="bi bi-envelope"></i> Contact Us</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/Blog" data-i18n="nav_blog"><i class="bi bi-journal-text"></i> Blog</a></li>
+                    <li class="nav-item ms-lg-3"><a class="login-btn" asp-area="" asp-page="/Login" data-i18n="nav_login">Login</a></li>
+                    <li class="nav-item ms-lg-3">
+                        <select id="languageSelect" class="form-select form-select-sm border-light text-dark"></select>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="hero-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-7 hero-content">
+                <h1 data-i18n="hero_title">Professional Cleaning Services for Your Home & Office</h1>
+                <p data-i18n="hero_subtitle">Experience the difference with our expert cleaning team. We bring cleanliness to perfection.</p>
+                <a href="#services" class="hero-btn" data-i18n="hero_button">Explore Our Services</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="features-section">
+    <div class="container">
+        <h2 class="text-center mb-5" data-i18n="features_title">Why Choose Us</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-award"></i></div>
+                    <h4 data-i18n="feature_expert_title">Expert Team</h4>
+                    <p data-i18n="feature_expert_text">Our certified cleaning professionals deliver exceptional results.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+                    <h4 data-i18n="feature_trusted_title">Trusted & Secure</h4>
+                    <p data-i18n="feature_trusted_text">Fully vetted staff. Your property is in safe hands.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-clock-history"></i></div>
+                    <h4 data-i18n="feature_flexible_title">Flexible Schedule</h4>
+                    <p data-i18n="feature_flexible_text">We work around your schedule. Same-day service!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="services-preview" id="services">
+    <div class="container">
+        <h2 class="text-center mb-5">Our Services</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="service-item"><h5><i class="bi bi-house"></i> Residential Cleaning</h5><p>Regular house cleaning, deep cleaning</p></div>
+                <div class="service-item"><h5><i class="bi bi-building"></i> Commercial Cleaning</h5><p>Office, retail, restaurants</p></div>
+            </div>
+            <div class="col-md-6">
+                <div class="service-item"><h5><i class="bi bi-droplet"></i> Deep Cleaning</h5><p>Thorough top-to-bottom cleaning</p></div>
+                <div class="service-item"><h5><i class="bi bi-stars"></i> Special Services</h5><p>Carpet, window, upholstery</p></div>
+            </div>
+        </div>
+        <div class="text-center mt-4"><a asp-page="/Services" class="hero-btn" data-i18n="services_view_all">View All Services</a></div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4"><h5><i class="bi bi-droplet-fill"></i> <span data-i18n="footer_brand">Yeka Cleaning</span></h5><p data-i18n="footer_desc">Your trusted partner for professional cleaning services.</p></div>
+            <div class="col-md-4 mb-4">
+                <h5 data-i18n="footer_quicklinks">Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a asp-page="/Services" data-i18n="footer_link_services">Services</a></li>
+                    <li><a asp-page="/About" data-i18n="footer_link_about">About Us</a></li>
+                    <li><a asp-page="/Contact" data-i18n="footer_link_contact">Contact</a></li>
+                    <li><a asp-page="/Blog" data-i18n="footer_link_blog">Blog</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 mb-4"><h5 data-i18n="footer_contact_title">Contact Us</h5><p><i class="bi bi-telephone"></i> <span data-i18n="footer_phone">(555) 123-4567</span></p><p><i class="bi bi-envelope"></i> <span data-i18n="footer_email">info@yeka-cleaning.com</span></p></div>
+        </div>
+        <div class="text-center border-top pt-3"><p class="mb-0" data-i18n="footer_copyright">&copy; 2026 Yeka Cleaning Services. All rights reserved.</p></div>
+    </div>
+</footer>
+
+<button class="chatbot-btn" onclick="toggleChat()" title="Chat with us"><i class="bi bi-chat-dots-fill"></i></button>
+
+<div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+        <div data-i18n="chat_title">
+            <i class="bi bi-robot"></i> Yeka Cleaning Support
+        </div>
+        <button style="background:none;border:none;color:white;cursor:pointer;font-size:20px" onclick="toggleChat()">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+        <div class="message bot-message">
+            <span id="chatWelcome" data-i18n="chat_welcome">Hello! Welcome to Yeka Cleaning! How can I help you today?</span>
+            <div class="quick-replies">
+                <span class="quick-reply" data-reply-key="pricing" data-i18n="chat_pricing" onclick="sendQuickMessage('pricing')">Pricing</span>
+                <span class="quick-reply" data-reply-key="services" data-i18n="chat_services" onclick="sendQuickMessage('services')">Services</span>
+                <span class="quick-reply" data-reply-key="booking" data-i18n="chat_book_now" onclick="sendQuickMessage('booking')">Book Now</span>
+                <span class="quick-reply" data-reply-key="contact" data-i18n="chat_contact" onclick="sendQuickMessage('contact')">Contact</span>
+            </div>
+        </div>
+    </div>
+    <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Type your message..." data-i18n-placeholder="chat_placeholder" onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()"><i class="bi bi-send"></i></button>
+    </div>
+</div>
+
+<script>
+    const chatResponseKeys = {
+        pricing: 'faq_pricing',
+        services: 'faq_services',
+        booking: 'faq_booking',
+        contact: 'faq_contact',
+        hello: 'faq_hello',
+        hi: 'faq_hi',
+        price: 'faq_price',
+        cost: 'faq_cost',
+        service: 'faq_service',
+        cleaning: 'faq_cleaning',
+        book: 'faq_book',
+        time: 'faq_time',
+        hours: 'faq_hours',
+        location: 'faq_location',
+        address: 'faq_address',
+        about: 'faq_about',
+        company: 'faq_company',
+        default: 'faq_default'
+    };
+
+    const faq = {};
+
+    function refreshFaqResponses() {
+        const translation = window.YekaTranslation;
+        if (!translation) {
+            return;
+        }
+
+        Object.keys(chatResponseKeys).forEach(key => {
+            const translationKey = chatResponseKeys[key];
+            faq[key] = translation.get(translationKey) || '';
+        });
+    }
+
+    function toggleChat() {
+        const chatWindow = document.getElementById('chatWindow');
+        chatWindow.classList.toggle('active');
+    }
+
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    }
+
+    function sendQuickMessage(key) {
+        const label = window.YekaTranslation?.get('chat_' + key) || key;
+        addUserMessage(label);
+        setTimeout(() => addBotMessage(faq[key] || faq.default), 500);
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('chatInput');
+        const message = input.value.trim();
+        if (message) {
+            addUserMessage(message);
+            const response = getBotResponse(message.toLowerCase());
+            setTimeout(() => addBotMessage(response), 500);
+            input.value = '';
+        }
+    }
+
+    function addUserMessage(message) {
+        const chatMessages = document.getElementById('chatMessages');
+        const userMsg = document.createElement('div');
+        userMsg.className = 'message user-message';
+        userMsg.textContent = message;
+        chatMessages.appendChild(userMsg);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addBotMessage(message) {
+        const chatMessages = document.getElementById('chatMessages');
+        const botMsg = document.createElement('div');
+        botMsg.className = 'message bot-message';
+        botMsg.innerHTML = message.replace(/\n/g, '<br>');
+        chatMessages.appendChild(botMsg);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function getBotResponse(message) {
+        for (let key in faq) {
+            if (message.includes(key) && faq[key]) {
+                return faq[key];
+            }
+        }
+        return faq.default || 'I understand you need help. For immediate assistance, please contact us.';
+    }
+
+    function refreshChatLabels() {
+        const welcomeEl = document.getElementById('chatWelcome');
+        if (welcomeEl) {
+            welcomeEl.textContent = window.YekaTranslation?.get('chat_welcome') || welcomeEl.textContent;
+        }
+        document.querySelectorAll('.quick-reply').forEach(btn => {
+            const labelKey = btn.dataset.i18n;
+            if (labelKey) {
+                btn.textContent = window.YekaTranslation?.get(labelKey) || btn.textContent;
+            }
+        });
+        const input = document.getElementById('chatInput');
+        if (input) {
+            input.placeholder = window.YekaTranslation?.get('chat_placeholder') || input.placeholder;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        refreshFaqResponses();
+        refreshChatLabels();
+    });
+
+    if (window.YekaTranslation) {
+        window.YekaTranslation.onLanguageChanged = () => {
+            refreshFaqResponses();
+            refreshChatLabels();
+        };
+    }
+</script>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/translation.js"></script>
+</body>
+</html>

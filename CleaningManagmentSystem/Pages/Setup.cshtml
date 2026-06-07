@@ -1,0 +1,142 @@
+@page
+@{
+    Layout = null;
+}
+@using MySqlConnector
+@{
+    var message = "";
+    var success = false;
+    var error = "";
+    
+    try
+    {
+        string connectionString = "Server=localhost;User=root;Password=;";
+        using var connection = new MySqlConnection(connectionString);
+        connection.Open();
+        
+        // Create database
+        using var cmd = new MySqlCommand("CREATE DATABASE IF NOT EXISTS yeka_cleaning", connection);
+        cmd.ExecuteNonQuery();
+        
+        // Use database
+        connection.ChangeDatabase("yeka_cleaning");
+        
+        // Create users table - simple version
+        string createUsers = @"
+        CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            email VARCHAR(100) NOT NULL UNIQUE,
+            password VARCHAR(255) NOT NULL,
+            role VARCHAR(20) DEFAULT 'user',
+            phone VARCHAR(20),
+            address TEXT,
+            is_active TINYINT(1) DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )";
+        cmd.CommandText = createUsers;
+        cmd.ExecuteNonQuery();
+        
+        // Insert superadmin if not exists
+        cmd.CommandText = "INSERT IGNORE INTO users (name, email, password, role, phone) VALUES ('Super Admin', 'superadmin@gmail.com', 'P@ssw0rd1', 'superadmin', '0931503513')";
+        cmd.ExecuteNonQuery();
+        
+        // Create services table
+        string createServices = @"
+        CREATE TABLE IF NOT EXISTS services (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            description TEXT,
+            price DECIMAL(10,2),
+            duration INT
+        )";
+        cmd.CommandText = createServices;
+        cmd.ExecuteNonQuery();
+        
+        // Insert default services
+        cmd.CommandText = @"INSERT IGNORE INTO services (name, description, price, duration) VALUES 
+            ('Residential Cleaning', 'Regular house cleaning', 50.00, 120),
+            ('Commercial Cleaning', 'Office cleaning', 75.00, 180),
+            ('Deep Cleaning', 'Thorough cleaning', 150.00, 240)";
+        cmd.ExecuteNonQuery();
+        
+        // Create bookings table
+        string createBookings = @"
+        CREATE TABLE IF NOT EXISTS bookings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT,
+            service_id INT,
+            booking_date DATE,
+            booking_time TIME,
+            address TEXT,
+            status VARCHAR(20) DEFAULT 'pending',
+            notes TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )";
+        cmd.CommandText = createBookings;
+        cmd.ExecuteNonQuery();
+        
+        success = true;
+        message = "Database and tables created successfully!";
+    }
+    catch (Exception ex)
+    {
+        error = ex.Message;
+    }
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Setup Database</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-dark" style="background: linear-gradient(135deg, #2E86AB, #A23B72);">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+        </div>
+    </nav>
+</header>
+
+<div class="container py-5">
+    <h2><i class="bi bi-database"></i> Database Setup</h2>
+    
+    @if(!string.IsNullOrEmpty(error))
+    {
+        <div class="alert alert-danger">
+            <h4>Error:</h4>
+            <p>@error</p>
+        </div>
+    }
+    
+    @if(success)
+    {
+        <div class="alert alert-success">
+            <h4><i class="bi bi-check-circle"></i> @message</h4>
+            <hr />
+            <h5>Login Credentials:</h5>
+            <table class="table table-bordered">
+                <tr><td>Email</td><td>superadmin@gmail.com</td></tr>
+                <tr><td>Password</td><td>P@ssw0rd1</td></tr>
+            </table>
+            <a href="/Login" class="btn btn-primary btn-lg">Go to Login</a>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-database"></i> Create Database
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+</div>
+</body>
+</html>

@@ -1,0 +1,233 @@
+@page
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userRole = HttpContext.Session.GetString("UserRole")?.ToLower() ?? "superadmin";
+    
+    if (userName == null)
+    {
+        Response.Redirect("/Login");
+        return;
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Super Admin Dashboard - Yeka Cleaning</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+</head>
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/Dashboard/SuperAdmin"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+            <div class="nav-user">
+                <span>Welcome, @userName</span>
+                <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top d-lg-none">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" onclick="toggleSidebar()">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/Dashboard/SuperAdmin"><i class="bi bi-droplet-fill"></i> Yeka</a>
+            <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i></a>
+        </div>
+    </nav>
+
+    <nav id="sidebarMenu" class="sidebar d-lg-none">
+        @await Html.PartialAsync("~/Pages/Dashboard/SuperAdmin/_Sidebar.cshtml")
+    </nav>
+
+    <nav class="col-md-3 col-lg-2 d-none d-md-block sidebar" style="transform: none; padding-top: 56px;">
+        @await Html.PartialAsync("~/Pages/Dashboard/SuperAdmin/_Sidebar.cshtml")
+    </nav>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 pt-lg-5">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="bi bi-shield-check me-2"></i>Super Admin Dashboard</h1>
+            <span class="badge bg-danger">Super Admin</span>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people display-4 text-primary"></i>
+                        <h4 class="mt-2">156</h4>
+                        <p class="text-muted mb-0">Total Users</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-building display-4 text-success"></i>
+                        <h4 class="mt-2">24</h4>
+                        <p class="text-muted mb-0">Companies</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-currency-dollar display-4 text-warning"></i>
+                        <h4 class="mt-2">1.2M</h4>
+                        <p class="text-muted mb-0">Total Revenue</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-clipboard-data display-4 text-info"></i>
+                        <h4 class="mt-2">48</h4>
+                        <p class="text-muted mb-0">Active Weredas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Monthly Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="border-end">
+                                    <h3 class="text-success">85%</h3>
+                                    <small class="text-muted">Task Completion</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border-end">
+                                    <h3 class="text-primary">92%</h3>
+                                    <small class="text-muted">User Satisfaction</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <h3 class="text-warning">15%</h3>
+                                <small class="text-muted">Growth Rate</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-people me-2"></i>Recent Users</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Alemayehu Kassa</td>
+                                        <td>alem@company.com</td>
+                                        <td><span class="badge bg-primary">Manager</span></td>
+                                        <td><span class="badge bg-success">Active</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tigist Girma</td>
+                                        <td>tigist@company.com</td>
+                                        <td><span class="badge bg-info">Staff</span></td>
+                                        <td><span class="badge bg-success">Active</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bekele Alemu</td>
+                                        <td>bekele@company.com</td>
+                                        <td><span class="badge bg-secondary">Driver</span></td>
+                                        <td><span class="badge bg-success">Active</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sisay Mengistu</td>
+                                        <td>sisay@company.com</td>
+                                        <td><span class="badge bg-warning text-dark">Wereda Officer</span></td>
+                                        <td><span class="badge bg-success">Active</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary"><i class="bi bi-person-plus me-2"></i>Add New User</button>
+                            <button class="btn btn-success"><i class="bi bi-building-add me-2"></i>Add Company</button>
+                            <button class="btn btn-info"><i class="bi bi-file-earmark-plus me-2"></i>Create Report</button>
+                            <button class="btn btn-warning"><i class="bi bi-gear me-2"></i>System Settings</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-bell me-2"></i>System Alerts</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                                    <span>3 companies need renewal</span>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-info-circle text-info me-2"></i>
+                                    <span>System update available</span>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    <span>Backup completed</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('show');
+            document.getElementById('sidebarBackdrop').classList.toggle('show');
+        }
+        document.querySelectorAll('#sidebarMenu .nav-link').forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (window.innerWidth < 992) toggleSidebar();
+            });
+        });
+    </script>
+</body>
+</html>

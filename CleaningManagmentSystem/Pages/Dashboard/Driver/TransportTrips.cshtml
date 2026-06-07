@@ -1,0 +1,362 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.Driver.TransportTripsModel
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userId = HttpContext.Session.GetInt32("UserId") ?? 0;
+    if (userName == null) { Response.Redirect("/Login"); return; }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transport Trips - Driver</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+    <style>
+        .status-badge{font-size:.75rem;padding:4px 10px;border-radius:20px;font-weight:600}
+        .status-DriverAssigned{background:#cfe2ff;color:#084298}
+        .status-DriverAccepted{background:#d1e7dd;color:#0a3622}
+        .status-PickedUp{background:#d0f0fd;color:#055160}
+        .status-MahberatApprovedPickup{background:#d1e7dd;color:#0a3622}
+        .status-ReceiptSubmitted{background:#e2d9f3;color:#432874}
+        .status-ReceiptVerified,.status-StaffApproved{background:#d1e7dd;color:#0a3622}
+        .status-Paid{background:#198754;color:#fff}
+        .status-DispatcherRejected,.status-StaffRejected{background:#f8d7da;color:#842029}
+        .trip-card{border:none;border-radius:16px;transition:transform .2s}
+        .trip-card:hover{transform:translateY(-2px)}
+    </style>
+</head>
+<body>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+<nav class="navbar navbar-dark dashboard-navbar fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/Dashboard/Driver"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+        <div class="nav-user"><span>Welcome, @userName</span><a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i> Logout</a></div>
+    </div>
+</nav>
+<nav class="navbar navbar-dark dashboard-navbar fixed-top d-lg-none">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" onclick="toggleSidebar()"><span class="navbar-toggler-icon"></span></button>
+        <a class="navbar-brand" href="/Dashboard/Driver"><i class="bi bi-droplet-fill"></i> Yeka</a>
+        <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i></a>
+    </div>
+</nav>
+<nav id="sidebarMenu" class="sidebar d-lg-none">
+    @await Html.PartialAsync("~/Pages/Dashboard/Driver/_Sidebar.cshtml")
+</nav>
+<nav class="col-md-3 col-lg-2 d-none d-md-block sidebar" style="transform:none;padding-top:56px;">
+    @await Html.PartialAsync("~/Pages/Dashboard/Driver/_Sidebar.cshtml")
+</nav>
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-truck me-2 text-primary"></i>My Transport Trips</h1>
+        <button class="btn btn-sm btn-outline-secondary" onclick="loadTrips()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm text-center p-3"><div class="fs-2 fw-bold text-primary" id="statAssigned">-</div><small class="text-muted">Assigned</small></div></div>
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm text-center p-3"><div class="fs-2 fw-bold text-info" id="statActive">-</div><small class="text-muted">Active</small></div></div>
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm text-center p-3"><div class="fs-2 fw-bold text-success" id="statPaid">-</div><small class="text-muted">Paid</small></div></div>
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm text-center p-3"><div class="fs-2 fw-bold text-secondary" id="statTotal">-</div><small class="text-muted">Total</small></div></div>
+    </div>
+
+    <!-- Active Trips needing action -->
+    <div id="actionCards" class="mb-4"></div>
+
+    <!-- All Trips -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 pt-3"><h6 class="fw-bold mb-0">Trip History</h6></div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr><th>Request #</th><th>Requester</th><th>Route</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="tripsBody">
+                        <tr><td colspan="6" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Accept/Reject Modal -->
+<div class="modal fade" id="actionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" id="actionModalHeader">
+                <h5 class="modal-title" id="actionModalTitle">Trip Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="actionRequestId" />
+                <input type="hidden" id="actionType" />
+                <p id="actionDesc"></p>
+                <div class="mb-3"><label class="form-label">Notes</label><textarea class="form-control" id="actionNotes" rows="2"></textarea></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" id="actionConfirmBtn" onclick="submitAction()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Receipt Upload Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-purple text-white" style="background:#6f42c1!important">
+                <h5 class="modal-title"><i class="bi bi-receipt me-2"></i>Submit Receipt</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="receiptRequestId" />
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Receipt Photo</label>
+                    <input type="file" class="form-control" id="receiptPhoto" accept="image/*" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Notes</label>
+                    <textarea class="form-control" id="receiptNotes" rows="2"></textarea>
+                </div>
+                <div id="uploadProgress" class="d-none">
+                    <div class="progress"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width:100%"></div></div>
+                    <small class="text-muted">Uploading...</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" onclick="submitReceipt()" style="background:#6f42c1;border-color:#6f42c1"><i class="bi bi-send me-1"></i>Submit Receipt</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Detailed Request Form Modal -->
+<div class="modal fade" id="requestFormModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title w-100 text-center text-uppercase fw-bold">
+                    <i class="bi bi-file-earmark-text me-2"></i>Transport Request Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-light p-4" id="requestFormBody">
+                <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+            </div>
+            <div class="modal-footer bg-white">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API = '/api/transport';
+const driverId = @userId;
+const driverName = '@Html.Raw(userName)';
+
+async function loadStats() {
+    const r = await fetch(`${API}/stats?userId=${driverId}&role=Driver`);
+    const s = await r.json();
+    document.getElementById('statAssigned').textContent = s.assigned ?? 0;
+    document.getElementById('statActive').textContent = (s.accepted ?? 0) + (s.pickedUp ?? 0);
+    document.getElementById('statPaid').textContent = s.paid ?? 0;
+    document.getElementById('statTotal').textContent = s.total ?? 0;
+}
+
+async function loadTrips() {
+    const r = await fetch(`${API}/requests?userId=${driverId}&role=Driver`);
+    const data = await r.json();
+    renderActionCards(data);
+    renderTable(data);
+}
+
+function statusBadge(s) {
+    return `<span class="status-badge status-${s}">${s.replace(/([A-Z])/g,' $1').trim()}</span>`;
+}
+
+function renderActionCards(data) {
+    const div = document.getElementById('actionCards');
+    const active = data.filter(r => ['DriverAssigned','DriverAccepted','MahberatApprovedPickup'].includes(r.status));
+    if (!active.length) { div.innerHTML = ''; return; }
+    div.innerHTML = `
+        <div class="alert alert-info border-0 shadow-sm">
+            <h6 class="fw-bold"><i class="bi bi-bell me-2"></i>Trips Needing Action (${active.length})</h6>
+            ${active.map(r => `
+                <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                    <div>
+                        <strong>${r.request_number}</strong> — ${r.pickup_location} → ${r.destination}
+                        <br>${statusBadge(r.status)}
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-info" onclick="openForm(${r.id})"><i class="bi bi-file-text me-1"></i>Details</button>
+                        ${r.status === 'DriverAssigned' ? `
+                            <button class="btn btn-sm btn-success" onclick="openAction(${r.id},'Accept','${r.request_number}')"><i class="bi bi-check me-1"></i>Accept</button>
+                            <button class="btn btn-sm btn-danger" onclick="openAction(${r.id},'Reject','${r.request_number}')"><i class="bi bi-x me-1"></i>Reject</button>
+                        ` : ''}
+                        ${r.status === 'DriverAccepted' ? `
+                            <button class="btn btn-sm btn-primary" onclick="openAction(${r.id},'Pickup','${r.request_number}')"><i class="bi bi-geo-alt me-1"></i>Mark Picked Up</button>
+                        ` : ''}
+                        ${r.status === 'MahberatApprovedPickup' ? `
+                            <button class="btn btn-sm btn-purple" style="background:#6f42c1;color:#fff;border:none" onclick="openReceipt(${r.id})"><i class="bi bi-receipt me-1"></i>Submit Receipt</button>
+                        ` : ''}
+                    </div>
+                </div>`).join('')}
+        </div>`;
+}
+
+function renderTable(data) {
+    const tbody = document.getElementById('tripsBody');
+    if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No trips yet</td></tr>'; return; }
+    tbody.innerHTML = data.map(r => `
+        <tr>
+            <td><strong>${r.request_number}</strong></td>
+            <td>${r.mahberat_user_name}</td>
+            <td><small>${r.pickup_location}<br><span class="text-muted">→ ${r.destination}</span></small></td>
+            <td><small>${r.requested_date ? r.requested_date.substring(0,10) : ''}</small></td>
+            <td>${statusBadge(r.status)}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-info me-1" onclick="openForm(${r.id})"><i class="bi bi-file-text"></i></button>
+                ${r.status === 'DriverAssigned' ? `
+                    <button class="btn btn-sm btn-success me-1" onclick="openAction(${r.id},'Accept','${r.request_number}')"><i class="bi bi-check"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="openAction(${r.id},'Reject','${r.request_number}')"><i class="bi bi-x"></i></button>
+                ` : ''}
+                ${r.status === 'DriverAccepted' ? `<button class="btn btn-sm btn-primary" onclick="openAction(${r.id},'Pickup','${r.request_number}')"><i class="bi bi-geo-alt"></i></button>` : ''}
+                ${r.status === 'MahberatApprovedPickup' ? `<button class="btn btn-sm" style="background:#6f42c1;color:#fff" onclick="openReceipt(${r.id})"><i class="bi bi-receipt"></i></button>` : ''}
+            </td>
+        </tr>`).join('');
+}
+
+function openAction(id, type, num) {
+    document.getElementById('actionRequestId').value = id;
+    document.getElementById('actionType').value = type;
+    document.getElementById('actionNotes').value = '';
+    const header = document.getElementById('actionModalHeader');
+    const title = document.getElementById('actionModalTitle');
+    const desc = document.getElementById('actionDesc');
+    const btn = document.getElementById('actionConfirmBtn');
+    if (type === 'Accept') {
+        header.className = 'modal-header bg-success text-white';
+        title.textContent = 'Accept Trip';
+        desc.textContent = `Accept trip ${num}? Pickup: will be assigned to you.`;
+        btn.className = 'btn btn-success'; btn.textContent = 'Accept Trip';
+    } else if (type === 'Reject') {
+        header.className = 'modal-header bg-danger text-white';
+        title.textContent = 'Reject Trip';
+        desc.textContent = `Reject trip ${num}? It will be returned to the dispatcher.`;
+        btn.className = 'btn btn-danger'; btn.textContent = 'Reject Trip';
+    } else {
+        header.className = 'modal-header bg-primary text-white';
+        title.textContent = 'Mark as Picked Up';
+        desc.textContent = `Confirm you have arrived and picked up for trip ${num}?`;
+        btn.className = 'btn btn-primary'; btn.textContent = 'Confirm Pickup';
+    }
+    new bootstrap.Modal(document.getElementById('actionModal')).show();
+}
+
+async function submitAction() {
+    const id = document.getElementById('actionRequestId').value;
+    const type = document.getElementById('actionType').value;
+    const notes = document.getElementById('actionNotes').value;
+    let url, body;
+    if (type === 'Accept' || type === 'Reject') {
+        url = `${API}/requests/${id}/driver-action`;
+        body = { driverId, driverName, action: type, notes };
+    } else {
+        url = `${API}/requests/${id}/pickup`;
+        body = { driverId, driverName, notes };
+    }
+    const r = await fetch(url, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const data = await r.json();
+    if (data.success) { bootstrap.Modal.getInstance(document.getElementById('actionModal')).hide(); loadTrips(); loadStats(); }
+    else alert(data.message || 'Error');
+}
+
+function openReceipt(id) {
+    document.getElementById('receiptRequestId').value = id;
+    document.getElementById('receiptNotes').value = '';
+    document.getElementById('receiptPhoto').value = '';
+    new bootstrap.Modal(document.getElementById('receiptModal')).show();
+}
+
+async function submitReceipt() {
+    const id = document.getElementById('receiptRequestId').value;
+    const notes = document.getElementById('receiptNotes').value;
+    let photoUrl = null;
+    const file = document.getElementById('receiptPhoto').files[0];
+    if (file) {
+        document.getElementById('uploadProgress').classList.remove('d-none');
+        const fd = new FormData(); fd.append('file', file);
+        const up = await fetch(`${API}/upload`, { method: 'POST', body: fd });
+        const upData = await up.json();
+        photoUrl = upData.url;
+        document.getElementById('uploadProgress').classList.add('d-none');
+    }
+    const r = await fetch(`${API}/requests/${id}/submit-receipt`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ driverId, driverName, receiptPhotoUrl: photoUrl, notes })
+    });
+    const data = await r.json();
+    if (data.success) { bootstrap.Modal.getInstance(document.getElementById('receiptModal')).hide(); loadTrips(); loadStats(); }
+    else alert(data.message || 'Error');
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebarMenu').classList.toggle('show');
+    document.getElementById('sidebarBackdrop').classList.toggle('show');
+}
+
+async function openForm(id) {
+    document.getElementById('requestFormBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    new bootstrap.Modal(document.getElementById('requestFormModal')).show();
+    try {
+        const r = await fetch(`/api/transport/requests/${id}`);
+        if (!r.ok) throw new Error('Failed to fetch');
+        const d = await r.json();
+        const req  = d.request ?? d;
+
+        const fmtDT = v => v ? new Date(v).toLocaleString() : 'Not specified';
+
+        document.getElementById('requestFormBody').innerHTML = `
+        <div class="border border-2 border-dark bg-white p-4" style="font-size:.9rem">
+            <div class="text-center fw-bold fs-5 border-bottom border-dark pb-2 mb-3">TRIP DETAILS</div>
+            
+            <div class="row mb-3 px-2">
+                <div class="col-md-6"><strong>Request ID:</strong> ${req.request_number}</div>
+                <div class="col-md-6"><strong>Status:</strong> ${statusBadge(req.status)}</div>
+                <div class="col-md-6 mt-1"><strong>Mahberat:</strong> ${req.mahberat_user_name ?? '-'}</div>
+                <div class="col-md-6 mt-1"><strong>Dispatcher:</strong> ${req.dispatcher_name ?? '-'}</div>
+            </div>
+
+            <div class="fw-bold bg-dark text-white px-2 py-1 mb-2">ROUTE & TIMING</div>
+            <div class="row mb-3 px-2">
+                <div class="col-md-6"><strong>Pickup Location:</strong> ${req.pickup_location ?? '-'}</div>
+                <div class="col-md-6"><strong>Destination:</strong> ${req.destination ?? '-'}</div>
+                <div class="col-12 mt-1"><strong>Requested Date/Time:</strong> ${fmtDT(req.requested_date ?? req.requested_date_time)}</div>
+            </div>
+
+            <div class="fw-bold bg-dark text-white px-2 py-1 mb-2">CARGO & INSTRUCTIONS</div>
+            <div class="row mb-3 px-2">
+                <div class="col-12"><strong>Passenger / Items:</strong> ${req.passenger_item_details ?? req.description ?? '-'}</div>
+                <div class="col-12 mt-1"><strong>Special Instructions:</strong> ${req.special_instructions ?? '-'}</div>
+                ${req.dispatcher_notes ? `<div class="col-12 mt-1"><strong>Dispatcher Notes:</strong> ${req.dispatcher_notes}</div>` : ''}
+            </div>
+        </div>`;
+    } catch (e) {
+        document.getElementById('requestFormBody').innerHTML = `<div class="alert alert-danger">Error loading form details: ${e.message}</div>`;
+    }
+}
+
+loadStats();
+loadTrips();
+setInterval(() => { loadStats(); loadTrips(); }, 30000);
+</script>
+</body>
+</html>

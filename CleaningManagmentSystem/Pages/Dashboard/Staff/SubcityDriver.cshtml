@@ -1,0 +1,207 @@
+@page
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userRole = HttpContext.Session.GetString("UserRole");
+    
+    if (userName == null)
+    {
+        Response.Redirect("/Login");
+        return;
+    }
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+}
+
+<div class="main-content p-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-truck me-2"></i>Subcity Drivers</h1>
+        <button class="btn btn-primary btn-sm"><i class="bi bi-plus-circle me-2"></i>Add Driver</button>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-people display-4 text-primary"></i>
+                    <h4 class="mt-2">8</h4>
+                    <p class="text-muted mb-0">Total Drivers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle display-4 text-success"></i>
+                    <h4 class="mt-2">6</h4>
+                    <p class="text-muted mb-0">Available</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-geo-alt display-4 text-info"></i>
+                    <h4 class="mt-2">15</h4>
+                    <p class="text-muted mb-0">Deliveries Today</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-speedometer2 display-4 text-warning"></i>
+                    <h4 class="mt-2">98%</h4>
+                    <p class="text-muted mb-0">On-time Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Driver List</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary active">All</button>
+                        <button class="btn btn-outline-secondary">Available</button>
+                        <button class="btn btn-outline-secondary">On Duty</button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Driver</th>
+                                    <th>License</th>
+                                    <th>Vehicle</th>
+                                    <th>Subcity</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                                <span class="text-white">TG</span>
+                                            </div>
+                                            <strong>Tigist Girma</strong>
+                                        </div>
+                                    </td>
+                                    <td>DL-2024-1234</td>
+                                    <td>Van 001</td>
+                                    <td>Bole</td>
+                                    <td><span class="badge bg-success">Available</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-whatsapp"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-info rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                                <span class="text-white">BA</span>
+                                            </div>
+                                            <strong>Bekele Alemayehu</strong>
+                                        </div>
+                                    </td>
+                                    <td>DL-2024-5678</td>
+                                    <td>Van 002</td>
+                                    <td>Kirkos</td>
+                                    <td><span class="badge bg-success">Available</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-whatsapp"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-success rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                                <span class="text-white">SM</span>
+                                            </div>
+                                            <strong>Sisay Mulugeta</strong>
+                                        </div>
+                                    </td>
+                                    <td>DL-2024-9012</td>
+                                    <td>Truck 001</td>
+                                    <td>Gulele</td>
+                                    <td><span class="badge bg-warning">On Duty</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-whatsapp"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-secondary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                                <span class="text-white">TM</span>
+                                            </div>
+                                            <strong>Tadesse Mengistu</strong>
+                                        </div>
+                                    </td>
+                                    <td>DL-2024-3456</td>
+                                    <td>Van 003</td>
+                                    <td>Lideta</td>
+                                    <td><span class="badge bg-success">Available</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-whatsapp"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <i class="bi bi-truck display-4 text-primary"></i>
+                    <h4 class="mt-2">4</h4>
+                    <p class="text-muted mb-0">Active Vehicles</p>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-event display-4 text-warning"></i>
+                    <h4 class="mt-2">12</h4>
+                    <p class="text-muted mb-0">Pending Routes</p>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Performance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>On-time Rate</span>
+                        <span class="badge bg-success">98%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-success" style="width: 98%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Deliveries</span>
+                        <span class="badge bg-info">156</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-info" style="width: 75%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Satisfaction</span>
+                        <span class="badge bg-primary">94%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" style="width: 94%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

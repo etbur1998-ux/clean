@@ -1,0 +1,265 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.Staff.TrainingModel
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userRole = HttpContext.Session.GetString("UserRole");
+    
+    if (userName == null)
+    {
+        Response.Redirect("/Login");
+        return;
+    }
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+}
+
+<div class="main-content p-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-people me-2"></i>Training Programs</h1>
+        @if (userRole == "superadmin" || userRole == "manager")
+        {
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addTrainingModal"><i class="bi bi-plus-circle me-2"></i>New Training</button>
+        }
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-collection-play display-4 text-primary"></i>
+                    <h4 class="mt-2">8</h4>
+                    <p class="text-muted mb-0">Total Programs</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-check display-4 text-success"></i>
+                    <h4 class="mt-2">3</h4>
+                    <p class="text-muted mb-0">Upcoming</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle display-4 text-info"></i>
+                    <h4 class="mt-2">45</h4>
+                    <p class="text-muted mb-0">Participants</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-star display-4 text-warning"></i>
+                    <h4 class="mt-2">92%</h4>
+                    <p class="text-muted mb-0">Completion Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Training Schedule</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Training</th>
+                                    <th>Category</th>
+                                    <th>Trainer</th>
+                                    <th>Date</th>
+                                    <th>Participants</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Trainings != null && Model.Trainings.Any())
+                                {
+                                    foreach (var training in Model.Trainings)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="fw-bold">@training.TrainingName</div>
+                                                <div class="mt-1 d-flex gap-1">
+                                                    @if (string.IsNullOrEmpty(training.Materials) || training.Materials.Contains("PDF"))
+                                                    {
+                                                        <span class="badge bg-danger bg-opacity-10 text-danger" style="font-size: 0.75rem;"><i class="bi bi-file-earmark-pdf"></i> PDF</span>
+                                                    }
+                                                    @if (string.IsNullOrEmpty(training.Materials) || training.Materials.Contains("Video"))
+                                                    {
+                                                        <span class="badge bg-warning bg-opacity-10 text-warning" style="font-size: 0.75rem;"><i class="bi bi-play-circle"></i> Video</span>
+                                                    }
+                                                    @if (string.IsNullOrEmpty(training.Materials) || training.Materials.Contains("Exam"))
+                                                    {
+                                                        <span class="badge bg-info bg-opacity-10 text-info" style="font-size: 0.75rem;"><i class="bi bi-pencil-square"></i> Exam</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var categoryBadge = training.Category switch
+                                                    {
+                                                        "Safety" => "bg-danger bg-opacity-10 text-danger border border-danger-subtle",
+                                                        "Equipment" => "bg-success bg-opacity-10 text-success border border-success-subtle",
+                                                        "Customer Service" => "bg-info bg-opacity-10 text-info border border-info-subtle",
+                                                        "Operations" => "bg-warning bg-opacity-10 text-warning border border-warning-subtle",
+                                                        "Leadership" => "bg-primary bg-opacity-10 text-primary border border-primary-subtle",
+                                                        _ => "bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle"
+                                                    };
+                                                }
+                                                <span class="badge @categoryBadge px-2 py-1 text-uppercase" style="font-size: 0.75rem;">@training.Category</span>
+                                            </td>
+                                            <td>@training.Trainer</td>
+                                            <td>@training.StartDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@training.Participants</td>
+                                            <td>
+                                                @{
+                                                    var badgeClass = training.Status switch
+                                                    {
+                                                        "Upcoming" => "bg-success",
+                                                        "In Progress" => "bg-primary",
+                                                        "Scheduled" => "bg-secondary",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                }
+                                                <span class="badge @badgeClass">@training.Status</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="/Dashboard/Staff/TrainingDetails?id=@training.Id" class="btn btn-outline-primary fw-semibold" title="View Details">
+                                                        <i class="bi bi-eye"></i> View Details
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">
+                                            <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                                            No training programs found.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-event display-4 text-primary"></i>
+                    <h4 class="mt-2">3</h4>
+                    <p class="text-muted mb-0">Upcoming</p>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <i class="bi bi-award display-4 text-warning"></i>
+                    <h4 class="mt-2">12</h4>
+                    <p class="text-muted mb-0">Certificates Issued</p>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Participation</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Safety Training</span>
+                        <span class="badge bg-success">45/45</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Equipment Training</span>
+                        <span class="badge bg-info">32/45</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-info" style="width: 71%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Leadership</span>
+                        <span class="badge bg-primary">10/45</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" style="width: 22%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Training Modal -->
+    <div class="modal fade" id="addTrainingModal" tabindex="-1" aria-labelledby="addTrainingModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="Add">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addTrainingModalLabel">Add New Training</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Training Title</label>
+                            <input type="text" class="form-control" name="TrainingName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="Description"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Trainer</label>
+                            <input type="text" class="form-control" name="Trainer">
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control" name="StartDate" required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control" name="EndDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Assign to Staff (Optional)</label>
+                            <select class="form-select" name="AssignedToUserId">
+                                <option value="">General Training (All Staff)</option>
+                                @if (Model.StaffList != null)
+                                {
+                                    @foreach (var staff in Model.StaffList)
+                                    {
+                                        <option value="@staff.Id">@staff.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Materials</label>
+                            <input type="text" class="form-control" name="Materials" placeholder="e.g., PDF, Video, Exam">
+                            <small class="text-muted">Enter keywords separated by comma.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Training</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

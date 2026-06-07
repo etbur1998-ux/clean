@@ -1,0 +1,59 @@
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.exe
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.deps.json
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.runtimeconfig.json
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.dll
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.pdb
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.csproj.AssemblyReference.cache
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.csproj.CoreCompileInputs.cache
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.sourcelink.json
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMig.C178A745.Up2Date
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.dll
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\refint\RunDbMigration.dll
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.pdb
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.genruntimeconfig.cache
+C:\Users\2M\Desktop\New folder\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\ref\RunDbMigration.dll
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.dll
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\refint\RunDbMigration.dll
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.pdb
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.exe
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.deps.json
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.runtimeconfig.json
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.dll
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.pdb
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.csproj.AssemblyReference.cache
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.csproj.CoreCompileInputs.cache
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.sourcelink.json
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMig.C178A745.Up2Date
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.genruntimeconfig.cache
+C:\Users\ict\Pictures\New folder (2)\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\ref\RunDbMigration.dll
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.exe
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.deps.json
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.runtimeconfig.json
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.dll
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.pdb
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.csproj.AssemblyReference.cache
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.csproj.CoreCompileInputs.cache
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.sourcelink.json
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMig.C178A745.Up2Date
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.dll
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\refint\RunDbMigration.dll
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.pdb
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.genruntimeconfig.cache
+C:\Users\2M\Pictures\CleaningManagmentSystem\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\ref\RunDbMigration.dll
+C:\Users\mezig\Music\eccc\yeka-main\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.dll
+C:\Users\mezig\Music\eccc\yeka-main\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\refint\RunDbMigration.dll
+C:\Users\mezig\Music\eccc\yeka-main\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.pdb
+C:\Users\mezig\Music\eccc\yeka-main\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.exe
+C:\Users\mezig\Music\eccc\yeka-main\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.deps.json
+C:\Users\mezig\Music\eccc\yeka-main\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.runtimeconfig.json
+C:\Users\mezig\Music\eccc\yeka-main\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.dll
+C:\Users\mezig\Music\eccc\yeka-main\CleaningManagmentSystem\bin\Migration\net10.0\RunDbMigration.pdb
+C:\Users\mezig\Music\eccc\yeka-main\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.csproj.AssemblyReference.cache
+C:\Users\mezig\Music\eccc\yeka-main\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\mezig\Music\eccc\yeka-main\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.csproj.CoreCompileInputs.cache
+C:\Users\mezig\Music\eccc\yeka-main\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMig.C178A745.Up2Date
+C:\Users\mezig\Music\eccc\yeka-main\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\RunDbMigration.genruntimeconfig.cache
+C:\Users\mezig\Music\eccc\yeka-main\CleaningManagmentSystem\Scripts\obj\Debug\net10.0\ref\RunDbMigration.dll

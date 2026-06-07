@@ -1,0 +1,388 @@
+@page "{id:int}"
+@model CleaningManagmentSystem.Pages.Dashboard.Staff.PostDetailsModel
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    if (userName == null) { Response.Redirect("/Login"); return; }
+    Layout = null;
+
+    var priorityBadgeClass = Model.Post.Priority switch
+    {
+        "High"   => "bg-danger text-white",
+        "Medium" => "bg-warning text-dark",
+        _        => "bg-info text-dark"
+    };
+    var categoryBadgeClass = Model.Post.Category switch
+    {
+        "Notice"       => "bg-primary text-white",
+        "Blog"         => "bg-success text-white",
+        "Training"     => "bg-info text-dark",
+        "Announcement" => "bg-warning text-dark",
+        "Policy"       => "bg-dark text-white",
+        "Event"        => "bg-purple text-white",
+        _              => "bg-secondary text-white"
+    };
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.Post.Title – Announcements – Yeka Cleaning</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+    <style>
+        .detail-card {
+            border-radius: 14px;
+            border: none;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .detail-card .card-header {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #fff;
+            border: none;
+            padding: 16px 22px;
+        }
+        .detail-card .card-body { padding: 28px; }
+        .meta-label {
+            font-size: 0.78rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 4px;
+        }
+        .meta-value { font-weight: 600; color: #1e293b; }
+        .post-body {
+            font-size: 1.08rem;
+            line-height: 1.85;
+            color: #334155;
+            white-space: pre-wrap;
+        }
+        .training-banner {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-left: 5px solid #3b82f6;
+            border-radius: 10px;
+            padding: 20px 24px;
+        }
+        .pinned-hero {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border-left: 5px solid #ef4444;
+            border-radius: 10px;
+            padding: 14px 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+    <!-- Desktop Navbar -->
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/Dashboard/Staff"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+            <div class="nav-user">
+                <span>Welcome, @userName</span>
+                <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Navbar -->
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top d-lg-none">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" onclick="toggleSidebar()">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/Dashboard/Staff"><i class="bi bi-droplet-fill"></i> Yeka</a>
+            <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i></a>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse" style="padding-top: 56px;">
+                @await Html.PartialAsync("sidebar")
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 pt-lg-5">
+
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="pt-3">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/Dashboard/Staff">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="/Dashboard/Staff/Post">Announcements</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Post Details</li>
+                    </ol>
+                </nav>
+
+                <!-- Page Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-start pb-2 mb-3 border-bottom gap-3">
+                    <h1 class="h2 fw-bold text-dark mb-0">
+                        @if (Model.Post.IsPinned)
+                        {
+                            <i class="bi bi-pin-angle-fill text-danger me-2" title="Pinned Announcement"></i>
+                        }
+                        @Model.Post.Title
+                    </h1>
+                    <a href="/Dashboard/Staff/Post" class="btn btn-outline-secondary btn-sm flex-shrink-0">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Announcements
+                    </a>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.ErrorMessage
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <div class="row g-4">
+                    <!-- ── Left column: main content ── -->
+                    <div class="col-lg-8">
+
+                        <!-- Pinned banner -->
+                        @if (Model.Post.IsPinned)
+                        {
+                            <div class="pinned-hero d-flex align-items-center gap-3">
+                                <i class="bi bi-pin-angle-fill text-danger fs-3"></i>
+                                <div>
+                                    <div class="fw-bold text-danger">Featured / Pinned Notice</div>
+                                    <small class="text-muted">This announcement has been marked as high-priority and pinned to the top of the feed.</small>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Post Body Card -->
+                        <div class="detail-card card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="bi bi-file-text me-2"></i>Announcement Content</h5>
+                                <span class="badge bg-light text-dark text-uppercase px-2 py-1">@Model.Post.Category</span>
+                            </div>
+                            <div class="card-body">
+                                <!-- Meta badges row -->
+                                <div class="row g-3 mb-4">
+                                    <div class="col-6 col-md-3">
+                                        <div class="meta-label">Status</div>
+                                        @{
+                                            var statusBadge = Model.Post.Status switch
+                                            {
+                                                "Published" => "bg-success",
+                                                "Draft"     => "bg-secondary",
+                                                "Deleted"   => "bg-danger",
+                                                _           => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @statusBadge">@Model.Post.Status</span>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="meta-label">Priority</div>
+                                        <span class="badge @priorityBadgeClass">@Model.Post.Priority</span>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="meta-label">Category</div>
+                                        <span class="badge @categoryBadgeClass">@Model.Post.Category</span>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="meta-label">Published</div>
+                                        <div class="meta-value" style="font-size:0.9rem;">@Model.Post.CreatedAt?.ToString("MMM dd, yyyy")</div>
+                                    </div>
+                                </div>
+
+                                <hr />
+
+                                <!-- Full content body -->
+                                <div class="post-body">@Model.Post.Content</div>
+                            </div>
+                        </div>
+
+                        <!-- Linked Training Full Details Card -->
+                        @if (Model.LinkedTraining != null)
+                        {
+                            <div class="detail-card card">
+                                <div class="card-header" style="background: linear-gradient(135deg, #1d4ed8, #1e40af);">
+                                    <h5 class="mb-0 text-white"><i class="bi bi-mortarboard-fill me-2"></i>Linked Training Program Details</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="training-banner mb-4">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-8">
+                                                <h4 class="text-primary fw-bold mb-1">@Model.LinkedTraining.Title</h4>
+                                                <p class="text-muted mb-0">Trainer: <strong>@Model.LinkedTraining.Trainer</strong></p>
+                                            </div>
+                                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                                @{
+                                                    var tStatusBadge = Model.LinkedTraining.Status switch
+                                                    {
+                                                        "Completed"   => "bg-success",
+                                                        "In Progress" => "bg-primary",
+                                                        "Upcoming"    => "bg-warning text-dark",
+                                                        _             => "bg-secondary"
+                                                    };
+                                                }
+                                                <span class="badge @tStatusBadge px-3 py-2" style="font-size:0.9rem;">@Model.LinkedTraining.Status</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-4 mb-4">
+                                        <div class="col-sm-6 col-md-4">
+                                            <div class="meta-label">Location</div>
+                                            <div class="meta-value"><i class="bi bi-geo-alt-fill text-danger me-1"></i>@Model.LinkedTraining.Location</div>
+                                        </div>
+                                        <div class="col-sm-6 col-md-4">
+                                            <div class="meta-label">Start Date</div>
+                                            <div class="meta-value"><i class="bi bi-calendar-event me-1 text-primary"></i>@Model.LinkedTraining.StartDate.ToString("MMM dd, yyyy")</div>
+                                        </div>
+                                        <div class="col-sm-6 col-md-4">
+                                            <div class="meta-label">End Date</div>
+                                            <div class="meta-value"><i class="bi bi-calendar-check me-1 text-success"></i>@Model.LinkedTraining.EndDate.ToString("MMM dd, yyyy")</div>
+                                        </div>
+                                        <div class="col-sm-6 col-md-4">
+                                            <div class="meta-label">Participants</div>
+                                            <div class="meta-value"><i class="bi bi-people-fill me-1"></i>@Model.LinkedTraining.Participants</div>
+                                        </div>
+                                        <div class="col-sm-6 col-md-8">
+                                            <div class="meta-label">Course Materials</div>
+                                            <div class="d-flex gap-2 mt-1 flex-wrap">
+                                                @if (string.IsNullOrEmpty(Model.LinkedTraining.Materials) || Model.LinkedTraining.Materials.Contains("PDF"))
+                                                {
+                                                    <span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1"><i class="bi bi-file-earmark-pdf me-1"></i>PDF Manual</span>
+                                                }
+                                                @if (string.IsNullOrEmpty(Model.LinkedTraining.Materials) || Model.LinkedTraining.Materials.Contains("Video"))
+                                                {
+                                                    <span class="badge bg-warning bg-opacity-10 text-warning px-2 py-1"><i class="bi bi-play-circle me-1"></i>Video Lecture</span>
+                                                }
+                                                @if (string.IsNullOrEmpty(Model.LinkedTraining.Materials) || Model.LinkedTraining.Materials.Contains("Exam"))
+                                                {
+                                                    <span class="badge bg-info bg-opacity-10 text-info px-2 py-1"><i class="bi bi-pencil-square me-1"></i>Written Exam</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(Model.LinkedTraining.Description))
+                                    {
+                                        <div class="meta-label mb-1">Training Description</div>
+                                        <p class="text-muted" style="line-height:1.7;">@Model.LinkedTraining.Description</p>
+                                    }
+
+                                    <a href="/Dashboard/Staff/Training" class="btn btn-primary fw-bold px-4 py-2 mt-2 shadow-sm">
+                                        <i class="bi bi-folder2-open me-2"></i>Access My Training Center
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- ── Right column: metadata + quick info ── -->
+                    <div class="col-lg-4">
+
+                        <!-- Post Info Card -->
+                        <div class="detail-card card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Post Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <div class="meta-label">Category</div>
+                                    <span class="badge @categoryBadgeClass px-2 py-1">@Model.Post.Category</span>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="meta-label">Priority Level</div>
+                                    <span class="badge @priorityBadgeClass px-2 py-1">@Model.Post.Priority Priority</span>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="meta-label">Pinned</div>
+                                    @if (Model.Post.IsPinned)
+                                    {
+                                        <span class="badge bg-danger px-2 py-1"><i class="bi bi-pin-angle-fill me-1"></i>Yes – Pinned to Top</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-muted border px-2 py-1">Not Pinned</span>
+                                    }
+                                </div>
+                                <div class="mb-3">
+                                    <div class="meta-label">Target Audience</div>
+                                    <div class="meta-value small">
+                                        @{
+                                            var targetLabel = Model.Post.TargetRole switch
+                                            {
+                                                "All"              => "All Users (Public)",
+                                                "staff"            => "Staff Members Only",
+                                                "cleaner"          => "Cleaners Only",
+                                                "wereda_mahberat"  => "Wereda Mahberat",
+                                                "dispatch_officer" => "Dispatch Officers",
+                                                "driver"           => "Drivers Only",
+                                                "manager"          => "Managers Only",
+                                                _                  => Model.Post.TargetRole
+                                            };
+                                        }
+                                        <span class="badge bg-dark text-white px-2 py-1">@targetLabel</span>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="mb-2">
+                                    <div class="meta-label">Published On</div>
+                                    <div class="meta-value small">@Model.Post.CreatedAt?.ToString("MMMM dd, yyyy · HH:mm")</div>
+                                </div>
+                                @if (Model.LinkedTraining != null)
+                                {
+                                    <div class="mt-3">
+                                        <div class="meta-label">Linked Training</div>
+                                        <div class="meta-value small text-primary"><i class="bi bi-mortarboard-fill me-1"></i>@Model.LinkedTraining.Title</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Quick Action Card (read-only for staff) -->
+                        @if (Model.LinkedTraining != null)
+                        {
+                            <div class="detail-card card" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border-left: 4px solid #3b82f6 !important;">
+                                <div class="card-body text-center py-4">
+                                    <i class="bi bi-mortarboard-fill display-5 text-primary mb-3"></i>
+                                    <h5 class="fw-bold text-primary">Training Attached</h5>
+                                    <p class="text-muted small mb-3">This announcement is linked to a scheduled training program. Access your training center to view full details, materials, and course status.</p>
+                                    <a href="/Dashboard/Staff/Training" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                                        <i class="bi bi-arrow-right-circle me-2"></i>Open Training Center
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="detail-card card bg-light text-center">
+                                <div class="card-body py-4">
+                                    <i class="bi bi-megaphone display-5 text-muted mb-3"></i>
+                                    <h5 class="fw-bold">General Announcement</h5>
+                                    <p class="text-muted small mb-0">This post is a general notice for all staff members and is not linked to a specific training program.</p>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Back Button -->
+                        <a href="/Dashboard/Staff/Post" class="btn btn-outline-secondary w-100 mt-2">
+                            <i class="bi bi-arrow-left me-1"></i>Back to All Announcements
+                        </a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('show');
+            document.getElementById('sidebarBackdrop').classList.toggle('show');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,307 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.Manager.SettingsModel
+@{
+    Layout = null;
+    var success = TempData["SuccessMessage"] as string;
+    var error = TempData["ErrorMessage"] as string;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manager Settings - Yeka Cleaning</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+    <style>
+        .settings-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+            overflow: hidden;
+            height: 100%;
+        }
+        .settings-card .card-header-section {
+            padding: 1rem 1.4rem 0.6rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+        .section-pricing  .card-header-section { background: linear-gradient(90deg,#e3f2fd,#bbdefb); color:#1565c0; }
+        .section-user     .card-header-section { background: linear-gradient(90deg,#e8f5e9,#c8e6c9); color:#2e7d32; }
+        .section-password .card-header-section { background: linear-gradient(90deg,#fff3e0,#ffe0b2); color:#e65100; }
+        .section-system   .card-header-section { background: linear-gradient(90deg,#f3e5f5,#e1bee7); color:#6a1b9a; }
+        .stat-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/Dashboard/Manager"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+            <div class="nav-user">
+                <span>Welcome, @HttpContext.Session.GetString("UserName")</span>
+                <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top d-lg-none">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" onclick="toggleSidebar()">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/Dashboard/Manager"><i class="bi bi-droplet-fill"></i> Yeka</a>
+            <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i></a>
+        </div>
+    </nav>
+
+    <nav id="sidebarMenu" class="sidebar d-lg-none">
+        @await Html.PartialAsync("~/Pages/Dashboard/Manager/_Sidebar.cshtml")
+    </nav>
+    <nav class="col-md-3 col-lg-2 d-none d-md-block sidebar" style="transform: none; padding-top: 56px;">
+        @await Html.PartialAsync("~/Pages/Dashboard/Manager/_Sidebar.cshtml")
+    </nav>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 pt-lg-5" style="margin-top: 56px;">
+
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+            <h1 class="h3 mb-0"><i class="bi bi-gear-fill me-2"></i>Manager Settings</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="/Dashboard/Manager">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Settings</li>
+                </ol>
+            </nav>
+        </div>
+
+        @if (!string.IsNullOrEmpty(success))
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>@success
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@error
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- ── ROW 1: Pricing (left) | Transport Rate (right) ── -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="card settings-card section-pricing">
+                    <div class="card-header-section">
+                        <i class="bi bi-cash-coin"></i> Receipt Pricing (Mahberat / Outsource)
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post" asp-page-handler="SavePricing">
+                            <label class="form-label fw-semibold">Default Price Per Kilogram</label>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text bg-primary text-white"><i class="bi bi-tag-fill"></i></span>
+                                <input type="number" step="0.01" min="0.01" class="form-control form-control-lg"
+                                       asp-for="DefaultPricePerKg" required />
+                                <span class="input-group-text fw-bold">ETB / KG</span>
+                            </div>
+                            <div class="form-text mb-3">Used as the default price when approving outsource receipts.</div>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-save me-2"></i>Save Pricing
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card settings-card" style="border:none;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,.07)">
+                    <div class="card-header-section" style="background:linear-gradient(90deg,#e8f5e9,#c8e6c9);color:#2e7d32;padding:1rem 1.4rem .6rem;font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:.5rem;border-bottom:1px solid rgba(0,0,0,.06)">
+                        <i class="bi bi-truck"></i> Transport Receipt Defaults
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post" asp-page-handler="SaveTransportDefaults">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Default Rate Per KG (Transport)</label>
+                                <div class="input-group mb-1">
+                                    <span class="input-group-text bg-success text-white"><i class="bi bi-currency-exchange"></i></span>
+                                    <input type="number" step="0.01" min="0" class="form-control"
+                                           asp-for="DefaultTransportRatePerKg" placeholder="e.g. 2.50" />
+                                    <span class="input-group-text fw-bold">ETB / KG</span>
+                                </div>
+                                <div class="form-text">Rate used to calculate total on transport receipts. Total = KG × Rate.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Default KG (if driver leaves blank)</label>
+                                <div class="input-group mb-1">
+                                    <span class="input-group-text bg-success text-white"><i class="bi bi-box-seam"></i></span>
+                                    <input type="number" step="0.01" min="0" class="form-control"
+                                           asp-for="DefaultKg" placeholder="e.g. 100" />
+                                    <span class="input-group-text fw-bold">KG</span>
+                                </div>
+                                <div class="form-text">Used as the default KG value when the driver does not enter one.</div>
+                            </div>
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="bi bi-save me-2"></i>Save Transport Defaults
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── ROW 2: Create User (left) | Reset Password (right) ── -->
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card settings-card section-user">
+                    <div class="card-header-section">
+                        <i class="bi bi-person-plus-fill"></i> Create User Account
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-envelope-check me-1"></i>
+                            A random password will be auto-generated and emailed to the user.
+                        </p>
+                        <form method="post" asp-page-handler="CreateUser">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <input type="text" class="form-control" asp-for="NewUserName"
+                                           placeholder="e.g. John Doe" required />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" class="form-control" asp-for="NewUserEmail"
+                                           placeholder="e.g. john@yeka.et" required />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Role <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-shield"></i></span>
+                                    <select class="form-select" asp-for="NewUserRole">
+                                        <option value="staff">Staff</option>
+                                        <option value="manager">Manager</option>
+                                        <option value="driver">Driver</option>
+                                        <option value="cleaner">Cleaner</option>
+                                        <option value="wereda_mahberat">Wereda Mahberat</option>
+                                        <option value="dispatch_officer">Dispatch Officer</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                                    <input type="text" class="form-control" asp-for="NewUserPhone"
+                                           placeholder="e.g. 0911000000" />
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-person-check me-2"></i>Create Account & Send Credentials
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card settings-card section-password">
+                    <div class="card-header-section">
+                        <i class="bi bi-key-fill"></i> Reset User Password
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-shield-check me-1"></i>
+                            Enter the user's email and set a new password for their account.
+                        </p>
+                        <form method="post" asp-page-handler="ResetPassword">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">User Email <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" class="form-control" asp-for="ResetEmail"
+                                           placeholder="User's email address" required />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">New Password <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                    <input type="password" class="form-control" asp-for="NewPassword"
+                                           id="resetPass" required />
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            onclick="toggleVis('resetPass', this)"><i class="bi bi-eye"></i></button>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                    <input type="password" class="form-control" asp-for="ConfirmNewPassword"
+                                           id="confirmPass" oninput="checkMatch()" required />
+                                </div>
+                                <div id="matchMsg" class="form-text d-none text-danger mt-1">
+                                    <i class="bi bi-x-circle"></i> Passwords do not match
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-warning w-100 fw-bold text-dark">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Reset Password
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('show');
+            document.getElementById('sidebarBackdrop').classList.toggle('show');
+        }
+
+        function toggleVis(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                btn.innerHTML = '<i class="bi bi-eye"></i>';
+            }
+        }
+
+        function checkMatch() {
+            const p1 = document.getElementById('resetPass').value;
+            const p2 = document.getElementById('confirmPass').value;
+            const msg = document.getElementById('matchMsg');
+            msg.classList.toggle('d-none', p2.length === 0 || p1 === p2);
+        }
+
+        document.querySelectorAll('#sidebarMenu .nav-link').forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (window.innerWidth < 992) toggleSidebar();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+@page
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userRole = HttpContext.Session.GetString("UserRole");
+    
+    if (userName == null)
+    {
+        Response.Redirect("/Login");
+        return;
+    }
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+}
+
+<div class="main-content p-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-calendar-schedule me-2"></i>Dispatch Schedule</h1>
+        <button class="btn btn-primary btn-sm"><i class="bi bi-plus-circle me-2"></i>New Schedule</button>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-list-check display-4 text-primary"></i>
+                    <h4 class="mt-2">18</h4>
+                    <p class="text-muted mb-0">Today's Dispatches</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-geo-alt display-4 text-success"></i>
+                    <h4 class="mt-2">8</h4>
+                    <p class="text-muted mb-0">Routes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-truck display-4 text-info"></i>
+                    <h4 class="mt-2">6</h4>
+                    <p class="text-muted mb-0">Vehicles</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-check2-circle display-4 text-success"></i>
+                    <h4 class="mt-2">95%</h4>
+                    <p class="text-muted mb-0">On-time Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-calendar3 me-2"></i>Today's Schedule</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary active">Today</button>
+                        <button class="btn btn-outline-secondary">Tomorrow</button>
+                        <button class="btn btn-outline-secondary">Week</button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Route</th>
+                                    <th>Driver</th>
+                                    <th>Vehicle</th>
+                                    <th>Origin</th>
+                                    <th>Destination</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold">08:00</td>
+                                    <td>Route A-1</td>
+                                    <td>Bekele A.</td>
+                                    <td>Van 001</td>
+                                    <td>Office</td>
+                                    <td>Bole Wereda</td>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">09:30</td>
+                                    <td>Route B-1</td>
+                                    <td>Tigist G.</td>
+                                    <td>Van 002</td>
+                                    <td>Office</td>
+                                    <td>Kirkos Wereda</td>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">11:00</td>
+                                    <td>Route A-2</td>
+                                    <td>Sisay M.</td>
+                                    <td>Truck 001</td>
+                                    <td>Bole</td>
+                                    <td>Gulele</td>
+                                    <td><span class="badge bg-info">In Transit</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">13:15</td>
+                                    <td>Route C-1</td>
+                                    <td>Mulugeta T.</td>
+                                    <td>Van 003</td>
+                                    <td>Gulele</td>
+                                    <td>Lideta</td>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">15:30</td>
+                                    <td>Route B-2</td>
+                                    <td>Aster Y.</td>
+                                    <td>Van 002</td>
+                                    <td>Kirkos</td>
+                                    <td>Bole</td>
+                                    <td><span class="badge bg-info">In Transit</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <i class="bi bi-truck display-4 text-primary"></i>
+                    <h4 class="mt-2">6</h4>
+                    <p class="text-muted mb-0">Active Vehicles</p>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-event display-4 text-warning"></i>
+                    <h4 class="mt-2">12</h4>
+                    <p class="text-muted mb-0">Pending Routes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

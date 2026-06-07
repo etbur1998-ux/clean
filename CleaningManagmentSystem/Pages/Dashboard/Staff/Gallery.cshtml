@@ -1,0 +1,237 @@
+@page
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userRole = HttpContext.Session.GetString("UserRole");
+    
+    if (userName == null)
+    {
+        Response.Redirect("/Login");
+        return;
+    }
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+}
+
+<div class="main-content p-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-images me-2"></i>Photo Gallery</h1>
+        <button class="btn btn-primary btn-sm"><i class="bi bi-plus-circle me-2"></i>Upload Photo</button>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-images display-4 text-primary"></i>
+                    <h4 class="mt-2">85</h4>
+                    <p class="text-muted mb-0">Total Photos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-folder display-4 text-success"></i>
+                    <h4 class="mt-2">12</h4>
+                    <p class="text-muted mb-0">Albums</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-eye display-4 text-info"></i>
+                    <h4 class="mt-2">1.2K</h4>
+                    <p class="text-muted mb-0">Total Views</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-download display-4 text-warning"></i>
+                    <h4 class="mt-2">245</h4>
+                    <p class="text-muted mb-0">Downloads</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <ul class="nav nav-pills" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="all-gallery-tab" data-bs-toggle="pill" data-bs-target="#all-gallery" type="button"><i class="bi bi-grid me-1"></i> All</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="events-tab" data-bs-toggle="pill" data-bs-target="#events" type="button"><i class="bi bi-calendar-event me-1"></i> Events</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="team-tab" data-bs-toggle="pill" data-bs-target="#team" type="button"><i class="bi bi-people me-1"></i> Team</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="projects-tab" data-bs-toggle="pill" data-bs-target="#projects" type="button"><i class="bi bi-briefcase me-1"></i> Projects</button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="galleryTabsContent">
+                <div class="tab-pane fade show active" id="all-gallery">
+                    <div class="row g-3">
+                        <div class="col-md-3 col-6">
+                            <div class="card h-100">
+                                <div class="card-body bg-light text-center p-4">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <small class="text-muted">Team Outing 2026</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="card h-100">
+                                <div class="card-body bg-light text-center p-4">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <small class="text-muted">Training Session</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="card h-100">
+                                <div class="card-body bg-light text-center p-4">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <small class="text-muted">Award Ceremony</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="card h-100">
+                                <div class="card-body bg-light text-center p-4">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <small class="text-muted">Office Expansion</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="card h-100">
+                                <div class="card-body bg-light text-center p-4">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <small class="text-muted">Community Service</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="card h-100">
+                                <div class="card-body bg-light text-center p-4">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <small class="text-muted">Client Meeting</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="card h-100">
+                                <div class="card-body bg-light text-center p-4">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <small class="text-muted">Year-end Party</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="card h-100">
+                                <div class="card-body bg-light text-center p-4">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <small class="text-muted">New Equipment</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="events">
+                    <div class="row g-3">
+                        <div class="col-md-3 col-6">
+                            <div class="card h-100">
+                                <div class="card-body bg-light text-center p-4">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <small class="text-muted">Team Outing 2026</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="card h-100">
+                                <div class="card-body bg-light text-center p-4">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <small class="text-muted">Award Ceremony</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="team">
+                    <div class="row g-3">
+                        <div class="col-md-3 col-6">
+                            <div class="card h-100">
+                                <div class="card-body bg-light text-center p-4">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <small class="text-muted">Team Outing 2026</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="card h-100">
+                                <div class="card-body bg-light text-center p-4">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <small class="text-muted">Training Session</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="projects">
+                    <div class="row g-3">
+                        <div class="col-md-3 col-6">
+                            <div class="card h-100">
+                                <div class="card-body bg-light text-center p-4">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <small class="text-muted">Office Expansion</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="card h-100">
+                                <div class="card-body bg-light text-center p-4">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <small class="text-muted">Community Service</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

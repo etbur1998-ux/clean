@@ -1,0 +1,118 @@
+@page
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userRole = HttpContext.Session.GetString("UserRole");
+    
+    if (userName == null)
+    {
+        Response.Redirect("/Login");
+        return;
+    }
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+}
+
+<div class="main-content p-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-envelope me-2"></i>Contact Directory</h1>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-building me-2"></i>Office Contacts</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Contact</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><i class="bi bi-person-badge text-primary me-2"></i>Reception</td>
+                                    <td>Front Desk</td>
+                                    <td>011-123-4567</td>
+                                    <td>info@yeka.com</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="bi bi-headset text-success me-2"></i>Customer Service</td>
+                                    <td>Support Team</td>
+                                    <td>011-234-5678</td>
+                                    <td>support@yeka.com</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="bi bi-briefcase text-info me-2"></i>Operations</td>
+                                    <td>Operations Manager</td>
+                                    <td>011-345-6789</td>
+                                    <td>ops@yeka.com</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="bi bi-people text-warning me-2"></i>HR Department</td>
+                                    <td>HR Manager</td>
+                                    <td>011-456-7890</td>
+                                    <td>hr@yeka.com</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="bi bi-credit-card text-danger me-2"></i>Finance</td>
+                                    <td>Finance Manager</td>
+                                    <td>011-567-8901</td>
+                                    <td>finance@yeka.com</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-send me-2"></i>Send Message</h5>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">To</label>
+                            <select class="form-select">
+                                <option>General Inquiry</option>
+                                <option>Customer Support</option>
+                                <option>HR Department</option>
+                                <option>Finance</option>
+                                <option>Operations</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Subject</label>
+                            <input type="text" class="form-control" placeholder="Enter subject">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea class="form-control" rows="5" placeholder="Enter your message"></textarea>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100"><i class="bi bi-send me-2"></i>Send Message</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-telephone me-2"></i>Quick Contact</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-success"><i class="bi bi-whatsapp me-2"></i>WhatsApp Support</button>
+                        <button class="btn btn-outline-primary"><i class="bi bi-envelope me-2"></i>Email Admin</button>
+                        <button class="btn btn-outline-secondary"><i class="bi bi-telephone me-2"></i>Call Reception</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,43 @@
+@{
+    var currentPath = Context.Request.Path.Value ?? "";
+    bool IsActive(string path, bool exact = false)
+    {
+        if (exact) return currentPath.Equals(path, StringComparison.OrdinalIgnoreCase);
+        return currentPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+    }
+}
+<button class="sidebar-toggle-btn d-none d-md-flex" id="sidebarToggleBtn" onclick="toggleSidebarCollapse()" title="Expand / Collapse">
+    <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+</button>
+<div class="sidebar-scroll pt-3" style="height:100%">
+    <div class="sidebar-logo-area pb-3 mb-3 border-bottom d-flex align-items-center gap-2 px-3" style="min-height:54px">
+        <i class="bi bi-droplet-fill text-info fs-5 flex-shrink-0"></i>
+        <div class="sidebar-brand-text">
+            <div class="text-white fw-bold" style="font-size:.95rem;line-height:1.2">Yeka Cleaning</div>
+            <div class="text-white-50" style="font-size:.68rem">Driver</div>
+        </div>
+    </div>
+    <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Driver",true)?"active":"")" href="/Dashboard/Driver" title="Dashboard"><i class="bi bi-speedometer2 flex-shrink-0"></i><span class="nav-label ms-2">Dashboard</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Driver/Location")?"active":"")" href="/Dashboard/Driver/Location" title="Location"><i class="bi bi-geo-alt flex-shrink-0"></i><span class="nav-label ms-2">Location</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Driver/Task")?"active":"")" href="/Dashboard/Driver/Task" title="Task"><i class="bi bi-clipboard-check flex-shrink-0"></i><span class="nav-label ms-2">Task</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Driver/Contact")?"active":"")" href="/Dashboard/Driver/Contact" title="Contact"><i class="bi bi-envelope flex-shrink-0"></i><span class="nav-label ms-2">Contact</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Driver/TransportTrips")?"active":"")" href="/Dashboard/Driver/TransportTrips" title="Transport Trips"><i class="bi bi-truck flex-shrink-0"></i><span class="nav-label ms-2">Transport Trips</span></a></li>
+        <li class="nav-item mt-3"><a class="nav-link text-warning fw-semibold" href="/Login?logout=1" title="Logout"><i class="bi bi-box-arrow-left flex-shrink-0"></i><span class="nav-label ms-2">Logout</span></a></li>
+    </ul>
+</div>
+<script>
+(function(){
+    var collapsed = localStorage.getItem('sidebarCollapsed')==='1';
+    if(collapsed) _applyCollapse(true);
+    function _applyCollapse(c){
+        var b=document.body, ic=document.getElementById('sidebarToggleIcon');
+        c ? b.classList.add('sidebar-collapsed') : b.classList.remove('sidebar-collapsed');
+        if(ic){ ic.className = c ? 'bi bi-chevron-right' : 'bi bi-chevron-left'; }
+    }
+    window.toggleSidebarCollapse=function(){
+        var c=!document.body.classList.contains('sidebar-collapsed');
+        _applyCollapse(c); localStorage.setItem('sidebarCollapsed',c?'1':'0');
+    };
+})();
+</script>

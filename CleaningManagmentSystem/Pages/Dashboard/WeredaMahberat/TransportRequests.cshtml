@@ -1,0 +1,967 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.WeredaMahberat.TransportRequestsModel
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userId   = HttpContext.Session.GetInt32("UserId") ?? 0;
+    if (userName == null) { Response.Redirect("/Login"); return; }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Transport Requests — Yeka Cleaning</title>
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+<link rel="stylesheet" href="~/css/dashboard.css"/>
+<style>
+/* ── base ── */
+body { background:#f4f6fb !important; }
+
+/* ── page header ── */
+.pg-top {
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:10px;
+  padding:14px 0 14px; border-bottom:2px solid #e2e8f0;
+  margin-bottom:18px;
+}
+.pg-top-left { display:flex; align-items:center; gap:10px; }
+.pg-top-icon {
+  width:38px; height:38px; border-radius:10px;
+  background:linear-gradient(135deg,#1d4ed8,#0891b2);
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:1.1rem; flex-shrink:0;
+}
+.pg-top h1 { font-size:1.1rem; font-weight:800; color:#1e293b; margin:0; }
+.pg-top small { font-size:.73rem; color:#64748b; display:block; margin-top:1px; }
+.btn-new {
+  background:linear-gradient(135deg,#1d4ed8,#0891b2);
+  color:#fff; border:none; padding:8px 18px;
+  border-radius:10px; font-weight:700; font-size:.82rem; cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px; transition:all .2s;
+}
+
+/* ── stats ── */
+.stats-row { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:20px; }
+@@media(max-width:640px){ .stats-row { grid-template-columns:repeat(3,1fr); } }
+.stat-box {
+  background:#fff; border-radius:14px; padding:14px 10px; text-align:center;
+  box-shadow:0 1px 4px rgba(0,0,0,.06); border-top:3px solid var(--c,#1d4ed8);
+}
+.stat-box .sv { font-size:1.8rem; font-weight:900; color:var(--c,#1d4ed8); line-height:1; }
+.stat-box .sl { font-size:.68rem; color:#6b7280; margin-top:2px; }
+
+/* ── action alert ── */
+.act-alert {
+  background:linear-gradient(135deg,#fef3c7,#fde68a);
+  border:1px solid #fbbf24; border-radius:14px; padding:14px 18px; margin-bottom:16px;
+}
+.act-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:9px 0; border-bottom:1px dashed #fcd34d; gap:10px; flex-wrap:wrap;
+}
+.act-row:last-child { border:none; padding-bottom:0; }
+
+/* ── main table ── */
+.req-table-wrap {
+  background:#fff; border-radius:16px;
+  box-shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.04);
+  overflow:hidden; margin-bottom:24px;
+}
+.req-table-head { background:linear-gradient(135deg,#1d4ed8,#0891b2); }
+.req-table-head th {
+  color:#fff; font-weight:700; font-size:.76rem; padding:11px 14px;
+  white-space:nowrap; letter-spacing:.3px;
+}
+.req-table tbody tr { transition:background .15s; }
+.req-table tbody tr:hover td { background:#eff6ff; }
+.req-table td { font-size:.81rem; padding:11px 14px; vertical-align:middle; border-top:1px solid #f1f5f9; }
+.req-table tbody tr:nth-child(even) td { background:#f8fafc; }
+.req-table tbody tr:nth-child(even):hover td { background:#eff6ff; }
+
+/* ── path steps inline ── */
+.path-row {
+  display:flex; align-items:center; gap:0; font-size:.62rem;
+  white-space:nowrap; overflow-x:auto;
+}
+.ps { display:flex; align-items:center; gap:0; }
+.ps-dot {
+  width:20px; height:20px; border-radius:50%; display:inline-flex;
+  align-items:center; justify-content:center; font-size:9px; font-weight:800;
+  border:2px solid #e2e8f0; background:#fff; color:#94a3b8; flex-shrink:0;
+}
+.ps-dot.done  { background:#1d4ed8; border-color:#1d4ed8; color:#fff; }
+.ps-dot.active{ background:#fff; border-color:#1d4ed8; color:#1d4ed8;
+  box-shadow:0 0 0 3px rgba(29,78,216,.15); }
+.ps-dot.rej   { background:#ef4444; border-color:#ef4444; color:#fff; }
+.ps-dot.paid  { background:#059669; border-color:#059669; color:#fff; }
+.ps-line { width:14px; height:2px; background:#e2e8f0; flex-shrink:0; }
+.ps-line.done { background:#1d4ed8; }
+.ps-lbl { font-size:.58rem; color:#94a3b8; margin-top:2px; text-align:center; max-width:44px; line-height:1.2; }
+.ps-lbl.done,.ps-lbl.active { color:#1d4ed8; font-weight:700; }
+.ps-lbl.paid { color:#059669; font-weight:700; }
+.ps-lbl.rej  { color:#ef4444; font-weight:700; }
+.ps-col { display:flex; flex-direction:column; align-items:center; }
+
+/* ── status badge ── */
+.sb { display:inline-flex; align-items:center; gap:3px; padding:3px 9px;
+  border-radius:20px; font-size:.68rem; font-weight:700; white-space:nowrap; }
+.sb-blue  { background:#dbeafe; color:#1e40af; }
+.sb-green { background:#d1fae5; color:#065f46; }
+.sb-amber { background:#fef3c7; color:#92400e; }
+.sb-purple{ background:#ede9fe; color:#4c1d95; }
+.sb-teal  { background:#ccfbf1; color:#0f4c3a; }
+.sb-pay   { background:#059669; color:#fff; }
+.sb-red   { background:#fee2e2; color:#7f1d1d; }
+.sb-gray  { background:#f1f5f9; color:#475569; }
+
+/* ── action buttons ── */
+.btn-act {
+  padding:5px 12px; border-radius:8px; border:none; font-size:.74rem;
+  font-weight:600; cursor:pointer; display:inline-flex; align-items:center;
+  gap:4px; transition:all .15s; white-space:nowrap;
+}
+.btn-act-primary { background:#1d4ed8; color:#fff; }
+.btn-act-primary:hover { background:#1e40af; }
+.btn-act-success { background:#059669; color:#fff; }
+.btn-act-success:hover { background:#047857; }
+.btn-act-outline {
+  background:#fff; color:#64748b; border:1.5px solid #e2e8f0;
+}
+.btn-act-outline:hover { border-color:#1d4ed8; color:#1d4ed8; }
+.btn-act-amber { background:#f59e0b; color:#fff; }
+.btn-act-amber:hover { background:#d97706; }
+
+/* ── section title ── */
+.sec-title {
+  display:flex; align-items:center; gap:8px;
+  font-weight:800; font-size:.9rem; color:#1e293b; margin-bottom:8px;
+}
+.sec-badge {
+  padding:2px 8px; border-radius:12px; font-size:.68rem; font-weight:700;
+}
+
+/* ── bills table ── */
+.bill-table-wrap {
+  background:#fff; border-radius:16px; overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,.06); margin-bottom:24px;
+  border:1px solid #d1fae5;
+}
+.bill-table-head th {
+  background:linear-gradient(135deg,#059669,#0d9488);
+  color:#fff; font-weight:700; font-size:.76rem; padding:10px 12px;
+}
+.bill-table td { font-size:.8rem; padding:9px 12px; vertical-align:middle; }
+.bill-table tbody tr:nth-child(even) td { background:#f0fdf4; }
+.bill-table tbody tr:hover td { background:#d1fae5; }
+
+/* ── rejected table ── */
+.rej-table-wrap {
+  background:#fff; border-radius:14px; overflow:hidden;
+  border:1px solid #fecaca; margin-bottom:24px;
+}
+
+/* ── notice box ── */
+.notice-box {
+  background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px;
+  padding:11px 16px; margin-bottom:16px; display:flex;
+  align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;
+}
+.notice-box a.view-btn {
+  background:#1d4ed8; color:#fff; padding:5px 14px; border-radius:8px;
+  font-size:.76rem; font-weight:600; text-decoration:none;
+  display:inline-flex; align-items:center; gap:4px;
+}
+
+/* ── empty ── */
+.empty-box {
+  text-align:center; padding:40px 20px; color:#94a3b8;
+}
+.empty-box .ei { font-size:3rem; opacity:.2; display:block; margin-bottom:8px; }
+
+/* ── toast ── */
+.tp-toast {
+  position:fixed; bottom:24px; right:24px; z-index:9999;
+  padding:12px 18px; border-radius:12px; font-size:.83rem; font-weight:600;
+  box-shadow:0 8px 24px rgba(0,0,0,.15); display:flex; align-items:center;
+  gap:8px; animation:slideUp .3s ease;
+}
+@@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── modal polish ── */
+.modal-content { border:none; border-radius:18px; box-shadow:0 20px 60px rgba(0,0,0,.18); }
+.modal-header  { border:none; border-radius:18px 18px 0 0; }
+.modal-footer  { border:none; }
+</style>
+</head>
+<body>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark dashboard-navbar fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/Dashboard/WeredaMahberat"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+    <div class="nav-user">
+      <span>Welcome, @userName</span>
+      <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    </div>
+  </div>
+</nav>
+<nav class="navbar navbar-dark dashboard-navbar fixed-top d-lg-none">
+  <div class="container-fluid">
+    <button class="navbar-toggler" type="button" onclick="toggleSidebar()"><span class="navbar-toggler-icon"></span></button>
+    <a class="navbar-brand" href="/Dashboard/WeredaMahberat"><i class="bi bi-droplet-fill"></i> Yeka</a>
+    <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i></a>
+  </div>
+</nav>
+
+<!-- Sidebar -->
+<nav id="sidebarMenu" class="sidebar d-lg-none">
+  @await Html.PartialAsync("~/Pages/Dashboard/WeredaMahberat/_Sidebar.cshtml")
+</nav>
+<nav class="col-md-3 col-lg-2 d-none d-md-block sidebar" style="transform:none;padding-top:56px;">
+  @await Html.PartialAsync("~/Pages/Dashboard/WeredaMahberat/_Sidebar.cshtml")
+</nav>
+
+<!-- Main -->
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content" style="padding-top:24px!important">
+
+  <!-- Compact Page Header -->
+  <div class="pg-top">
+    <div class="pg-top-left">
+      <div class="pg-top-icon"><i class="bi bi-truck"></i></div>
+      <div>
+        <h1>Transport Requests</h1>
+        <small>Track and manage your transport requests</small>
+      </div>
+    </div>
+    <button class="btn-new" data-bs-toggle="modal" data-bs-target="#newRequestModal">
+      <i class="bi bi-plus-circle-fill"></i> New Request
+    </button>
+  </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-box" style="--c:#f59e0b">
+        <i class="bi bi-hourglass-split" style="color:#f59e0b;font-size:1.1rem"></i>
+        <div class="sv" id="statPending">—</div><div class="sl">Pending</div>
+      </div>
+      <div class="stat-box" style="--c:#0891b2">
+        <i class="bi bi-truck" style="color:#0891b2;font-size:1.1rem"></i>
+        <div class="sv" id="statActive">—</div><div class="sl">Active</div>
+      </div>
+      <div class="stat-box" style="--c:#8b5cf6">
+        <i class="bi bi-receipt" style="color:#8b5cf6;font-size:1.1rem"></i>
+        <div class="sv" id="statReceipt">—</div><div class="sl">Receipt</div>
+      </div>
+      <div class="stat-box" style="--c:#059669">
+        <i class="bi bi-cash-coin" style="color:#059669;font-size:1.1rem"></i>
+        <div class="sv" id="statPaid">—</div><div class="sl">Paid</div>
+      </div>
+      <div class="stat-box" style="--c:#1d4ed8">
+        <i class="bi bi-list-ul" style="color:#1d4ed8;font-size:1.1rem"></i>
+        <div class="sv" id="statTotal">—</div><div class="sl">Total</div>
+      </div>
+    </div>
+
+    <!-- Action Required Banner -->
+    <div id="actionRequired"></div>
+
+    <!-- Refresh bar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-weight:700;font-size:.88rem;color:#1e293b">
+        <i class="bi bi-table me-1 text-primary"></i> All Requests
+      </div>
+      <button class="btn-act btn-act-outline" onclick="loadRequests();loadStats()">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+      </button>
+    </div>
+
+    <!-- Main content area -->
+    <div id="cardsContainer">
+      <div class="empty-box"><span class="ei"><i class="bi bi-hourglass-split"></i></span>Loading…</div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════════════════ -->
+
+<!-- New Request Modal -->
+<div class="modal fade" id="newRequestModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header text-white" style="background:linear-gradient(135deg,#1d4ed8,#0891b2)">
+        <h5 class="modal-title"><i class="bi bi-truck me-2"></i>New Transport Request</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Pickup Location <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="pickup" placeholder="Enter pickup address"/>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Destination <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="destination" placeholder="Enter destination"/>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Requested Date <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" id="reqDate" min="@DateTime.Now.ToString("yyyy-MM-dd")"/>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Requested Time</label>
+            <input type="time" class="form-control" id="reqTime"/>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Passenger / Item Details</label>
+            <textarea class="form-control" id="details" rows="2" placeholder="Who or what is being transported?"></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Special Instructions</label>
+            <textarea class="form-control" id="instructions" rows="2" placeholder="Any special requirements…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer px-4 pb-4">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary px-4" onclick="submitRequest()">
+          <i class="bi bi-send me-1"></i>Submit Request
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pickup Confirm Modal -->
+<div class="modal fade" id="pickupModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header text-white" style="background:linear-gradient(135deg,#0891b2,#0e7490)">
+        <h5 class="modal-title"><i class="bi bi-box-seam me-2"></i>Confirm Pickup</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <input type="hidden" id="pickupRequestId"/>
+        <div class="alert alert-info border-0 py-2">
+          <i class="bi bi-info-circle me-2"></i><span id="pickupDesc"></span>
+        </div>
+        <label class="form-label fw-semibold">Notes</label>
+        <textarea class="form-control" id="pickupNotes" rows="2" placeholder="Optional notes…"></textarea>
+      </div>
+      <div class="modal-footer px-4 pb-4">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger" onclick="pickupAction('Reject')"><i class="bi bi-x-circle me-1"></i>Reject</button>
+        <button class="btn btn-success px-4" onclick="pickupAction('Approve')"><i class="bi bi-check-circle me-1"></i>Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt Approve Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header text-white" style="background:linear-gradient(135deg,#059669,#0d9488)">
+        <h5 class="modal-title"><i class="bi bi-receipt-cutoff me-2"></i>Approve Receipt — Mahberat Level 1</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <input type="hidden" id="receiptRequestId"/>
+        <div class="px-4 pt-3 pb-2 bg-light border-bottom">
+          <div class="row g-2" id="receiptTripInfo">
+            <div class="col-12 text-center text-muted py-2"><div class="spinner-border spinner-border-sm"></div> Loading…</div>
+          </div>
+        </div>
+        <div class="px-4 py-3">
+          <div class="row g-3 mb-3" id="receiptKgTotal"></div>
+          <div id="receiptPhotoContainer" class="mb-3"></div>
+          <div id="receiptDriverNotes" class="mb-3"></div>
+          <label class="form-label fw-semibold"><i class="bi bi-chat-left-text me-1 text-success"></i>Your Approval Notes</label>
+          <textarea class="form-control" id="receiptNotes" rows="2" placeholder="e.g. KG verified, service satisfactory…"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer px-4 pb-4 justify-content-between">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <div class="d-flex gap-2">
+          <button class="btn btn-warning" onclick="receiptAction('RequestCorrection')"><i class="bi bi-pencil me-1"></i>Request Correction</button>
+          <button class="btn btn-success px-4" onclick="receiptAction('Verify')"><i class="bi bi-check-circle me-1"></i>Approve & Forward to Staff</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Approval Form Modal -->
+<div class="modal fade" id="approvalFormModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title w-100 text-center fw-bold"><i class="bi bi-file-earmark-check me-2"></i>Receipt Approval Form</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4" id="approvalFormBody">
+        <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+      </div>
+      <div class="modal-footer justify-content-between px-4">
+        <div id="approvalFormActions" class="d-flex gap-2"></div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print</button>
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Level 1 Approve Modal -->
+<div class="modal fade" id="level1ApproveModal" tabindex="-1" style="z-index:1060">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title"><i class="bi bi-check-circle me-2"></i>Approve — Level 1 (Mahberat)</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <input type="hidden" id="l1RequestId"/>
+        <div class="alert alert-info py-2 small"><i class="bi bi-info-circle me-2"></i>Your approval forwards this to <strong>Staff</strong> for final payment.</div>
+        <label class="form-label fw-semibold">Your Comments <span class="text-danger">*</span></label>
+        <textarea class="form-control" id="l1Comments" rows="3" placeholder="e.g. Driver arrived on time, service was satisfactory…"></textarea>
+      </div>
+      <div class="modal-footer px-4 pb-4">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-success px-4" onclick="submitLevel1Approve()"><i class="bi bi-check-circle me-1"></i>Approve & Forward</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════════════════════ -->
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API      = '/api/transport';
+const userId   = @userId;
+const userName = '@Html.Raw(userName?.Replace("'","\\'")??"")';
+
+// ── sidebar ──────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebarMenu').classList.toggle('show');
+  document.getElementById('sidebarBackdrop').classList.toggle('show');
+}
+
+// ── status config ─────────────────────────────────────────
+const STATUS_CFG = {
+  PendingDispatcher :{ label:'Pending Dispatch', cls:'sb-amber',  icon:'hourglass-split'   },
+  DriverAssigned    :{ label:'Driver Assigned',  cls:'sb-blue',   icon:'person-check'      },
+  DriverAccepted    :{ label:'Driver Accepted',  cls:'sb-blue',   icon:'truck'             },
+  PickedUp          :{ label:'Picked Up',        cls:'sb-teal',   icon:'box-seam'          },
+  MahberatApprovedPickup:{ label:'Pickup OK',    cls:'sb-green',  icon:'check-circle'      },
+  ReceiptSubmitted  :{ label:'Receipt Submitted',cls:'sb-purple', icon:'receipt'           },
+  MahberatVerified  :{ label:'You Approved',     cls:'sb-green',  icon:'patch-check'       },
+  ReceiptVerified   :{ label:'Staff Verified',   cls:'sb-green',  icon:'shield-check'      },
+  StaffApproved     :{ label:'Staff Approved',   cls:'sb-green',  icon:'check2-circle'     },
+  Paid              :{ label:'Paid ✓',           cls:'sb-pay',    icon:'cash-coin'         },
+  DispatcherRejected:{ label:'Rejected',         cls:'sb-red',    icon:'x-circle'          },
+  DriverRejected    :{ label:'Rejected',         cls:'sb-red',    icon:'x-circle'          },
+  StaffRejected     :{ label:'Rejected',         cls:'sb-red',    icon:'x-circle'          },
+};
+function statusBadge(s) {
+  const c = STATUS_CFG[s] || { label: s.replace(/([A-Z])/g,' $1').trim(), cls:'sb-gray', icon:'circle' };
+  return `<span class="sb ${c.cls}"><i class="bi bi-${c.icon}"></i> ${c.label}</span>`;
+}
+
+// ── path steps ────────────────────────────────────────────
+const PATH_STEPS = [
+  { key:'PendingDispatcher',       short:'Submit'    },
+  { key:'DriverAssigned',          short:'Dispatch'  },
+  { key:'DriverAccepted',          short:'Accept'    },
+  { key:'PickedUp',                short:'Pickup'    },
+  { key:'MahberatApprovedPickup',  short:'OK Pickup' },
+  { key:'ReceiptSubmitted',        short:'Receipt'   },
+  { key:'MahberatVerified',        short:'Verified'  },
+  { key:'StaffApproved',           short:'Approved'  },
+  { key:'Paid',                    short:'Paid'      },
+];
+const REJECTED_S = ['DispatcherRejected','DriverRejected','StaffRejected'];
+const PAID_S     = ['Paid','StaffApproved','ReceiptVerified'];
+
+function buildPath(status) {
+  if (REJECTED_S.includes(status))
+    return `<span style="color:#ef4444;font-size:.72rem;font-weight:700"><i class="bi bi-x-circle me-1"></i>${status.replace('Rejected','').replace(/([A-Z])/g,' $1').trim()} Rejected</span>`;
+
+  const idx = PATH_STEPS.findIndex(s => s.key === status);
+  const isPaid = status === 'Paid';
+
+  return `<div class="path-row">` + PATH_STEPS.map((s, i) => {
+    let dotCls = '';
+    if (isPaid || i < idx)       dotCls = isPaid ? 'paid' : 'done';
+    else if (i === idx)          dotCls = 'active';
+    const lineCls = (i < idx || isPaid) ? 'done' : '';
+    const lblCls  = dotCls;
+    const icon    = (dotCls === 'done' || dotCls === 'paid') ? '✓' : (i + 1);
+    const line    = i < PATH_STEPS.length - 1 ? `<div class="ps-line ${lineCls}"></div>` : '';
+    return `<div class="ps-col">
+      <div class="ps-dot ${dotCls}">${icon}</div>
+      <div class="ps-lbl ${lblCls}">${s.short}</div>
+    </div>${line}`;
+  }).join('') + `</div>`;
+}
+
+// ── stats ─────────────────────────────────────────────────
+async function loadStats() {
+  const r = await fetch(`${API}/stats?userId=${userId}&role=WeredaMahberat`);
+  const s = await r.json();
+  document.getElementById('statPending').textContent  = s.pending ?? 0;
+  document.getElementById('statActive').textContent   = (s.assigned??0)+(s.accepted??0)+(s.pickedUp??0);
+  document.getElementById('statReceipt').textContent  = (s.receiptSubmitted??0)+(s.receiptVerified??0);
+  document.getElementById('statPaid').textContent     = s.paid ?? 0;
+  document.getElementById('statTotal').textContent    = s.total ?? 0;
+}
+
+// ── load & render ─────────────────────────────────────────
+async function loadRequests() {
+  const r    = await fetch(`${API}/requests?userId=${userId}&role=WeredaMahberat`);
+  const data = await r.json();
+  renderActionBanner(data);
+  renderAll(data);
+}
+
+function renderActionBanner(data) {
+  const div   = document.getElementById('actionRequired');
+  const items = data.filter(r => ['PickedUp','ReceiptSubmitted'].includes(r.status));
+  if (!items.length) { div.innerHTML = ''; return; }
+  div.innerHTML = `
+  <div class="act-alert mb-3">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+      <span style="font-weight:800;font-size:.88rem;color:#78350f">Action Required — ${items.length} item(s) need your attention</span>
+    </div>
+    ${items.map(r=>`
+    <div class="act-row">
+      <div style="min-width:0">
+        <div style="font-weight:700;font-size:.84rem;font-family:monospace;color:#1e293b">${r.request_number}</div>
+        <div style="font-size:.76rem;color:#78716c;margin-top:2px">
+          <i class="bi bi-geo-alt text-primary"></i> ${r.pickup_location} &rarr; <i class="bi bi-flag text-warning"></i> ${r.destination}
+        </div>
+        <div style="margin-top:4px">${statusBadge(r.status)}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        ${r.status==='PickedUp'
+          ? `<button class="btn-act btn-act-teal" style="background:#0d9488;color:#fff" onclick="openPickup(${r.id},'${r.request_number}')"><i class="bi bi-box-seam"></i> Confirm Pickup</button>`:''}
+        ${r.status==='ReceiptSubmitted'
+          ? `<button class="btn-act btn-act-success" onclick="openReceipt(${r.id})"><i class="bi bi-receipt-cutoff"></i> Approve Receipt</button>`:''}
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderAll(data) {
+  const el         = document.getElementById('cardsContainer');
+  if (!data.length) {
+    el.innerHTML = `<div class="empty-box"><span class="ei"><i class="bi bi-inbox"></i></span>No requests yet.<br><small>Click "New Request" to create one.</small></div>`;
+    return;
+  }
+
+  const activeItems = data.filter(r => !PAID_S.includes(r.status) && !REJECTED_S.includes(r.status));
+  const paidItems   = data.filter(r => PAID_S.includes(r.status));
+  const rejItems    = data.filter(r => REJECTED_S.includes(r.status));
+  let html = '';
+
+  // ── notice: paid items are in Monthly Receipt ─────────
+  if (paidItems.length) {
+    html += `<div class="notice-box">
+      <div style="display:flex;align-items:center;gap:8px">
+        <i class="bi bi-receipt-cutoff text-primary fs-5"></i>
+        <div>
+          <div style="font-weight:700;font-size:.85rem;color:#1e40af">${paidItems.length} completed bill(s) saved to Monthly Receipt</div>
+          <div style="font-size:.74rem;color:#3b82f6">Paid requests are archived in Monthly Receipt Management</div>
+        </div>
+      </div>
+      <a href="/Dashboard/WeredaMahberat/MonthlyReceipt" class="view-btn">
+        <i class="bi bi-arrow-right"></i> View Bills
+      </a>
+    </div>`;
+  }
+
+  // ── ACTIVE REQUESTS TABLE ─────────────────────────────
+  if (activeItems.length) {
+    html += `
+    <div class="sec-title">
+      <i class="bi bi-activity text-primary"></i> Active Requests
+      <span class="sec-badge" style="background:#dbeafe;color:#1e40af">${activeItems.length}</span>
+    </div>
+    <div class="req-table-wrap mb-4">
+      <table class="req-table table mb-0">
+        <thead class="req-table-head">
+          <tr>
+            <th>#</th>
+            <th>Request No</th>
+            <th>Date</th>
+            <th>Route</th>
+            <th>Driver</th>
+            <th style="text-align:center">KG</th>
+            <th style="text-align:center">Cost</th>
+            <th>Status</th>
+            <th>Path Progress</th>
+            <th style="text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${activeItems.map((r, i) => {
+            const kg   = r.actual_kilogram ? parseFloat(r.actual_kilogram).toFixed(1) : '—';
+            const cost = r.transport_cost  ? 'ETB ' + parseFloat(r.transport_cost).toFixed(2) : '—';
+            const date = r.requested_date  ? r.requested_date.substring(0,10) : '—';
+            return `<tr>
+              <td style="color:#94a3b8;font-weight:600">${i+1}</td>
+              <td><span style="font-family:monospace;font-weight:800;color:#1d4ed8;font-size:.8rem">${r.request_number}</span></td>
+              <td style="color:#64748b">${date}</td>
+              <td style="max-width:140px">
+                <div style="font-weight:600;font-size:.8rem">${r.pickup_location??'—'}</div>
+                <div style="font-size:.72rem;color:#94a3b8">→ ${r.destination??'—'}</div>
+              </td>
+              <td>
+                <div style="font-weight:600;font-size:.8rem">${r.driver_name??'—'}</div>
+                <div style="font-size:.7rem;color:#94a3b8">${r.vehicle_plate??''}</div>
+              </td>
+              <td style="text-align:center;font-weight:700;color:#0891b2">${kg}</td>
+              <td style="text-align:center;font-weight:700;color:#059669;white-space:nowrap">${cost}</td>
+              <td>${statusBadge(r.status)}</td>
+              <td style="min-width:320px">${buildPath(r.status)}</td>
+              <td style="text-align:center">
+                <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap">
+                  <button class="btn-act btn-act-outline" onclick="openApprovalForm(${r.id})">
+                    <i class="bi bi-file-earmark-text"></i> Form
+                  </button>
+                  ${r.status==='PickedUp'
+                    ? `<button class="btn-act btn-act-success" onclick="openPickup(${r.id},'${r.request_number}')"><i class="bi bi-box-seam"></i> Pickup</button>` :''}
+                  ${r.status==='ReceiptSubmitted'
+                    ? `<button class="btn-act btn-act-success" onclick="openReceipt(${r.id})"><i class="bi bi-receipt-cutoff"></i> Approve</button>` :''}
+                  ${r.status==='MahberatVerified'
+                    ? `<span class="btn-act" style="background:#d1fae5;color:#065f46;cursor:default"><i class="bi bi-check-circle-fill"></i> Sent to Staff</span>` :''}
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  } else if (!paidItems.length && !rejItems.length) {
+    html += `<div class="empty-box"><span class="ei"><i class="bi bi-inbox"></i></span>No active requests.</div>`;
+  }
+
+  // ── COMPLETED BILLS (mini table) ──────────────────────
+  if (paidItems.length) {
+    html += `
+    <div class="sec-title mt-2">
+      <i class="bi bi-receipt-cutoff text-success"></i> Completed Bills
+      <span class="sec-badge" style="background:#d1fae5;color:#065f46">${paidItems.length}</span>
+      <a href="/Dashboard/WeredaMahberat/MonthlyReceipt" style="font-size:.74rem;color:#059669;font-weight:600;text-decoration:none;margin-left:auto">
+        <i class="bi bi-arrow-right me-1"></i>Full Monthly View
+      </a>
+    </div>
+    <div class="bill-table-wrap">
+      <table class="bill-table table mb-0">
+        <thead class="bill-table-head">
+          <tr>
+            <th>#</th><th>Request No</th><th>Date</th><th>Route</th>
+            <th>Driver</th><th style="text-align:center">KG</th>
+            <th style="text-align:center">Amount</th><th style="text-align:center">Status</th>
+            <th style="text-align:center">Bill</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${paidItems.map((r,i)=>{
+            const kg   = r.actual_kilogram ? parseFloat(r.actual_kilogram).toFixed(1) : '—';
+            const cost = r.transport_cost  ? 'ETB ' + parseFloat(r.transport_cost).toFixed(2) : '—';
+            const date = r.requested_date  ? r.requested_date.substring(0,10) : '—';
+            return `<tr>
+              <td style="color:#94a3b8;font-weight:600">${i+1}</td>
+              <td><span style="font-family:monospace;font-weight:800;color:#059669;font-size:.78rem">${r.request_number}</span></td>
+              <td style="color:#64748b">${date}</td>
+              <td style="max-width:130px">
+                <div style="font-weight:600;font-size:.79rem">${r.pickup_location??'—'}</div>
+                <div style="font-size:.71rem;color:#94a3b8">→ ${r.destination??'—'}</div>
+              </td>
+              <td>
+                <div style="font-weight:600;font-size:.79rem">${r.driver_name??'—'}</div>
+                <div style="font-size:.7rem;color:#94a3b8">${r.vehicle_plate??''}</div>
+              </td>
+              <td style="text-align:center;font-weight:700;color:#0891b2">${kg}</td>
+              <td style="text-align:center;font-weight:700;color:#059669">${cost}</td>
+              <td style="text-align:center">
+                ${r.status==='Paid'
+                  ? '<span class="sb sb-pay">✓ PAID</span>'
+                  : '<span class="sb sb-green">✓ APPROVED</span>'}
+              </td>
+              <td style="text-align:center">
+                <button class="btn-act btn-act-outline" onclick="openApprovalForm(${r.id})" style="font-size:.71rem">
+                  <i class="bi bi-receipt"></i> View
+                </button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }
+
+  // ── REJECTED ─────────────────────────────────────────
+  if (rejItems.length) {
+    html += `
+    <div class="sec-title mt-2">
+      <i class="bi bi-x-circle text-danger"></i> Rejected
+      <span class="sec-badge" style="background:#fee2e2;color:#7f1d1d">${rejItems.length}</span>
+    </div>
+    <div class="rej-table-wrap">
+      <table class="table mb-0" style="font-size:.8rem">
+        <thead><tr style="background:#fee2e2">
+          <th style="padding:9px 12px;color:#7f1d1d">#</th>
+          <th style="padding:9px 12px;color:#7f1d1d">Request No</th>
+          <th style="padding:9px 12px;color:#7f1d1d">Date</th>
+          <th style="padding:9px 12px;color:#7f1d1d">Route</th>
+          <th style="padding:9px 12px;color:#7f1d1d">Reason</th>
+        </tr></thead>
+        <tbody>
+          ${rejItems.map((r,i)=>`
+          <tr style="border-top:1px solid #fecaca">
+            <td style="padding:9px 12px;color:#94a3b8;font-weight:600">${i+1}</td>
+            <td style="padding:9px 12px;font-family:monospace;color:#dc2626;font-weight:700;font-size:.77rem">${r.request_number}</td>
+            <td style="padding:9px 12px;color:#94a3b8">${r.requested_date?r.requested_date.substring(0,10):'—'}</td>
+            <td style="padding:9px 12px;font-size:.78rem">${r.pickup_location??'—'} → ${r.destination??'—'}</td>
+            <td style="padding:9px 12px">${statusBadge(r.status)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+// ── submit new request ────────────────────────────────────
+async function submitRequest() {
+  const pickup = document.getElementById('pickup').value.trim();
+  const dest   = document.getElementById('destination').value.trim();
+  const date   = document.getElementById('reqDate').value;
+  if (!pickup||!dest||!date){ alert('Please fill in Pickup, Destination and Date.'); return; }
+  const r = await fetch(`${API}/requests`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      userId, userName,
+      pickupLocation: pickup, destination: dest,
+      passengerItemDetails: document.getElementById('details').value,
+      requestedDate: date, requestedTime: document.getElementById('reqTime').value,
+      specialInstructions: document.getElementById('instructions').value
+    })
+  });
+  const d = await r.json();
+  if (d.success) {
+    bootstrap.Modal.getInstance(document.getElementById('newRequestModal')).hide();
+    loadRequests(); loadStats();
+    showToast(`✓ Request ${d.requestNumber} submitted!`,'success');
+  } else alert(d.message||'Error submitting request');
+}
+
+// ── pickup ────────────────────────────────────────────────
+function openPickup(id, num) {
+  document.getElementById('pickupRequestId').value = id;
+  document.getElementById('pickupDesc').textContent = `Confirm driver has arrived and picked up for trip ${num}?`;
+  document.getElementById('pickupNotes').value = '';
+  new bootstrap.Modal(document.getElementById('pickupModal')).show();
+}
+async function pickupAction(action) {
+  const id = document.getElementById('pickupRequestId').value;
+  const r = await fetch(`${API}/requests/${id}/mahberat-pickup`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ userId, userName, action, notes: document.getElementById('pickupNotes').value })
+  });
+  const d = await r.json();
+  if (d.success) { bootstrap.Modal.getInstance(document.getElementById('pickupModal')).hide(); loadRequests(); loadStats(); showToast('Pickup updated','success'); }
+  else alert(d.message||'Error');
+}
+
+// ── receipt ───────────────────────────────────────────────
+async function openReceipt(id) {
+  document.getElementById('receiptRequestId').value = id;
+  document.getElementById('receiptNotes').value = '';
+  document.getElementById('receiptTripInfo').innerHTML = '<div class="col-12 text-center py-2"><div class="spinner-border spinner-border-sm"></div></div>';
+  document.getElementById('receiptKgTotal').innerHTML = '';
+  document.getElementById('receiptPhotoContainer').innerHTML = '';
+  document.getElementById('receiptDriverNotes').innerHTML = '';
+  new bootstrap.Modal(document.getElementById('receiptModal')).show();
+  try {
+    const r   = await fetch(`${API}/requests/${id}`);
+    const d   = await r.json();
+    const req = d.request ?? d;
+    // resolve best available mahberat name
+    const mahberatName = req.receipt_mahberat_name ?? req.mahberat_name ?? req.mahberat_user_name ?? '—';
+    const weredaName   = req.receipt_wereda_name   ?? '—';
+    document.getElementById('receiptTripInfo').innerHTML = `
+      <div class="col-md-6"><small class="text-muted d-block">Request #</small><strong>${req.request_number??'—'}</strong></div>
+      <div class="col-md-6"><small class="text-muted d-block">Driver</small><strong>${req.driver_name??'—'}</strong> ${req.vehicle_plate?`<span class="badge bg-secondary">${req.vehicle_plate}</span>`:''}</div>
+      <div class="col-md-6"><small class="text-muted d-block">Route</small>${req.pickup_location??'—'} → ${req.destination??'—'}</div>
+      <div class="col-md-6"><small class="text-muted d-block">Mahberat</small><strong class="text-success">${mahberatName}</strong></div>`;
+    const kg   = parseFloat(req.actual_kilogram??0);
+    const cost = parseFloat(req.transport_cost??0);
+    document.getElementById('receiptKgTotal').innerHTML = `
+      <div class="col-md-4"><div class="border rounded-3 p-3 text-center bg-white"><div class="text-muted small">Actual KG</div><div class="fs-3 fw-bold text-primary">${kg>0?kg.toFixed(1):'—'}</div></div></div>
+      <div class="col-md-4"><div class="border rounded-3 p-3 text-center bg-white"><div class="text-muted small">Mahberat Name</div><div class="fw-bold text-success">${mahberatName}</div><div class="text-muted" style="font-size:.7rem">${weredaName}</div></div></div>
+      <div class="col-md-4"><div class="border rounded-3 p-3 text-center" style="background:linear-gradient(135deg,#d1e7dd,#a3cfbb)"><div class="text-muted small">Transport Cost</div><div class="fs-4 fw-bold text-success">${cost>0?'ETB '+cost.toFixed(2):'Set by Staff'}</div></div></div>`;
+    if (req.receipt_photo_url) {
+      const photos = req.receipt_photo_url.split(',').map(p=>p.trim()).filter(p=>p);
+      document.getElementById('receiptPhotoContainer').innerHTML = `
+        <label class="form-label fw-semibold text-muted small text-uppercase">Receipt Photo(s)</label>
+        <div class="d-flex flex-wrap gap-2">${photos.map(p=>`<a href="${p}" target="_blank"><img src="${p}" class="rounded border shadow-sm" style="width:90px;height:90px;object-fit:cover" onerror="this.style.display='none'"/></a>`).join('')}</div>`;
+    } else {
+      document.getElementById('receiptPhotoContainer').innerHTML = '<div class="alert alert-warning py-2"><i class="bi bi-exclamation-triangle me-2"></i>No receipt photo uploaded.</div>';
+    }
+    if (req.receipt_notes) document.getElementById('receiptDriverNotes').innerHTML = `<div class="alert alert-light border py-2"><small class="text-muted d-block"><i class="bi bi-chat-left-quote me-1"></i>Driver Notes</small>${req.receipt_notes}</div>`;
+  } catch(err) {
+    document.getElementById('receiptTripInfo').innerHTML = `<div class="col-12"><div class="alert alert-danger">Error: ${err.message}</div></div>`;
+  }
+}
+async function receiptAction(action) {
+  const id    = document.getElementById('receiptRequestId').value;
+  const notes = document.getElementById('receiptNotes').value;
+  if (action==='RequestCorrection'&&!notes.trim()) { alert('Please provide correction notes.'); return; }
+  const r = await fetch(`${API}/requests/${id}/mahberat-verify`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ userId, userName, action, notes })
+  });
+  const d = await r.json();
+  if (d.success) {
+    bootstrap.Modal.getInstance(document.getElementById('receiptModal')).hide();
+    loadRequests(); loadStats();
+    showToast(action==='Verify'?'✓ Receipt approved — forwarded to Staff':'⚠ Correction requested', action==='Verify'?'success':'warning');
+  } else alert(d.message||'Error');
+}
+
+// ── approval form ─────────────────────────────────────────
+async function openApprovalForm(id) {
+  document.getElementById('approvalFormBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+  document.getElementById('approvalFormActions').innerHTML = '';
+  new bootstrap.Modal(document.getElementById('approvalFormModal')).show();
+  try {
+    const r   = await fetch(`/api/transport/requests/${id}`);
+    const d   = await r.json();
+    const req = d.request??d;
+    const logs= d.logs??[];
+    const fmt = v => v?new Date(v).toLocaleString():'-';
+    const chk = v => v==='Approved'?'<span class="text-success fw-bold">[✓] Approved</span>':v==='Rejected'?'<span class="text-danger fw-bold">[✗] Rejected</span>':'<span class="text-warning">[  ] Pending</span>';
+    document.getElementById('approvalFormBody').innerHTML = `
+    <div class="border border-2 border-dark bg-white p-4" style="font-size:.88rem">
+      <div class="text-center fw-bold fs-5 border-bottom border-dark pb-2 mb-3 text-uppercase">Receipt Approval Form</div>
+      <div class="fw-bold bg-dark text-white px-2 py-1 mb-2">A — Request Information</div>
+      <div class="row mb-3 px-2">
+        <div class="col-md-4"><strong>Request #:</strong> <span style="font-family:monospace;color:#059669">${req.request_number}</span></div>
+        <div class="col-md-4"><strong>Requestor:</strong> ${req.mahberat_user_name??'—'}</div>
+        <div class="col-md-4"><strong>Date:</strong> ${fmt(req.created_at)}</div>
+        <div class="col-md-4 mt-2"><strong>Status:</strong> ${statusBadge(req.status)}</div>
+        <div class="col-md-4 mt-2"><strong>KG Collected:</strong> ${req.actual_kilogram??'—'}</div>
+        <div class="col-md-4 mt-2"><strong>Transport Cost:</strong> ${req.transport_cost?'ETB '+parseFloat(req.transport_cost).toFixed(2):'—'}</div>
+      </div>
+      <div class="fw-bold bg-dark text-white px-2 py-1 mb-2">B — Route Details</div>
+      <div class="row mb-3 px-2">
+        <div class="col-md-6"><strong>Pickup:</strong> ${req.pickup_location??'—'}</div>
+        <div class="col-md-6"><strong>Destination:</strong> ${req.destination??'—'}</div>
+        <div class="col-md-6 mt-1"><strong>Driver:</strong> ${req.driver_name??'—'}</div>
+        <div class="col-md-6 mt-1"><strong>Vehicle:</strong> ${req.vehicle_plate??'—'}</div>
+        <div class="col-md-6 mt-1"><strong>Cargo/Passenger:</strong> ${req.passenger_item_details??'—'}</div>
+        <div class="col-md-6 mt-1"><strong>Special Notes:</strong> ${req.special_instructions??'—'}</div>
+      </div>
+      <div class="fw-bold bg-dark text-white px-2 py-1 mb-2">C — Approval Levels</div>
+      <table class="table table-sm table-bordered border-dark mb-3">
+        <thead class="table-secondary"><tr><th>Level</th><th>Role</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Mahberat (You)</td><td>${chk(req.level_1_mahberat_status)}</td><td>${fmt(req.level_1_date)}</td></tr>
+          <tr><td>2</td><td>Staff / Finance</td><td>${chk(req.level_2_manager_status)}</td><td>${fmt(req.level_2_date)}</td></tr>
+        </tbody>
+      </table>
+      <div class="fw-bold bg-dark text-white px-2 py-1 mb-2">D — Activity Log</div>
+      <div class="px-2">
+        ${logs.length?logs.map((l,i)=>`
+        <div class="d-flex mb-2">
+          <div class="me-2 text-center" style="min-width:26px">
+            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:22px;height:22px;font-size:10px">${i+1}</div>
+          </div>
+          <div class="bg-light rounded p-2 flex-grow-1">
+            <div class="d-flex justify-content-between">
+              <strong>${l.actor_name??'System'}</strong>
+              <small class="text-muted">${new Date(l.created_at).toLocaleString()}</small>
+            </div>
+            <span class="badge bg-secondary me-1">${l.from_status||'Start'}</span>
+            <i class="bi bi-arrow-right text-muted me-1"></i>
+            <span class="badge bg-primary">${l.to_status}</span>
+            ${l.notes?`<div class="mt-1 small fst-italic text-muted">"${l.notes}"</div>`:''}
+          </div>
+        </div>`).join(''):'<p class="text-muted">No activity logged.</p>'}
+      </div>
+    </div>`;
+    const lvl1 = req.level_1_mahberat_status;
+    if (!lvl1||lvl1==='Pending') {
+      document.getElementById('approvalFormActions').innerHTML = `<button class="btn btn-success" onclick="openLevel1Approve(${id})"><i class="bi bi-check-circle me-1"></i>Approve (Level 1)</button>`;
+    } else {
+      document.getElementById('approvalFormActions').innerHTML = `<span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Level 1 Approved</span>`;
+    }
+  } catch(err) {
+    document.getElementById('approvalFormBody').innerHTML = `<div class="alert alert-danger">Error loading form: ${err.message}</div>`;
+  }
+}
+function openLevel1Approve(id) {
+  document.getElementById('l1RequestId').value = id;
+  document.getElementById('l1Comments').value  = '';
+  new bootstrap.Modal(document.getElementById('level1ApproveModal')).show();
+}
+async function submitLevel1Approve() {
+  const id  = document.getElementById('l1RequestId').value;
+  const cmt = document.getElementById('l1Comments').value.trim();
+  if (!cmt) { alert('Please enter your comments.'); return; }
+  const r = await fetch(`/api/transport/requests/${id}/mahberat-verify`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ userId, userName, action:'Verify', notes: cmt })
+  });
+  const d = await r.json();
+  if (d.success) {
+    bootstrap.Modal.getInstance(document.getElementById('level1ApproveModal'))?.hide();
+    bootstrap.Modal.getInstance(document.getElementById('approvalFormModal'))?.hide();
+    loadRequests(); loadStats();
+    showToast('✓ Receipt approved — forwarded to Staff','success');
+  } else alert(d.message||'Error');
+}
+
+// ── toast ─────────────────────────────────────────────────
+function showToast(msg, type='success') {
+  const bg = {success:'#059669',warning:'#f59e0b',danger:'#ef4444'}[type]||'#1d4ed8';
+  const t  = document.createElement('div');
+  t.className = 'tp-toast';
+  t.style.background = bg; t.style.color = '#fff';
+  t.innerHTML = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 3200);
+}
+
+// ── path steps config ─────────────────────────────────────
+const STEPS = [
+  { key:'PendingDispatcher',       label:'Submit',    actor:'You'       },
+  { key:'DriverAssigned',          label:'Dispatch',  actor:'Dispatcher'},
+  { key:'DriverAccepted',          label:'Accept',    actor:'Driver'    },
+  { key:'PickedUp',                label:'Pickup',    actor:'Driver'    },
+  { key:'MahberatApprovedPickup',  label:'OK Pickup', actor:'You'       },
+  { key:'ReceiptSubmitted',        label:'Receipt',   actor:'Driver'    },
+  { key:'MahberatVerified',        label:'Verified',  actor:'You'       },
+  { key:'StaffApproved',           label:'Approved',  actor:'Staff'     },
+  { key:'Paid',                    label:'Paid',      actor:'Finance'   },
+];
+const REJECTED = ['DispatcherRejected','DriverRejected','StaffRejected'];
+
+// ── init ──────────────────────────────────────────────────
+loadStats();
+loadRequests();
+setInterval(()=>{ loadStats(); loadRequests(); }, 30000);
+</script>
+</body>
+</html>

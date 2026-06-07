@@ -1,0 +1,48 @@
+@{
+    var currentPath = Context.Request.Path.Value ?? "";
+    bool IsActive(string path, bool exact = false)
+    {
+        if (exact) return currentPath.Equals(path, StringComparison.OrdinalIgnoreCase);
+        return currentPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+    }
+}
+<button class="sidebar-toggle-btn d-none d-md-flex" id="sidebarToggleBtn" onclick="toggleSidebarCollapse()" title="Expand / Collapse">
+    <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+</button>
+<div class="sidebar-scroll pt-3" style="height:100%">
+    <div class="sidebar-logo-area pb-3 mb-3 border-bottom d-flex align-items-center gap-2 px-3" style="min-height:54px">
+        <i class="bi bi-droplet-fill text-info fs-5 flex-shrink-0"></i>
+        <div class="sidebar-brand-text">
+            <div class="text-white fw-bold" style="font-size:.95rem;line-height:1.2">Yeka Cleaning</div>
+            <div class="text-white-50" style="font-size:.68rem">Manager</div>
+        </div>
+    </div>
+    <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Manager",true)?"active":"")" href="/Dashboard/Manager" title="Dashboard"><i class="bi bi-speedometer2 flex-shrink-0"></i><span class="nav-label ms-2">Dashboard</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Manager/Weredas")?"active":"")" href="/Dashboard/Manager/Weredas" title="Weredas"><i class="bi bi-geo-alt flex-shrink-0"></i><span class="nav-label ms-2">Weredas</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Manager/Mahberats")?"active":"")" href="/Dashboard/Manager/Mahberats" title="Mahberats"><i class="bi bi-people flex-shrink-0"></i><span class="nav-label ms-2">Mahberats</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Manager/Vehicles")?"active":"")" href="/Dashboard/Manager/Vehicles" title="Vehicles"><i class="bi bi-truck flex-shrink-0"></i><span class="nav-label ms-2">Vehicles</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Manager/Drivers")?"active":"")" href="/Dashboard/Manager/Drivers" title="Drivers"><i class="bi bi-person-badge flex-shrink-0"></i><span class="nav-label ms-2">Drivers</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Manager/OutsourceCompany")?"active":"")" href="/Dashboard/Manager/OutsourceCompany" title="Outsource Companies"><i class="bi bi-building flex-shrink-0"></i><span class="nav-label ms-2">Outsource Companies</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Manager/Staff")?"active":"")" href="/Dashboard/Manager/Staff" title="My Staff"><i class="bi bi-people flex-shrink-0"></i><span class="nav-label ms-2">My Staff</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Manager/Approvals",true)?"active":"")" href="/Dashboard/Manager/Approvals" title="Approvals"><i class="bi bi-check2-square flex-shrink-0"></i><span class="nav-label ms-2">Approvals</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Manager/Tasks")?"active":"")" href="/Dashboard/Manager/Tasks" title="Tasks"><i class="bi bi-clipboard-check flex-shrink-0"></i><span class="nav-label ms-2">Tasks</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/Manager/Settings")?"active":"")" href="/Dashboard/Manager/Settings" title="Settings"><i class="bi bi-gear flex-shrink-0"></i><span class="nav-label ms-2">Settings</span></a></li>
+        <li class="nav-item mt-3"><a class="nav-link text-warning fw-semibold" href="/Login?logout=1" title="Logout"><i class="bi bi-box-arrow-left flex-shrink-0"></i><span class="nav-label ms-2">Logout</span></a></li>
+    </ul>
+</div>
+<script>
+(function(){
+    var collapsed = localStorage.getItem('sidebarCollapsed')==='1';
+    if(collapsed) _applyCollapse(true);
+    function _applyCollapse(c){
+        var b=document.body, ic=document.getElementById('sidebarToggleIcon');
+        c ? b.classList.add('sidebar-collapsed') : b.classList.remove('sidebar-collapsed');
+        if(ic){ ic.className = c ? 'bi bi-chevron-right' : 'bi bi-chevron-left'; }
+    }
+    window.toggleSidebarCollapse=function(){
+        var c=!document.body.classList.contains('sidebar-collapsed');
+        _applyCollapse(c); localStorage.setItem('sidebarCollapsed',c?'1':'0');
+    };
+})();
+</script>

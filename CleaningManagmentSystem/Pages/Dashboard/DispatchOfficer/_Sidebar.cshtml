@@ -1,0 +1,46 @@
+@{
+    var currentPath = Context.Request.Path.Value ?? "";
+    bool IsActive(string path, bool exact = false)
+    {
+        if (exact) return currentPath.Equals(path, StringComparison.OrdinalIgnoreCase);
+        return currentPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+    }
+}
+<button class="sidebar-toggle-btn d-none d-md-flex" id="sidebarToggleBtn" onclick="toggleSidebarCollapse()" title="Expand / Collapse">
+    <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
+</button>
+<div class="sidebar-scroll pt-3" style="height:100%">
+    <div class="sidebar-logo-area pb-3 mb-3 border-bottom d-flex align-items-center gap-2 px-3" style="min-height:54px">
+        <i class="bi bi-droplet-fill text-info fs-5 flex-shrink-0"></i>
+        <div class="sidebar-brand-text">
+            <div class="text-white fw-bold" style="font-size:.95rem;line-height:1.2">Yeka Cleaning</div>
+            <div class="text-white-50" style="font-size:.68rem">Dispatch Officer</div>
+        </div>
+    </div>
+    <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/DispatchOfficer",true)?"active":"")" href="/Dashboard/DispatchOfficer" title="Home"><i class="bi bi-house flex-shrink-0"></i><span class="nav-label ms-2">Home</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/DispatchOfficer/MeetingRoom")?"active":"")" href="/Dashboard/DispatchOfficer/MeetingRoom" title="Meeting Room"><i class="bi bi-calendar-event flex-shrink-0"></i><span class="nav-label ms-2">Meeting Room</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/DispatchOfficer/AllMahberatReport")?"active":"")" href="/Dashboard/DispatchOfficer/AllMahberatReport" title="All Mahberat Report"><i class="bi bi-file-earmark-text flex-shrink-0"></i><span class="nav-label ms-2">All Mahberat Report</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/DispatchOfficer/TransportRequests")?"active":"")" href="/Dashboard/DispatchOfficer/TransportRequests" title="Transport Requests"><i class="bi bi-truck flex-shrink-0"></i><span class="nav-label ms-2">Transport Requests</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/DispatchOfficer/Requests")?"active":"")" href="/Dashboard/DispatchOfficer/Requests" title="WMRAS Requests"><i class="bi bi-ui-checks-grid flex-shrink-0"></i><span class="nav-label ms-2">WMRAS Requests</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/DispatchOfficer/CreateDispatch")?"active":"")" href="/Dashboard/DispatchOfficer/CreateDispatch" title="Create Dispatch"><i class="bi bi-send flex-shrink-0"></i><span class="nav-label ms-2">Create Dispatch</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/DispatchOfficer/Gallery")?"active":"")" href="/Dashboard/DispatchOfficer/Gallery" title="Gallery"><i class="bi bi-images flex-shrink-0"></i><span class="nav-label ms-2">Gallery</span></a></li>
+        <li class="nav-item"><a class="nav-link @(IsActive("/Dashboard/DispatchOfficer/Contact")?"active":"")" href="/Dashboard/DispatchOfficer/Contact" title="Contact"><i class="bi bi-envelope flex-shrink-0"></i><span class="nav-label ms-2">Contact</span></a></li>
+        <li class="nav-item mt-3"><a class="nav-link text-warning fw-semibold" href="/Login?logout=1" title="Logout"><i class="bi bi-box-arrow-left flex-shrink-0"></i><span class="nav-label ms-2">Logout</span></a></li>
+    </ul>
+</div>
+<script>
+(function(){
+    var collapsed = localStorage.getItem('sidebarCollapsed')==='1';
+    if(collapsed) _applyCollapse(true);
+    function _applyCollapse(c){
+        var b=document.body, ic=document.getElementById('sidebarToggleIcon');
+        c ? b.classList.add('sidebar-collapsed') : b.classList.remove('sidebar-collapsed');
+        if(ic){ ic.className = c ? 'bi bi-chevron-right' : 'bi bi-chevron-left'; }
+    }
+    window.toggleSidebarCollapse=function(){
+        var c=!document.body.classList.contains('sidebar-collapsed');
+        _applyCollapse(c); localStorage.setItem('sidebarCollapsed',c?'1':'0');
+    };
+})();
+</script>

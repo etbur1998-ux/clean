@@ -1,0 +1,45 @@
+@{
+    var currentPath = Context.Request.Path.Value ?? "";
+    
+    bool IsActive(string path, bool exact = false)
+    {
+        if (exact)
+        {
+            return currentPath.Equals(path, StringComparison.OrdinalIgnoreCase);
+        }
+        return currentPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+    }
+}
+<div class="sidebar-scroll pt-3" style="height: 100%;">
+    <div class="pb-3 mb-3 border-bottom text-center">
+        <h5 class="text-white fw-bold"><i class="bi bi-droplet-fill text-info me-1"></i>Yeka Cleaning</h5>
+        <small class="text-white-50">User Dashboard</small>
+    </div>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link @(IsActive("/Dashboard/User", true) ? "active" : "")" href="/Dashboard/User">
+                <i class="bi bi-speedometer2 me-2"></i>Dashboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="bi bi-calendar-plus me-2"></i>Book Service
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="bi bi-clock-history me-2"></i>My Bookings
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="bi bi-person-gear me-2"></i>Profile
+            </a>
+        </li>
+        <li class="nav-item mt-4">
+            <a class="nav-link text-warning fw-semibold" href="/Login?logout=1">
+                <i class="bi bi-box-arrow-left me-2"></i>Logout
+            </a>
+        </li>
+    </ul>
+</div>

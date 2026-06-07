@@ -1,0 +1,90 @@
+@page
+@{
+    Layout = null;
+    ViewData["Title"] = "Contact Us";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-i18n-title="contact_page_title">@ViewData["Title"] - Yeka Cleaning Services</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" asp-area="" asp-page="/Index" data-i18n="nav_brand"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/Index" data-i18n="nav_home"><i class="bi bi-house-door"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/Gallery" data-i18n="nav_gallery"><i class="bi bi-images"></i> Gallery</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/Services" data-i18n="nav_services"><i class="bi bi-briefcase"></i> Services</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/About" data-i18n="nav_about"><i class="bi bi-people"></i> About Us</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/Contact" data-i18n="nav_contact"><i class="bi bi-envelope"></i> Contact Us</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/Blog" data-i18n="nav_blog"><i class="bi bi-journal-text"></i> Blog</a></li>
+                    <li class="nav-item ms-lg-3"><a class="login-btn" asp-area="" asp-page="/Login" data-i18n="nav_login">Login</a></li>
+                    <li class="nav-item ms-lg-3">
+                        <select id="languageSelect" class="form-select form-select-sm border-light text-dark"></select>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="container py-5" style="margin-top: 80px;">
+    <h1 class="text-center mb-5" data-i18n="contact_page_header">Contact Us</h1>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h3 class="mb-4" data-i18n="contact_get_in_touch">Get in Touch</h3>
+                    <form>
+                        <div class="mb-3"><label class="form-label" data-i18n="contact_name_label">Your Name</label><input type="text" class="form-control" placeholder="Enter your name" data-i18n-placeholder="contact_name_label"></div>
+                        <div class="mb-3"><label class="form-label" data-i18n="contact_email_label">Email Address</label><input type="email" class="form-control" placeholder="Enter your email" data-i18n-placeholder="contact_email_label"></div>
+                        <div class="mb-3"><label class="form-label" data-i18n="contact_service_label">Service Needed</label><select class="form-select"><option data-i18n="service_residential">Residential Cleaning</option><option data-i18n="service_commercial">Commercial Cleaning</option><option data-i18n="service_deep">Deep Cleaning</option></select></div>
+                        <div class="mb-3"><label class="form-label" data-i18n="contact_message_label">Message</label><textarea class="form-control" rows="4" placeholder="Tell us about your needs" data-i18n-placeholder="contact_message_label"></textarea></div>
+                        <button type="submit" class="btn btn-primary w-100" data-i18n="contact_send_message">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h3 class="mb-4" data-i18n="contact_information_title">Contact Information</h3>
+                    <div class="mb-4"><h5><i class="bi bi-geo-alt text-primary"></i> <span data-i18n="contact_location_title">Location</span></h5><p data-i18n="contact_location_text">123 Clean Street, Suite 100<br>City, State 12345</p></div>
+                    <div class="mb-4"><h5><i class="bi bi-telephone text-primary"></i> <span data-i18n="contact_phone_title">Phone</span></h5><p data-i18n="contact_phone_text">(555) 123-4567</p></div>
+                    <div class="mb-4"><h5><i class="bi bi-envelope text-primary"></i> <span data-i18n="contact_email_title">Email</span></h5><p data-i18n="contact_email_text">info@yeka-cleaning.com</p></div>
+                    <div class="mb-4"><h5><i class="bi bi-clock text-primary"></i> <span data-i18n="contact_hours_title">Business Hours</span></h5><p data-i18n="contact_hours_text">Mon - Fri: 8:00 AM - 6:00 PM</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4"><h5><i class="bi bi-droplet-fill"></i> <span data-i18n="footer_brand">Yeka Cleaning</span></h5><p data-i18n="about_footer_desc">Your trusted partner.</p></div>
+            <div class="col-md-4 mb-4"><h5 data-i18n="footer_quicklinks">Quick Links</h5><ul class="list-unstyled"><li><a asp-page="/Services" data-i18n="footer_link_services">Services</a></li><li><a asp-page="/About" data-i18n="footer_link_about">About Us</a></li><li><a asp-page="/Contact" data-i18n="footer_link_contact">Contact</a></li></ul></div>
+            <div class="col-md-4 mb-4"><h5 data-i18n="footer_contact_title">Contact</h5><p><span data-i18n="footer_phone">(555) 123-4567</span></p></div>
+        </div>
+        <div class="text-center border-top pt-3"><p class="mb-0" data-i18n="footer_copyright">&copy; 2026 Yeka Cleaning.</p></div>
+    </div>
+</footer>
+
+<button class="chatbot-btn" onclick="alert('Chat support coming soon!')"><i class="bi bi-chat-dots-fill"></i></button>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/translation.js"></script>
+</body>
+</html>

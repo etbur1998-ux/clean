@@ -1,0 +1,421 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.WeredaMahberat.ReceiptApprovalsModel
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    if (userName == null) { Response.Redirect("/Login"); return; }
+    Layout = null;
+
+    // ── 5-step receipt tracker helper ───────────────────────────
+    string rcpTracker(string status, object mahberatApproved)
+    {
+        // mahberatApproved: null=pending, 1=approved, 0=rejected
+        int mApproved = mahberatApproved == null ? -1 : Convert.ToInt32(mahberatApproved);
+        bool mRejected = status == "MahberatRejected";
+        bool sRejected = status == "Rejected";
+
+        var steps = new[] {
+            ("Submitted",          "Driver/Staff"),
+            ("Mahberat Review",    "You"),
+            ("Staff Review",       "Staff"),
+            ("Billed",             "Staff"),
+            ("Paid",               "Finance"),
+        };
+
+        int activeIdx = status switch {
+            "Pending"           => mApproved == 1 ? 2 : 1,
+            "Approved"          => 2,
+            "Billed"            => 3,
+            "Paid"              => 4,
+            "MahberatRejected"  => 1,
+            "Rejected"          => 2,
+            _                   => 1
+        };
+
+        if (mRejected || sRejected)
+        {
+            var who = mRejected ? "Mahberat" : "Staff";
+            return $@"<div class=""d-flex align-items-center gap-2 py-1"">
+                <span class=""badge bg-danger px-3 py-2""><i class=""bi bi-x-circle me-1""></i>Rejected by {who}</span>
+                <small class=""text-muted"">This receipt was rejected at Level {(mRejected ? "1" : "2")} and closed.</small>
+            </div>";
+        }
+
+        var sb = new System.Text.StringBuilder();
+        sb.Append(@"<div class=""rcp-flow"">");
+        for (int i = 0; i < steps.Length; i++)
+        {
+            string cls = i < activeIdx ? "rcp-done" : (i == activeIdx ? "rcp-active" : "");
+            string icon = i < activeIdx ? "✓" : (i + 1).ToString();
+            sb.Append($@"<div class=""rcp-item {cls}"">
+                <div class=""rcp-circle"">{icon}</div>
+                <div class=""rcp-label"">Step {i+1}: {steps[i].Item1}</div>
+                <div class=""rcp-actor"">{steps[i].Item2}</div>
+            </div>");
+        }
+        sb.Append("</div>");
+        return sb.ToString();
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Receipt Approvals – Wereda Mahberat</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+    <style>
+        /* ── 5-Step Receipt Progress Tracker ── */
+        .rcp-flow{display:flex;align-items:flex-start;padding:8px 0;gap:0}
+        .rcp-item{display:flex;flex-direction:column;align-items:center;min-width:90px;position:relative;flex:1}
+        .rcp-item:not(:last-child)::after{content:'';position:absolute;top:14px;left:calc(50% + 15px);right:calc(-50% + 15px);height:3px;background:#dee2e6;z-index:0}
+        .rcp-item:not(:last-child).rcp-done::after{background:#198754}
+        .rcp-item:not(:last-child).rcp-active::after{background:linear-gradient(90deg,#198754 50%,#dee2e6 50%)}
+        .rcp-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;z-index:1;position:relative;border:3px solid #dee2e6;background:#fff;color:#adb5bd}
+        .rcp-done .rcp-circle{background:#198754;border-color:#198754;color:#fff}
+        .rcp-active .rcp-circle{background:#fff;border-color:#198754;color:#198754;box-shadow:0 0 0 4px rgba(25,135,84,.15);animation:rcpPulse 1.5s infinite}
+        .rcp-rejected .rcp-circle{background:#dc3545;border-color:#dc3545;color:#fff}
+        @@keyframes rcpPulse{0%,100%{box-shadow:0 0 0 4px rgba(25,135,84,.15)}50%{box-shadow:0 0 0 7px rgba(25,135,84,.05)}}
+        .rcp-label{font-size:10px;text-align:center;margin-top:4px;line-height:1.3;color:#6c757d;max-width:88px}
+        .rcp-done .rcp-label{color:#198754;font-weight:600}
+        .rcp-active .rcp-label{color:#198754;font-weight:700}
+        .rcp-rejected .rcp-label{color:#dc3545;font-weight:600}
+        .rcp-actor{font-size:9px;text-align:center;color:#adb5bd;max-width:88px;margin-top:1px}
+        .rcp-active .rcp-actor{color:#198754;font-weight:600}
+        /* highlight "You" step */
+        .rcp-item.rcp-active .rcp-label { background:#d1e7dd; border-radius:4px; padding:1px 4px; }
+    </style>
+</head>
+<body>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+<nav class="navbar navbar-dark dashboard-navbar fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/Dashboard/WeredaMahberat"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+        <div class="nav-user">
+            <span>Welcome, @userName</span>
+            <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        </div>
+    </div>
+</nav>
+<nav id="sidebarMenu" class="sidebar d-lg-none">
+    @await Html.PartialAsync("~/Pages/Dashboard/WeredaMahberat/_Sidebar.cshtml")
+</nav>
+<nav class="col-md-3 col-lg-2 d-none d-md-block sidebar" style="transform:none;padding-top:56px;">
+    @await Html.PartialAsync("~/Pages/Dashboard/WeredaMahberat/_Sidebar.cshtml")
+</nav>
+
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-clipboard-check me-2 text-success"></i>Receipt Approvals <span class="badge bg-success fs-6 ms-2">Level 1 – Mahberat</span></h1>
+        @if (Model.PendingReceipts.Count > 0)
+        {
+            <span class="badge bg-danger fs-6 px-3 py-2"><i class="bi bi-exclamation-circle me-1"></i>@Model.PendingReceipts.Count Awaiting Your Review</span>
+        }
+    </div>
+
+    <!-- Flow explanation banner -->
+    <div class="alert alert-info border-0 shadow-sm mb-4 d-flex align-items-center gap-3">
+        <i class="bi bi-info-circle-fill fs-4 text-info"></i>
+        <div>
+            <strong>Your role in the receipt workflow:</strong>
+            You are <strong>Level 1 (Mahberat)</strong>. Review receipts submitted by drivers and staff.
+            If you <span class="text-success fw-bold">Approve</span>, they move to Staff for final review.
+            If you <span class="text-danger fw-bold">Reject</span>, they are closed and will not be billed.
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav gap-2 mb-4">
+        <li class="nav-item">
+            <button class="btn btn-primary rounded-pill px-4" onclick="switchTab('pending')" id="tab-pending">
+                <i class="bi bi-hourglass-split me-1"></i> Pending Review
+                <span class="badge bg-danger ms-1">@Model.PendingReceipts.Count</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="btn btn-outline-secondary rounded-pill px-4" onclick="switchTab('actioned')" id="tab-actioned">
+                <i class="bi bi-clock-history me-1"></i> My Actions
+                <span class="badge bg-light text-dark ms-1">@Model.ActionedReceipts.Count</span>
+            </button>
+        </li>
+    </ul>
+
+    <!-- Search -->
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-md-5">
+            <div class="input-group">
+                <input type="text" class="form-control" name="SearchQuery"
+                       placeholder="Search wereda, driver, plate..." value="@Model.SearchQuery" />
+                <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+                @if (!string.IsNullOrEmpty(Model.SearchQuery))
+                {
+                    <a href="/Dashboard/WeredaMahberat/ReceiptApprovals" class="btn btn-outline-secondary"><i class="bi bi-x"></i></a>
+                }
+            </div>
+        </div>
+    </form>
+
+    <!-- ══ PENDING TAB ══ -->
+    <div id="pane-pending">
+        @if (Model.PendingReceipts.Count == 0)
+        {
+            <div class="alert alert-success text-center py-5 shadow-sm rounded-4">
+                <i class="bi bi-check-circle-fill display-4 text-success mb-3 d-block"></i>
+                <h4>All Caught Up!</h4>
+                <p class="mb-0">No receipts waiting for your review.</p>
+            </div>
+        }
+        else
+        {
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Date / Time</th>
+                                    <th>Wereda &amp; Entity</th>
+                                    <th>Driver / Plate</th>
+                                    <th>KG &amp; Amount</th>
+                                    <th>Images</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var r in Model.PendingReceipts)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">
+                                            #@r.id
+                                            @if (r.receiptType == "Outsource")
+                                            { <span class="badge bg-info d-block mt-1" style="font-size:.65em">Outsource</span> }
+                                            else
+                                            { <span class="badge bg-primary d-block mt-1" style="font-size:.65em">Mahberat</span> }
+                                        </td>
+                                        <td>
+                                            <span class="d-block fw-bold">@r.date</span>
+                                            <small class="text-muted">@r.time</small>
+                                        </td>
+                                        <td>
+                                            <span class="d-block fw-bold text-primary">@r.weredaName</span>
+                                            <small class="text-muted">@r.mahberatName</small>
+                                        </td>
+                                        <td>
+                                            <span class="d-block fw-bold">@r.vehicleName</span>
+                                            <small class="text-muted"><i class="bi bi-person me-1"></i>@r.driverName</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary me-1">@r.kilogram KG</span>
+                                            <span class="badge bg-success">@r.total ETB</span>
+                                            @if (!string.IsNullOrEmpty((string?)r.notes))
+                                            {
+                                                <small class="text-muted d-block fst-italic mt-1">@r.notes</small>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty((string?)r.imageUrl))
+                                            {
+                                                @foreach (var img in ((string)r.imageUrl).Split(','))
+                                                {
+                                                    var ci = img.Trim();
+                                                    if (!string.IsNullOrEmpty(ci))
+                                                    {
+                                                        <a href="@ci" target="_blank">
+                                                            <img src="@ci" class="rounded border shadow-sm me-1"
+                                                                 style="width:40px;height:40px;object-fit:cover"
+                                                                 onerror="this.src='/images/placeholder.png'" />
+                                                        </a>
+                                                    }
+                                                }
+                                            }
+                                            else { <span class="text-muted small">No image</span> }
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-success me-1 mb-1"
+                                                    onclick="openAction(@r.id, '@r.receiptType', 'approve')">
+                                                <i class="bi bi-check-circle me-1"></i>Approve
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger mb-1"
+                                                    onclick="openAction(@r.id, '@r.receiptType', 'reject')">
+                                                <i class="bi bi-x-circle me-1"></i>Reject
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <!-- 5-Step tracker row -->
+                                    <tr class="table-light">
+                                        <td colspan="7" class="pt-0 pb-2 px-3">
+                                            @Html.Raw(rcpTracker(r.status?.ToString() ?? "Pending", r.mahberat_approved))
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- ══ ACTIONED TAB ══ -->
+    <div id="pane-actioned" style="display:none">
+        @if (Model.ActionedReceipts.Count == 0)
+        {
+            <div class="alert alert-info text-center py-5 shadow-sm rounded-4">
+                <i class="bi bi-clock-history display-4 text-secondary mb-3 d-block"></i>
+                <h4>No History Yet</h4>
+            </div>
+        }
+        else
+        {
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th><th>Type</th><th>Date</th>
+                                    <th>Wereda</th><th>Driver</th><th>KG</th>
+                                    <th>Your Decision</th><th>Notes</th><th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var r in Model.ActionedReceipts)
+                                {
+                                    int ma = r.mahberat_approved == null ? -1 : Convert.ToInt32(r.mahberat_approved);
+                                    <tr>
+                                        <td class="fw-bold">#@r.id</td>
+                                        <td><span class="badge @(r.receiptType=="Outsource"?"bg-info":"bg-primary")">@r.receiptType</span></td>
+                                        <td><small>@r.date</small></td>
+                                        <td>
+                                            <span class="fw-bold text-primary">@r.weredaName</span><br/>
+                                            <small class="text-muted">@r.mahberatName</small>
+                                        </td>
+                                        <td><small>@r.driverName</small></td>
+                                        <td><span class="badge bg-secondary">@r.kilogram KG</span></td>
+                                        <td>
+                                            @if (ma == 1)
+                                            {
+                                                <span class="badge bg-success px-3 py-2">
+                                                    <i class="bi bi-check-circle me-1"></i>Approved by You
+                                                </span>
+                                            }
+                                            else if (ma == 0)
+                                            {
+                                                <span class="badge bg-danger px-3 py-2">
+                                                    <i class="bi bi-x-circle me-1"></i>Rejected by You
+                                                </span>
+                                            }
+                                        </td>
+                                        <td><small class="text-muted fst-italic">@r.mahberat_notes</small></td>
+                                        <td>
+                                            @{
+                                                string sc = r.status switch {
+                                                    "Pending"          => "bg-warning text-dark",
+                                                    "Approved"         => "bg-success",
+                                                    "Billed"           => "bg-info",
+                                                    "Paid"             => "bg-primary",
+                                                    "MahberatRejected" => "bg-danger",
+                                                    "Rejected"         => "bg-danger",
+                                                    _                  => "bg-secondary"
+                                                };
+                                            }
+                                            <span class="badge @sc">@r.status</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="table-light">
+                                        <td colspan="9" class="pt-0 pb-2 px-3">
+                                            @Html.Raw(rcpTracker(r.status?.ToString() ?? "Pending", r.mahberat_approved))
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</main>
+
+<!-- Approve/Reject Action Modal -->
+<div class="modal fade" id="actionModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header" id="actionModalHeader">
+                <h5 class="modal-title" id="actionModalTitle"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" id="actionForm">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="id" id="actionId" />
+                    <input type="hidden" name="receiptType" id="actionReceiptType" />
+                    <div id="actionInfo" class="alert alert-light mb-3"></div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Notes / Comments</label>
+                        <textarea class="form-control" name="notes" id="actionNotes" rows="3"
+                                  placeholder="Add your review notes here..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn" id="actionSubmitBtn"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function switchTab(tab) {
+    document.getElementById('pane-pending').style.display  = tab === 'pending'  ? 'block' : 'none';
+    document.getElementById('pane-actioned').style.display = tab === 'actioned' ? 'block' : 'none';
+    document.getElementById('tab-pending').className  = tab === 'pending'
+        ? 'btn btn-primary rounded-pill px-4'
+        : 'btn btn-outline-primary rounded-pill px-4';
+    document.getElementById('tab-actioned').className = tab === 'actioned'
+        ? 'btn btn-secondary rounded-pill px-4'
+        : 'btn btn-outline-secondary rounded-pill px-4';
+}
+
+function openAction(id, receiptType, action) {
+    const isApprove = action === 'approve';
+    const header  = document.getElementById('actionModalHeader');
+    const title   = document.getElementById('actionModalTitle');
+    const form    = document.getElementById('actionForm');
+    const info    = document.getElementById('actionInfo');
+    const btn     = document.getElementById('actionSubmitBtn');
+
+    document.getElementById('actionId').value          = id;
+    document.getElementById('actionReceiptType').value = receiptType;
+    document.getElementById('actionNotes').value       = '';
+
+    if (isApprove) {
+        header.className = 'modal-header bg-success text-white';
+        title.innerHTML  = '<i class="bi bi-check-circle me-2"></i>Approve Receipt #' + id;
+        info.innerHTML   = '<strong>Approving</strong> this receipt will forward it to <strong>Staff</strong> for final review and billing.';
+        btn.className    = 'btn btn-success px-4';
+        btn.innerHTML    = '<i class="bi bi-check-circle me-1"></i>Confirm Approval';
+        form.action      = '?handler=Approve';
+    } else {
+        header.className = 'modal-header bg-danger text-white';
+        title.innerHTML  = '<i class="bi bi-x-circle me-2"></i>Reject Receipt #' + id;
+        info.innerHTML   = '<strong class="text-danger">Rejecting</strong> this receipt will close it permanently. The driver/staff will be notified.';
+        btn.className    = 'btn btn-danger px-4';
+        btn.innerHTML    = '<i class="bi bi-x-circle me-1"></i>Confirm Rejection';
+        form.action      = '?handler=Reject';
+    }
+
+    new bootstrap.Modal(document.getElementById('actionModal')).show();
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebarMenu').classList.toggle('show');
+    document.getElementById('sidebarBackdrop').classList.toggle('show');
+}
+</script>
+</body>
+</html>

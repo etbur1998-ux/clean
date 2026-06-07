@@ -1,0 +1,242 @@
+@page
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userRole = HttpContext.Session.GetString("UserRole");
+    
+    if (userName == null)
+    {
+        Response.Redirect("/Login");
+        return;
+    }
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+}
+
+<div class="main-content p-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-book me-2"></i>Resource Library</h1>
+        <span class="badge bg-primary">@userRole</span>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-file-earmark-text display-4 text-primary"></i>
+                    <h4 class="mt-2">45</h4>
+                    <p class="text-muted mb-0">Documents</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-collection-play display-4 text-success"></i>
+                    <h4 class="mt-2">12</h4>
+                    <p class="text-muted mb-0">Videos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-download display-4 text-info"></i>
+                    <h4 class="mt-2">230</h4>
+                    <p class="text-muted mb-0">Downloads</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-bookmark display-4 text-warning"></i>
+                    <h4 class="mt-2">8</h4>
+                    <p class="text-muted mb-0">Saved Items</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <ul class="nav nav-pills" id="libraryTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="documents-tab" data-bs-toggle="pill" data-bs-target="#documents" type="button"><i class="bi bi-file-earmark-text me-1"></i> Documents</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="videos-tab" data-bs-toggle="pill" data-bs-target="#videos" type="button"><i class="bi bi-collection-play me-1"></i> Videos</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="guides-tab" data-bs-toggle="pill" data-bs-target="#guides" type="button"><i class="bi bi-compass me-1"></i> Guides</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-0">
+                    <div class="tab-content p-3" id="libraryTabsContent">
+                        <div class="tab-pane fade show active" id="documents">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-file-pdf text-danger fs-4 me-3"></i>
+                                        <div>
+                                            <h6 class="mb-0">Employee Handbook 2026</h6>
+                                            <small class="text-muted">PDF - 2.4 MB</small>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i></button>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-file-word text-info fs-4 me-3"></i>
+                                        <div>
+                                            <h6 class="mb-0">Cleaning Procedures Manual</h6>
+                                            <small class="text-muted">DOCX - 1.8 MB</small>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i></button>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-file-excel text-success fs-4 me-3"></i>
+                                        <div>
+                                            <h6 class="mb-0">Monthly Report Template</h6>
+                                            <small class="text-muted">XLSX - 456 KB</small>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i></button>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-file-pdf text-danger fs-4 me-3"></i>
+                                        <div>
+                                            <h6 class="mb-0">Safety Guidelines 2026</h6>
+                                            <small class="text-muted">PDF - 1.2 MB</small>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i></button>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-file-word text-info fs-4 me-3"></i>
+                                        <div>
+                                            <h6 class="mb-0">Performance Review Form</h6>
+                                            <small class="text-muted">DOCX - 89 KB</small>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="videos">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-play-circle text-primary fs-4 me-3"></i>
+                                        <div>
+                                            <h6 class="mb-0">Cleaning Equipment Training</h6>
+                                            <small class="text-muted">Video - 12:45</small>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i></button>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-play-circle text-primary fs-4 me-3"></i>
+                                        <div>
+                                            <h6 class="mb-0">Safety Procedures Overview</h6>
+                                            <small class="text-muted">Video - 8:30</small>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="guides">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-book text-success fs-4 me-3"></i>
+                                        <div>
+                                            <h6 class="mb-0">Onboarding Guide</h6>
+                                            <small class="text-muted">PDF - 3.2 MB</small>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i></button>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-book text-success fs-4 me-3"></i>
+                                        <div>
+                                            <h6 class="mb-0">Equipment Maintenance Guide</h6>
+                                            <small class="text-muted">PDF - 2.1 MB</small>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-search me-2"></i>Quick Search</h5>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Search documents...">
+                        </div>
+                        <div class="mb-3">
+                            <select class="form-select">
+                                <option>All Categories</option>
+                                <option>Policies</option>
+                                <option>Training</option>
+                                <option>Forms</option>
+                                <option>Reports</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100">Search</button>
+                    </form>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-star me-2"></i>Recent Documents</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-3 py-2">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-file-earmark-text text-primary me-2"></i>
+                            <div>
+                                <small class="fw-bold">Employee Handbook</small><br>
+                                <small class="text-muted">Updated 2 days ago</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-3 py-2">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-file-word text-info me-2"></i>
+                            <div>
+                                <small class="fw-bold">Cleaning Procedures</small><br>
+                                <small class="text-muted">Updated 5 days ago</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-3 py-2">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-file-excel text-success me-2"></i>
+                            <div>
+                                <small class="fw-bold">Monthly Reports</small><br>
+                                <small class="text-muted">Updated 1 week ago</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

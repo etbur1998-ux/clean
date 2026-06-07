@@ -1,0 +1,499 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.SuperAdmin.TrainingModel
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userRole = HttpContext.Session.GetString("UserRole")?.ToLower() ?? "superadmin";
+    if (userName == null) { Response.Redirect("/Login"); return; }
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Training Programs Management - Super Admin - Yeka Cleaning</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+</head>
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+    
+    <!-- Desktop Navbar -->
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/Dashboard/SuperAdmin"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+            <div class="nav-user">
+                <span>Welcome, @userName</span>
+                <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Navbar -->
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top d-lg-none">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" onclick="toggleSidebar()">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/Dashboard/SuperAdmin"><i class="bi bi-droplet-fill"></i> Yeka</a>
+            <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i></a>
+        </div>
+    </nav>
+
+    <!-- Mobile Sidebar -->
+    <nav id="sidebarMenu" class="sidebar d-lg-none">
+        @await Html.PartialAsync("~/Pages/Dashboard/SuperAdmin/_Sidebar.cshtml")
+    </nav>
+    <nav class="col-md-3 col-lg-2 d-none d-md-block sidebar" style="transform: none; padding-top: 56px;">
+        @await Html.PartialAsync("~/Pages/Dashboard/SuperAdmin/_Sidebar.cshtml")
+    </nav>
+
+    <!-- Main Content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 pt-lg-5">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h3 fw-bold text-dark"><i class="bi bi-mortarboard-fill text-primary me-2"></i>Training Programs Management</h1>
+            <button class="btn btn-primary btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#addTrainingModal">
+                <i class="bi bi-plus-circle me-1"></i>Create New Training
+            </button>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>@Model.SuccessMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.ErrorMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- Stat Summary cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-dark bg-white" style="border-left: 4px solid #3b82f6 !important;">
+                    <div class="card-body py-3 d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded text-primary">
+                            <i class="bi bi-collection-play-fill fs-3"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h4 class="mb-0 fw-bold">@Model.Trainings.Count</h4>
+                            <p class="text-muted small mb-0">Total Programs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-dark bg-white" style="border-left: 4px solid #ef4444 !important;">
+                    <div class="card-body py-3 d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-danger bg-opacity-10 p-3 rounded text-danger">
+                            <i class="bi bi-shield-lock-fill fs-3"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h4 class="mb-0 fw-bold">@Model.Trainings.Count(t => t.Category == "Safety")</h4>
+                            <p class="text-muted small mb-0">Safety Courses</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-dark bg-white" style="border-left: 4px solid #10b981 !important;">
+                    <div class="card-body py-3 d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-success bg-opacity-10 p-3 rounded text-success">
+                            <i class="bi bi-tools fs-3"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h4 class="mb-0 fw-bold">@Model.Trainings.Count(t => t.Category == "Equipment")</h4>
+                            <p class="text-muted small mb-0">Equipment Courses</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-dark bg-white" style="border-left: 4px solid #f59e0b !important;">
+                    <div class="card-body py-3 d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-warning bg-opacity-10 p-3 rounded text-warning">
+                            <i class="bi bi-people-fill fs-3"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h4 class="mb-0 fw-bold">@Model.Trainings.Sum(t => t.Participants)</h4>
+                            <p class="text-muted small mb-0">Total Learners</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Listings Table -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-table me-2 text-primary"></i>Active Training Programs</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Program Details</th>
+                                <th>Category</th>
+                                <th>Trainer & Location</th>
+                                <th>Target Schedule</th>
+                                <th>Assigned Person</th>
+                                <th>Status</th>
+                                <th class="text-end px-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Trainings != null && Model.Trainings.Any())
+                            {
+                                @foreach (var t in Model.Trainings)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold text-dark">@t.Title</div>
+                                            <div class="small text-muted" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@t.Description</div>
+                                            <div class="d-flex gap-1.5 mt-1">
+                                                @if (string.IsNullOrEmpty(t.Materials) || t.Materials.Contains("PDF"))
+                                                {
+                                                    <span class="badge bg-danger bg-opacity-10 text-danger" style="font-size: 0.7rem;"><i class="bi bi-file-pdf"></i> PDF</span>
+                                                }
+                                                @if (string.IsNullOrEmpty(t.Materials) || t.Materials.Contains("Video"))
+                                                {
+                                                    <span class="badge bg-warning bg-opacity-10 text-warning" style="font-size: 0.7rem;"><i class="bi bi-play-circle"></i> Video</span>
+                                                }
+                                                @if (string.IsNullOrEmpty(t.Materials) || t.Materials.Contains("Exam"))
+                                                {
+                                                    <span class="badge bg-info bg-opacity-10 text-info" style="font-size: 0.7rem;"><i class="bi bi-pencil-square"></i> Exam</span>
+                                                }
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @{
+                                                var categoryBadge = t.Category switch
+                                                {
+                                                    "Safety" => "bg-danger bg-opacity-10 text-danger border border-danger-subtle",
+                                                    "Equipment" => "bg-success bg-opacity-10 text-success border border-success-subtle",
+                                                    "Customer Service" => "bg-info bg-opacity-10 text-info border border-info-subtle",
+                                                    "Operations" => "bg-warning bg-opacity-10 text-warning border border-warning-subtle",
+                                                    "Leadership" => "bg-primary bg-opacity-10 text-primary border border-primary-subtle",
+                                                    _ => "bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle"
+                                                };
+                                            }
+                                            <span class="badge @categoryBadge px-2.5 py-1.5 text-uppercase">@t.Category</span>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold small"><i class="bi bi-person-badge text-muted me-1"></i>@t.Trainer</div>
+                                            <div class="small text-muted"><i class="bi bi-geo-alt text-danger me-1"></i>@t.Location</div>
+                                        </td>
+                                        <td>
+                                            <div class="small fw-semibold text-dark"><i class="bi bi-calendar-event me-1 text-primary"></i>@t.StartDate.ToString("MMM dd, yyyy")</div>
+                                            <div class="small text-muted"><i class="bi bi-arrow-right me-1"></i>@t.EndDate.ToString("MMM dd, yyyy")</div>
+                                        </td>
+                                        <td>
+                                            @if (t.AssignedToUserId.HasValue)
+                                            {
+                                                <span class="badge bg-primary text-white py-1.5 px-2.5"><i class="bi bi-person-fill me-1"></i>@t.AssignedToUserName</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-light text-dark py-1.5 px-2.5"><i class="bi bi-people-fill me-1"></i>General (All Staff)</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @{
+                                                var statusBadge = t.Status switch
+                                                {
+                                                    "Upcoming" => "bg-success",
+                                                    "In Progress" => "bg-primary",
+                                                    "Completed" => "bg-secondary",
+                                                    _ => "bg-secondary"
+                                                };
+                                            }
+                                            <span class="badge @statusBadge">@t.Status</span>
+                                        </td>
+                                        <td class="text-end px-4">
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-outline-secondary btn-edit-training" 
+                                                        data-id="@t.Id"
+                                                        data-title="@t.Title"
+                                                        data-category="@t.Category"
+                                                        data-trainer="@t.Trainer"
+                                                        data-description="@t.Description"
+                                                        data-startdate="@t.StartDate.ToString("yyyy-MM-dd")"
+                                                        data-enddate="@t.EndDate.ToString("yyyy-MM-dd")"
+                                                        data-location="@t.Location"
+                                                        data-participants="@t.Participants"
+                                                        data-status="@t.Status"
+                                                        data-materials="@t.Materials"
+                                                        data-assignedtouserid="@(t.AssignedToUserId?.ToString() ?? "")"
+                                                        title="Edit Program">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <form method="post" asp-page-handler="Delete" asp-route-id="@t.Id" onsubmit="return confirm('Are you sure you want to delete this training program?');" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Program"><i class="bi bi-trash"></i></button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-5">
+                                        <i class="bi bi-mortarboard display-5 d-block mb-2.5"></i>
+                                        No training programs recorded in the system yet.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Training Modal -->
+    <div class="modal fade" id="addTrainingModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle text-primary me-2"></i>Create New Training</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" asp-page-handler="Create">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Training Program Title</label>
+                                <input type="text" class="form-control" name="title" placeholder="e.g. Advanced Cleaning Operations" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Category Classification</label>
+                                <select class="form-select" name="category" required>
+                                    <option value="Safety">Safety & Compliance</option>
+                                    <option value="Equipment">Equipment Operations</option>
+                                    <option value="Customer Service">Customer Service</option>
+                                    <option value="Operations">Standard Operations</option>
+                                    <option value="Leadership">Leadership & Team Skills</option>
+                                    <option value="Other">Other / General</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Trainer / Lecturer</label>
+                                <input type="text" class="form-control" name="trainer" placeholder="e.g. Sarah Connor" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Location / Link</label>
+                                <input type="text" class="form-control" name="location" placeholder="e.g. Conference Hall A / Online Link" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Start Date</label>
+                                <input type="date" class="form-control" name="startDate" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">End Date</label>
+                                <input type="date" class="form-control" name="endDate" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Maximum Participants</label>
+                                <input type="number" class="form-control" name="participants" value="15" min="1" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Assign Person (Target User)</label>
+                                <select class="form-select" name="assignedToUserId">
+                                    <option value="">General Training (All Staff Members)</option>
+                                    @if (Model.UsersList != null)
+                                    {
+                                        @foreach (var user in Model.UsersList)
+                                        {
+                                            <option value="@user.Id">@user.Name (@user.Role)</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Training Status</label>
+                                <select class="form-select" name="status">
+                                    <option value="Scheduled">Scheduled</option>
+                                    <option value="Upcoming">Upcoming</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Materials & Scope (Comma Separated Keywords)</label>
+                            <input type="text" class="form-control" name="materials" placeholder="e.g., PDF Manual, Safety Video, Written Exam" value="PDF, Video">
+                            <span class="text-muted small">Input PDF, Video, or Exam to activate respective indicator badges.</span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Course Description</label>
+                            <textarea class="form-control" name="description" rows="4" placeholder="Briefly describe the objectives and requirements of this training program..."></textarea>
+                        </div>
+                        <div class="modal-footer px-0 pb-0">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Publish Training</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Training Modal -->
+    <div class="modal fade" id="editTrainingModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square text-success me-2"></i>Modify Training Program</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" asp-page-handler="Update">
+                        <input type="hidden" name="id" id="editTrainingId" />
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Training Program Title</label>
+                                <input type="text" class="form-control" name="title" id="editTrainingTitle" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Category Classification</label>
+                                <select class="form-select" name="category" id="editTrainingCategory" required>
+                                    <option value="Safety">Safety & Compliance</option>
+                                    <option value="Equipment">Equipment Operations</option>
+                                    <option value="Customer Service">Customer Service</option>
+                                    <option value="Operations">Standard Operations</option>
+                                    <option value="Leadership">Leadership & Team Skills</option>
+                                    <option value="Other">Other / General</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Trainer / Lecturer</label>
+                                <input type="text" class="form-control" name="trainer" id="editTrainingTrainer" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Location / Link</label>
+                                <input type="text" class="form-control" name="location" id="editTrainingLocation" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Start Date</label>
+                                <input type="date" class="form-control" name="startDate" id="editTrainingStartDate" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">End Date</label>
+                                <input type="date" class="form-control" name="endDate" id="editTrainingEndDate" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Maximum Participants</label>
+                                <input type="number" class="form-control" name="participants" id="editTrainingParticipants" min="1" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Assign Person (Target User)</label>
+                                <select class="form-select" name="assignedToUserId" id="editTrainingAssignedToUserId">
+                                    <option value="">General Training (All Staff Members)</option>
+                                    @if (Model.UsersList != null)
+                                    {
+                                        @foreach (var user in Model.UsersList)
+                                        {
+                                            <option value="@user.Id">@user.Name (@user.Role)</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Training Status</label>
+                                <select class="form-select" name="status" id="editTrainingStatus">
+                                    <option value="Scheduled">Scheduled</option>
+                                    <option value="Upcoming">Upcoming</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Materials & Scope (Comma Separated Keywords)</label>
+                            <input type="text" class="form-control" name="materials" id="editTrainingMaterials">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Course Description</label>
+                            <textarea class="form-control" name="description" id="editTrainingDescription" rows="4"></textarea>
+                        </div>
+                        <div class="modal-footer px-0 pb-0">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success"><i class="bi bi-save-fill me-1"></i>Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('show');
+            document.getElementById('sidebarBackdrop').classList.toggle('show');
+        }
+        document.querySelectorAll('#sidebarMenu .nav-link').forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (window.innerWidth < 992) toggleSidebar();
+            });
+        });
+
+        // Edit Modal populating
+        document.querySelectorAll('.btn-edit-training').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const title = this.getAttribute('data-title');
+                const category = this.getAttribute('data-category');
+                const trainer = this.getAttribute('data-trainer');
+                const description = this.getAttribute('data-description');
+                const startdate = this.getAttribute('data-startdate');
+                const enddate = this.getAttribute('data-enddate');
+                const location = this.getAttribute('data-location');
+                const participants = this.getAttribute('data-participants');
+                const status = this.getAttribute('data-status');
+                const materials = this.getAttribute('data-materials');
+                const assignedtouserid = this.getAttribute('data-assignedtouserid');
+
+                document.getElementById('editTrainingId').value = id;
+                document.getElementById('editTrainingTitle').value = title;
+                document.getElementById('editTrainingCategory').value = category || 'Safety';
+                document.getElementById('editTrainingTrainer').value = trainer;
+                document.getElementById('editTrainingDescription').value = description || '';
+                document.getElementById('editTrainingStartDate').value = startdate;
+                document.getElementById('editTrainingEndDate').value = enddate;
+                document.getElementById('editTrainingLocation').value = location;
+                document.getElementById('editTrainingParticipants').value = participants;
+                document.getElementById('editTrainingStatus').value = status || 'Scheduled';
+                document.getElementById('editTrainingMaterials').value = materials || '';
+                document.getElementById('editTrainingAssignedToUserId').value = assignedtouserid || '';
+
+                // Show Edit Modal
+                const editModal = new bootstrap.Modal(document.getElementById('editTrainingModal'));
+                editModal.show();
+            });
+        });
+    </script>
+</body>
+</html>

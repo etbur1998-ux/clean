@@ -1,0 +1,135 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.Manager.TasksModel
+@{
+    Layout = null;
+    var userName = HttpContext.Session.GetString("UserName");
+    if (userName == null) { Response.Redirect("/Login"); return; }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tasks - Manager - Yeka Cleaning</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+</head>
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/Dashboard/Manager"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+            <div class="nav-user">
+                <span>Welcome, @userName</span>
+                <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top d-lg-none">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" onclick="toggleSidebar()">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/Dashboard/Manager"><i class="bi bi-droplet-fill"></i> Yeka</a>
+            <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-left me-2"></i></a>
+        </div>
+    </nav>
+    <nav id="sidebarMenu" class="sidebar d-lg-none">
+        @await Html.PartialAsync("~/Pages/Dashboard/Manager/_Sidebar.cshtml")
+    </nav>
+    <nav class="col-md-3 col-lg-2 d-none d-md-block sidebar" style="transform: none; padding-top: 56px;">
+        @await Html.PartialAsync("~/Pages/Dashboard/Manager/_Sidebar.cshtml")
+    </nav>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 pt-lg-5" style="margin-top: 56px;">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="bi bi-clipboard-check me-2"></i>Task Management</h1>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white pb-0">
+                <h5 class="card-title mt-2"><i class="bi bi-plus-circle me-2"></i>Add New Task</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="Create">
+                    @Html.AntiForgeryToken()
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Task Number <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="TaskNumber" required placeholder="TSK-001" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Task Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="TaskDate" required value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Priority</label>
+                            <select class="form-select" name="Priority">
+                                <option value="Low">Low</option>
+                                <option value="Normal" selected>Normal</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Description <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="Description" rows="2" required placeholder="Enter task details..."></textarea>
+                        </div>
+                        <div class="col-12 text-end mt-3">
+                            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check2-circle me-2"></i>Save Task</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Task #</th>
+                                <th>Date</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var task in Model.TasksList)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@task.task_number</td>
+                                    <td><i class="bi bi-calendar me-1"></i>@task.task_date.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        @if(task.priority == "High") { <span class="badge bg-danger">@task.priority</span> }
+                                        else if(task.priority == "Low") { <span class="badge bg-info">@task.priority</span> }
+                                        else { <span class="badge bg-secondary">@task.priority</span> }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning text-dark">@task.status</span>
+                                    </td>
+                                    <td><span class="text-muted small">@task.description</span></td>
+                                </tr>
+                            }
+                            @if(Model.TasksList.Count == 0) {
+                                <tr><td colspan="5" class="text-center py-4 text-muted">No tasks found.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('show');
+            document.getElementById('sidebarBackdrop').classList.toggle('show');
+        }
+    </script>
+</body>
+</html>

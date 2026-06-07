@@ -1,0 +1,535 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.SuperAdmin.PostModel
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    if (userName == null) { Response.Redirect("/Login"); return; }
+
+    string StatusBadge(string s) => s switch {
+        "Published" => "bg-success",
+        "Draft"     => "bg-secondary",
+        "Deleted"   => "bg-danger",
+        _           => "bg-secondary"
+    };
+    string CatBadge(string c) => c switch {
+        "Blog"         => "bg-success",
+        "Notice"       => "bg-primary",
+        "Announcement" => "bg-warning text-dark",
+        "Training"     => "bg-info text-dark",
+        "Policy"       => "bg-dark",
+        _              => "bg-secondary"
+    };
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>Post / Blog Management – Yeka Cleaning</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <link rel="stylesheet" href="~/css/dashboard.css"/>
+</head>
+<body>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+<nav class="navbar navbar-dark dashboard-navbar fixed-top d-none d-lg-flex">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/Dashboard/SuperAdmin">
+            <i class="bi bi-droplet-fill"></i> Yeka Cleaning
+        </a>
+        <div class="nav-user">
+            <span>@userName</span>
+            <a class="btn-logout" href="/Login?logout=1">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
+    </div>
+</nav>
+<nav class="navbar navbar-dark dashboard-navbar fixed-top d-lg-none">
+    <div class="container-fluid">
+        <button class="navbar-toggler" onclick="toggleSidebar()">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <a class="navbar-brand" href="/Dashboard/SuperAdmin">
+            <i class="bi bi-droplet-fill"></i> Yeka
+        </a>
+        <a class="btn-logout" href="/Login?logout=1">
+            <i class="bi bi-box-arrow-left"></i>
+        </a>
+    </div>
+</nav>
+<nav id="sidebarMenu" class="sidebar d-lg-none">
+    @await Html.PartialAsync("~/Pages/Dashboard/SuperAdmin/_Sidebar.cshtml")
+</nav>
+<nav class="col-md-3 col-lg-2 d-none d-md-block sidebar" style="transform:none;padding-top:56px">
+    @await Html.PartialAsync("~/Pages/Dashboard/SuperAdmin/_Sidebar.cshtml")
+</nav>
+
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 pt-lg-5" style="margin-top:56px">
+
+    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom flex-wrap gap-2">
+        <h1 class="h2 mb-0">
+            <i class="bi bi-journal-richtext me-2 text-primary"></i>Blog &amp; Post Management
+        </h1>
+        <div class="d-flex gap-2">
+            <a href="/Blog" target="_blank" class="btn btn-outline-success btn-sm">
+                <i class="bi bi-box-arrow-up-right me-1"></i>View Public Blog
+            </a>
+            <button class="btn btn-primary btn-sm"
+                    data-bs-toggle="modal" data-bs-target="#modalCreate">
+                <i class="bi bi-plus-circle me-1"></i>New Blog Post
+            </button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show py-2">
+            <i class="bi bi-check-circle-fill me-1"></i>@Model.SuccessMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show py-2">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i>@Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Stats -->
+    <div class="d-flex gap-2 flex-wrap mb-3">
+        <span class="badge bg-primary px-3 py-2">Total: @Model.Posts.Count</span>
+        <span class="badge bg-success px-3 py-2">
+            Published (on Blog): @Model.Posts.Count(p => p.Status == "Published" && p.TargetRole == "All")
+        </span>
+        <span class="badge bg-secondary px-3 py-2">Draft: @Model.Posts.Count(p => p.Status == "Draft")</span>
+    </div>
+
+    <!-- Filter -->
+    <div class="d-flex gap-2 flex-wrap mb-3">
+        <form method="get" class="d-flex gap-2">
+            @foreach (var cat in new[]{"","Blog","Notice","Announcement","Training","Policy"})
+            {
+                <a href="/Dashboard/SuperAdmin/Post@(cat != "" ? "?FilterCategory="+cat : "")"
+                   class="btn btn-sm @(Model.FilterCategory == cat ? "btn-primary" : "btn-outline-secondary")">
+                    @(cat == "" ? "All" : cat)
+                </a>
+            }
+        </form>
+    </div>
+
+    <!-- Posts Table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size:.85rem">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width:80px">Images</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Audience</th>
+                        <th>Status</th>
+                        <th>Pinned</th>
+                        <th>Date</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (!Model.Posts.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            No posts yet. Click <strong>New Blog Post</strong> to create one.
+                        </td>
+                    </tr>
+                }
+                @foreach (var p in Model.Posts)
+                {
+                    <tr>
+                        <td>
+                            @if (!string.IsNullOrEmpty(p.ImageUrl))
+                            {
+                                var imgUrls = p.ImageUrl.Split(',').Select(u => u.Trim()).Where(u => !string.IsNullOrEmpty(u));
+                                @foreach (var img in imgUrls.Take(3))
+                                {
+                                    <img src="@img" width="40" height="35"
+                                         style="object-fit:cover;border-radius:6px;margin-right:2px"
+                                         onerror="this.style.display='none'"/>
+                                }
+                                @if (imgUrls.Count() > 3) { <span class="badge bg-light">+@(imgUrls.Count()-3)</span> }
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center"
+                                     style="width:50px;height:40px">
+                                    <i class="bi bi-image text-muted small"></i>
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            @if (p.IsPinned)
+                            {
+                                <i class="bi bi-pin-angle-fill text-danger me-1"></i>
+                            }
+                            <span class="fw-semibold">@p.Title</span>
+                            <div class="text-muted small" style="max-width:300px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                                @p.Content
+                            </div>
+                        </td>
+                        <td><span class="badge @CatBadge(p.Category)">@p.Category</span></td>
+                        <td>
+                            @if (p.TargetRole == "All")
+                            {
+                                <span class="badge bg-light text-dark border">🌐 Public</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-dark">@p.TargetRole</span>
+                            }
+                        </td>
+                        <td><span class="badge @StatusBadge(p.Status)">@p.Status</span></td>
+                        <td class="text-center">
+                            @if (p.IsPinned) { <i class="bi bi-pin-fill text-danger"></i> }
+                        </td>
+                        <td class="small text-muted">@p.CreatedAt?.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            <div class="d-flex gap-1 justify-content-center flex-wrap">
+                                <!-- Edit -->
+                                <button class="btn btn-sm btn-outline-warning"
+                                        title="Edit"
+                                        onclick="fillEdit(
+                                            @p.Id,
+                                            @Html.Raw(System.Text.Json.JsonSerializer.Serialize(p.Title)),
+                                            @Html.Raw(System.Text.Json.JsonSerializer.Serialize(p.Category)),
+                                            @Html.Raw(System.Text.Json.JsonSerializer.Serialize(p.Content)),
+                                            @Html.Raw(System.Text.Json.JsonSerializer.Serialize(p.Status)),
+                                            @Html.Raw(System.Text.Json.JsonSerializer.Serialize(p.TargetRole)),
+                                            @Html.Raw(System.Text.Json.JsonSerializer.Serialize(p.ImageUrl ?? "")),
+                                            @(p.IsPinned ? "true" : "false"),
+                                            @Html.Raw(System.Text.Json.JsonSerializer.Serialize(p.Priority))
+                                        )"
+                                        data-bs-toggle="modal" data-bs-target="#modalEdit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                @if (p.Status != "Published")
+                                {
+                                    <!-- Publish to Blog -->
+                                    <form method="post" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="action" value="publish"/>
+                                        <input type="hidden" name="Id"     value="@p.Id"/>
+                                        <button type="submit" class="btn btn-sm btn-success"
+                                                title="Publish to Public Blog"
+                                                onclick="return confirm('Publish to public blog?')">
+                                            <i class="bi bi-globe"></i> Publish
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <!-- Unpublish -->
+                                    <form method="post" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="action" value="unpublish"/>
+                                        <input type="hidden" name="Id"     value="@p.Id"/>
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary"
+                                                title="Move to Draft">
+                                            <i class="bi bi-eye-slash"></i>
+                                        </button>
+                                    </form>
+                                    <a href="/Blog" target="_blank"
+                                       class="btn btn-sm btn-outline-success" title="View on Blog">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                    </a>
+                                }
+                                <!-- Delete -->
+                                <form method="post" class="m-0"
+                                      onsubmit="return confirm('Delete this post?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="action" value="delete"/>
+                                    <input type="hidden" name="Id"     value="@p.Id"/>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<!-- CREATE POST MODAL -->
+<div class="modal fade" id="modalCreate" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="action" value="create"/>
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-plus-circle me-1"></i> Create Blog Post / Announcement
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body row g-3">
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Title *</label>
+                        <input class="form-control" name="Title" required
+                               placeholder="Enter post title…"/>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Category *</label>
+                        <select class="form-select" name="Category" required>
+                            <option value="Blog">Blog</option>
+                            <option value="Notice">Notice</option>
+                            <option value="Announcement">Announcement</option>
+                            <option value="Training">Training</option>
+                            <option value="Policy">Policy</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Status</label>
+                        <select class="form-select" name="Status">
+                            <option value="Draft">Draft (not visible)</option>
+                            <option value="Published">Published (visible on /Blog)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Audience</label>
+                        <select class="form-select" name="TargetRole">
+                            <option value="All">🌐 All (Public Blog)</option>
+                            <option value="staff">Staff Only</option>
+                            <option value="driver">Drivers Only</option>
+                            <option value="manager">Managers Only</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Content *</label>
+                        <textarea class="form-control" name="PostContent" rows="6"
+                                  required placeholder="Write your post content here…"></textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">
+                            Cover Images <small class="text-muted">(upload multiple files or paste URL)</small>
+                        </label>
+                        <input type="file" class="form-control mb-2" name="ImageFiles"
+                               accept="image/*" multiple onchange="previewMultiple(this)"/>
+                        <input type="text" class="form-control" name="ImageUrl"
+                               placeholder="Or paste image URL (comma-separated for multiple)…"/>
+                        <div class="mt-2 text-center" id="createPreviews"></div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Priority</label>
+                        <select class="form-select" name="Priority">
+                            <option value="Normal">Normal</option>
+                            <option value="High">High</option>
+                            <option value="Critical">Critical</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="IsPinned"
+                                   value="true" id="createPinned"/>
+                            <label class="form-check-label fw-semibold" for="createPinned">
+                                📌 Pin (feature at top)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i>Save Post
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT POST MODAL -->
+<div class="modal fade" id="modalEdit" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="action" value="update"/>
+                <input type="hidden" name="Id"     id="eId"/>
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil-square me-1"></i> Edit Post
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Title *</label>
+                        <input class="form-control" name="Title" id="eTitle" required/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Category</label>
+                        <select class="form-select" name="Category" id="eCat">
+                            <option value="Blog">Blog</option>
+                            <option value="Notice">Notice</option>
+                            <option value="Announcement">Announcement</option>
+                            <option value="Training">Training</option>
+                            <option value="Policy">Policy</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Status</label>
+                        <select class="form-select" name="Status" id="eStatus">
+                            <option value="Draft">Draft</option>
+                            <option value="Published">Published (visible on /Blog)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Audience</label>
+                        <select class="form-select" name="TargetRole" id="eRole">
+                            <option value="All">🌐 All (Public Blog)</option>
+                            <option value="staff">Staff Only</option>
+                            <option value="driver">Drivers Only</option>
+                            <option value="manager">Managers Only</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Content *</label>
+                        <textarea class="form-control" name="PostContent" id="eContent"
+                                  rows="6" required></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Cover Images</label>
+                        <div class="mb-2" id="eCurrentImgs"></div>
+                        <input type="file" class="form-control mb-2" name="ImageFiles"
+                               accept="image/*" multiple onchange="previewMultipleEdit(this)"/>
+                        <input type="text" class="form-control" name="ImageUrl" id="eImgUrl"
+                               placeholder="Or paste image URL (comma-separated for multiple)…"/>
+                        <small class="text-muted">Leave blank to keep existing images. New uploads are added to existing ones.</small>
+                        <div class="mt-2 text-center" id="editPreviews"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Priority</label>
+                        <select class="form-select" name="Priority" id="ePriority">
+                            <option value="Normal">Normal</option>
+                            <option value="High">High</option>
+                            <option value="Critical">Critical</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="IsPinned"
+                                   value="true" id="ePinned"/>
+                            <label class="form-check-label fw-semibold" for="ePinned">
+                                📌 Pin (feature at top)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-save me-1"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleSidebar(){
+    document.getElementById('sidebarMenu').classList.toggle('show');
+    document.getElementById('sidebarBackdrop').classList.toggle('show');
+}
+
+function previewMultiple(input) {
+    var container = document.getElementById('createPreviews');
+    container.innerHTML = '';
+    if (input.files) {
+        for (var i = 0; i < input.files.length; i++) {
+            var file = input.files[i];
+            if (file.type.startsWith('image/')) {
+                var r = new FileReader();
+                r.onload = (function(file) { return function(e) {
+                    var img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxHeight = '80px';
+                    img.style.borderRadius = '8px';
+                    img.style.margin = '5px';
+                    img.style.border = '1px solid #dee2e6';
+                    container.appendChild(img);
+                }; })(file);
+                r.readAsDataURL(file);
+            }
+        }
+    }
+}
+
+function previewMultipleEdit(input) {
+    var container = document.getElementById('editPreviews');
+    container.innerHTML = '';
+    if (input.files) {
+        for (var i = 0; i < input.files.length; i++) {
+            var file = input.files[i];
+            if (file.type.startsWith('image/')) {
+                var r = new FileReader();
+                r.onload = (function(file) { return function(e) {
+                    var img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxHeight = '80px';
+                    img.style.borderRadius = '8px';
+                    img.style.margin = '5px';
+                    img.style.border = '1px solid #dee2e6';
+                    container.appendChild(img);
+                }; })(file);
+                r.readAsDataURL(file);
+            }
+        }
+    }
+}
+
+function fillEdit(id, title, cat, content, status, role, imgUrl, pinned, priority) {
+    document.getElementById('eId').value       = id;
+    document.getElementById('eTitle').value    = title;
+    document.getElementById('eCat').value      = cat;
+    document.getElementById('eStatus').value   = status;
+    document.getElementById('eRole').value     = role;
+    document.getElementById('eContent').value  = content;
+    document.getElementById('ePriority').value = priority;
+    document.getElementById('ePinned').checked = pinned;
+    document.getElementById('eImgUrl').value   = imgUrl || '';
+
+    var cur = document.getElementById('eCurrentImgs');
+    if (imgUrl) {
+        var urls = imgUrl.split(',').map(u => u.trim()).filter(u => u);
+        var html = '<div class="d-flex flex-wrap">';
+        for (var i = 0; i < urls.length; i++) {
+            html += '<img src="' + urls[i] + '" style="max-height:60px;border-radius:6px;border:1px solid #dee2e6;margin:2px" onerror="this.style.display=\'none\'"/>';
+        }
+        html += '<small class="ms-2 text-muted align-self-center">Current images</small></div>';
+        cur.innerHTML = html;
+    } else {
+        cur.innerHTML = '<small class="text-muted">No images currently set.</small>';
+    }
+    document.getElementById('editPreviews').innerHTML = '';
+}
+</script>
+</body>
+</html>

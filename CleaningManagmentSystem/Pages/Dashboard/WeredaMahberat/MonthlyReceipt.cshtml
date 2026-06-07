@@ -1,0 +1,297 @@
+@page
+@model CleaningManagmentSystem.Pages.Dashboard.WeredaMahberat.MonthlyReceiptModel
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    if (userName == null) { Response.Redirect("/Login"); return; }
+
+    var allReceipts  = Model.Receipts?.ToList() ?? new List<CleaningManagmentSystem.Models.MonthlyReceipt>();
+    var paidList     = allReceipts.Where(r => r.Status == "Paid" || r.Status == "Approved" || r.Status == "Verified" || r.Status == "Billed").ToList();
+    var pendingList  = allReceipts.Where(r => r.Status != "Paid" && r.Status != "Approved" && r.Status != "Verified" && r.Status != "Billed").ToList();
+    var totalAmount  = paidList.Sum(r => r.TotalAmount);
+    var totalPaid    = paidList.Where(r => r.Status == "Paid" || r.Status == "Billed").Sum(r => r.PaidAmount);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monthly Receipt Management - Yeka Cleaning</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+    <style>
+        .bill-header { background: linear-gradient(135deg, #059669, #0d9488); }
+        .stat-pill { border-radius: 12px; padding: 14px 18px; }
+        .bill-table th { background: linear-gradient(135deg,#059669,#0d9488); color:#fff; font-size:.8rem; padding:10px 12px; }
+        .bill-table td { font-size:.82rem; padding:9px 12px; vertical-align:middle; }
+        .bill-table tr:nth-child(even) td { background:#f0fdf4; }
+        .bill-table tr:hover td { background:#d1fae5; }
+        .status-paid { background:#059669;color:#fff;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700 }
+        .status-approved { background:#10b981;color:#fff;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700 }
+        .status-pending { background:#f59e0b;color:#fff;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700 }
+        .section-title { font-weight:800;font-size:.95rem;color:#1e293b;display:flex;align-items:center;gap:8px;margin-bottom:10px }
+    </style>
+</head>
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/Dashboard/WeredaMahberat"><i class="bi bi-droplet-fill"></i> Yeka Cleaning</a>
+            <div class="nav-user">
+                <span>Welcome, @userName</span>
+                <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+    <nav class="navbar navbar-dark dashboard-navbar fixed-top d-lg-none">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" onclick="toggleSidebar()"><span class="navbar-toggler-icon"></span></button>
+            <a class="navbar-brand" href="/Dashboard/WeredaMahberat"><i class="bi bi-droplet-fill"></i> Yeka</a>
+            <a class="btn-logout" href="/Login?logout=1"><i class="bi bi-box-arrow-right"></i></a>
+        </div>
+    </nav>
+
+    <nav id="sidebarMenu" class="sidebar d-lg-none">
+        @await Html.PartialAsync("~/Pages/Dashboard/WeredaMahberat/_Sidebar.cshtml")
+    </nav>
+    <nav class="col-md-3 col-lg-2 d-none d-md-block sidebar" style="transform:none;padding-top:56px;">
+        @await Html.PartialAsync("~/Pages/Dashboard/WeredaMahberat/_Sidebar.cshtml")
+    </nav>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 pt-lg-5">
+
+        <!-- Page header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+            <div>
+                <h2 class="mb-0 fw-bold"><i class="bi bi-receipt-cutoff me-2 text-success"></i>Monthly Receipt Management</h2>
+                <small class="text-muted">All completed & paid transport bills</small>
+            </div>
+            <span class="badge bg-success px-3 py-2">Wereda Mahberat</span>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show"><i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show"><i class="bi bi-x-circle me-2"></i>@TempData["ErrorMessage"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+        }
+
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="stat-pill bg-white shadow-sm border border-success-subtle text-center">
+                    <div class="fs-3 fw-bold text-success">@paidList.Count</div>
+                    <div class="small text-muted">Completed Bills</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-pill bg-white shadow-sm border border-warning-subtle text-center">
+                    <div class="fs-3 fw-bold text-warning">@pendingList.Count</div>
+                    <div class="small text-muted">Pending</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-pill bg-white shadow-sm border border-primary-subtle text-center">
+                    <div class="fs-4 fw-bold text-primary">ETB @totalAmount.ToString("N0")</div>
+                    <div class="small text-muted">Total Amount</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-pill bg-white shadow-sm border border-info-subtle text-center">
+                    <div class="fs-4 fw-bold text-info">ETB @totalPaid.ToString("N0")</div>
+                    <div class="small text-muted">Total Paid</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ COMPLETED BILLS TABLE ══ -->
+        <div class="section-title">
+            <i class="bi bi-receipt-cutoff text-success fs-5"></i> Completed Bills
+            <span class="badge bg-success rounded-pill">@paidList.Count</span>
+        </div>
+        <div class="bg-white rounded-3 shadow-sm border border-success-subtle overflow-hidden mb-4">
+            @if (paidList.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover bill-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Request / Receipt No</th>
+                                <th>Month</th>
+                                <th>Source / Route</th>
+                                <th class="text-center">Amount (ETB)</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int rowNum = 1; }
+                            @foreach (var item in paidList)
+                            {
+                                <tr>
+                                    <td class="text-muted fw-semibold">@(rowNum++)</td>
+                                    <td>
+                                        <span class="fw-bold" style="font-family:monospace;color:#059669">@item.ReceiptNumber</span>
+                                    </td>
+                                    <td><span class="text-muted">@item.Month @item.Year</span></td>
+                                    <td style="max-width:260px">
+                                        <small class="text-secondary">@item.Source</small>
+                                    </td>
+                                    <td class="text-center fw-bold text-success">
+                                        @item.TotalAmount.ToString("N2")
+                                    </td>
+                                    <td class="text-center">
+                                        @if (item.Status == "Paid")
+                                        {
+                                            <span class="status-paid">✓ PAID</span>
+                                        }
+                                        else if (item.Status == "Approved")
+                                        {
+                                            <span class="status-approved">✓ APPROVED</span>
+                                        }
+                                        else if (item.Status == "Billed")
+                                        {
+                                            <span style="background:#1d4ed8;color:#fff;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700">✓ BILLED</span>
+                                        }
+                                        else
+                                        {
+                                            <span style="background:#6366f1;color:#fff;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700">✓ VERIFIED</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-success px-3"
+                                                onclick="printBillRow('@item.ReceiptNumber','@item.Month @item.Year','@item.Source.Replace("'","")','@item.TotalAmount.ToString("N2")','@item.Status')">
+                                            <i class="bi bi-printer me-1"></i>Print
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-success">
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold">Total:</td>
+                                <td class="text-center fw-bold text-success fs-6">ETB @totalPaid.ToString("N2")</td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-receipt display-4 opacity-25 d-block mb-2"></i>
+                    No completed bills yet. Bills appear here after transport requests are paid.
+                </div>
+            }
+        </div>
+
+        <!-- ══ PENDING / OTHER ══ -->
+        @if (pendingList.Any())
+        {
+            <div class="section-title mt-4">
+                <i class="bi bi-hourglass-split text-warning fs-5"></i> Pending Receipts
+                <span class="badge bg-warning rounded-pill text-dark">@pendingList.Count</span>
+            </div>
+            <div class="bg-white rounded-3 shadow-sm border border-warning-subtle overflow-hidden mb-4">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" style="font-size:.83rem">
+                        <thead class="table-warning">
+                            <tr>
+                                <th>#</th>
+                                <th>Receipt No</th>
+                                <th>Month</th>
+                                <th>Source</th>
+                                <th class="text-center">Amount</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int pNum = 1; }
+                            @foreach (var item in pendingList)
+                            {
+                                <tr>
+                                    <td class="text-muted">@(pNum++)</td>
+                                    <td class="fw-bold" style="font-family:monospace">@item.ReceiptNumber</td>
+                                    <td>@item.Month @item.Year</td>
+                                    <td style="max-width:220px"><small>@item.Source</small></td>
+                                    <td class="text-center fw-semibold">ETB @item.TotalAmount.ToString("N2")</td>
+                                    <td class="text-center">
+                                        <span class="status-pending">@item.Status</span>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (item.Status == "Pending")
+                                        {
+                                            <form method="post" asp-page-handler="ApproveLevel1" class="d-inline">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <button type="submit" class="btn btn-sm btn-success px-2">
+                                                    <i class="bi bi-check-circle me-1"></i>Approve
+                                                </button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+    </main>
+
+    <!-- Print Bill Modal -->
+    <div class="modal fade" id="printModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bill-header text-white">
+                    <h5 class="modal-title w-100 text-center fw-bold"><i class="bi bi-receipt me-2"></i>PAYMENT RECEIPT</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" id="printBillBody"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-success" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('show');
+            document.getElementById('sidebarBackdrop').classList.toggle('show');
+        }
+
+        function printBillRow(no, period, source, amount, status) {
+            const now = new Date().toLocaleDateString();
+            document.getElementById('printBillBody').innerHTML = `
+                <div style="font-size:.9rem;border:2px solid #059669;border-radius:10px;padding:20px">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div><strong>Yeka Cleaning Services</strong><br><small class="text-muted">Wereda Mahberat</small></div>
+                        <div class="text-end"><small class="text-muted">Date: ${now}</small></div>
+                    </div>
+                    <hr>
+                    <table class="table table-sm table-bordered mb-3">
+                        <tr><th class="bg-light" style="width:40%">Receipt No</th><td class="fw-bold text-success" style="font-family:monospace">${no}</td></tr>
+                        <tr><th class="bg-light">Period</th><td>${period}</td></tr>
+                        <tr><th class="bg-light">Source / Details</th><td><small>${source}</small></td></tr>
+                        <tr><th class="bg-light">Amount</th><td class="fw-bold text-success fs-5">ETB ${amount}</td></tr>
+                        <tr><th class="bg-light">Status</th><td><span style="background:#059669;color:#fff;padding:2px 10px;border-radius:10px;font-size:.8rem">${status}</span></td></tr>
+                    </table>
+                    <div class="text-center text-muted small mt-2">
+                        <i class="bi bi-check-circle-fill text-success me-1"></i>This receipt is verified and complete.
+                    </div>
+                </div>`;
+            new bootstrap.Modal(document.getElementById('printModal')).show();
+        }
+    </script>
+</body>
+</html>

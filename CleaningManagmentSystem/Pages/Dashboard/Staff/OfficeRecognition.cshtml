@@ -1,0 +1,211 @@
+@page
+@{
+    var userName = HttpContext.Session.GetString("UserName");
+    var userRole = HttpContext.Session.GetString("UserRole");
+    
+    if (userName == null)
+    {
+        Response.Redirect("/Login");
+        return;
+    }
+    Layout = "/Pages/Dashboard/Staff/_StaffLayout.cshtml";
+}
+
+<div class="main-content p-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-award me-2"></i>Office Recognition</h1>
+        <button class="btn btn-primary btn-sm"><i class="bi bi-plus-circle me-2"></i>Award Certificate</button>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-trophy display-4 text-warning"></i>
+                    <h4 class="mt-2">15</h4>
+                    <p class="text-muted mb-0">Total Awards</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-star display-4 text-success"></i>
+                    <h4 class="mt-2">8</h4>
+                    <p class="text-muted mb-0">This Year</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-people display-4 text-info"></i>
+                    <h4 class="mt-2">12</h4>
+                    <p class="text-muted mb-0">Recipients</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-check display-4 text-primary"></i>
+                    <h4 class="mt-2">3</h4>
+                    <p class="text-muted mb-0">Upcoming</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Award Recipients</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Recipient</th>
+                                    <th>Award</th>
+                                    <th>Reason</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-success rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                                <span class="text-white">TG</span>
+                                            </div>
+                                            <strong>Tigist Girma</strong>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-warning text-dark">Employee of Month</span></td>
+                                    <td>Outstanding service quality</td>
+                                    <td>Apr 2026</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-success"><i class="bi bi-download"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-info rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                                <span class="text-white">AK</span>
+                                            </div>
+                                            <strong>Alemayehu Kassa</strong>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-primary">Best Team Leader</span></td>
+                                    <td>Excellent leadership</td>
+                                    <td>Mar 2026</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-success"><i class="bi bi-download"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                                <span class="text-white">HT</span>
+                                            </div>
+                                            <strong>Haftom Tesfay</strong>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success">Outstanding Staff</span></td>
+                                    <td>Consistent excellence</td>
+                                    <td>Mar 2026</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-success"><i class="bi bi-download"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-warning rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                                <span class="text-white">SA</span>
+                                            </div>
+                                            <strong>Seble Abebe</strong>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-info">Innovation Award</span></td>
+                                    <td>Process improvement</td>
+                                    <td>Feb 2026</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-success"><i class="bi bi-download"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-event display-4 text-primary"></i>
+                    <h4 class="mt-2">Upcoming Awards</h4>
+                    <p class="text-muted mb-0">Next 30 days</p>
+                    <div class="mt-4 text-start">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Employee of Month</span>
+                            <span class="badge bg-warning">May 5</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Service Excellence</span>
+                            <span class="badge bg-info">May 12</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Team Leadership</span>
+                            <span class="badge bg-primary">May 20</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Recognition Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Employee of Month</span>
+                        <span class="badge bg-warning">3</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-warning" style="width: 20%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Team Leadership</span>
+                        <span class="badge bg-primary">5</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-primary" style="width: 33%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Outstanding Staff</span>
+                        <span class="badge bg-success">4</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-success" style="width: 27%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Innovation</span>
+                        <span class="badge bg-info">3</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-info" style="width: 20%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
