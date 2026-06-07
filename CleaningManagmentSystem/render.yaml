@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: yeka-cleaning-web
+    runtime: docker
+    dockerfilePath: ./CleaningManagmentSystem/Dockerfile
+    dockerContext: ./CleaningManagmentSystem
+    plan: free
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        sync: false   # set manually in Render dashboard

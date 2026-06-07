@@ -1,0 +1,25 @@
+# .NET build artifacts
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Flutter build artifacts
+cleanapp/build/
+cleanapp/.dart_tool/
+cleanapp/.flutter-plugins
+cleanapp/.flutter-plugins-dependencies
+
+# Environment / secrets
+appsettings.Development.json
+*.env
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Rider / VS Code
+.idea/
+.vscode/

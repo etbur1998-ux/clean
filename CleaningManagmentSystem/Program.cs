@@ -2,35 +2,11 @@ using Microsoft.AspNetCore.Http;
 using CleaningManagmentSystem.Data;
 using CleaningManagmentSystem.Services;
 
-// ── Kill any process already using port 5000 before we try to bind ─────────
-try
-{
-    var psi = new System.Diagnostics.ProcessStartInfo("netstat", "-ano")
-        { RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true };
-    using var proc = System.Diagnostics.Process.Start(psi)!;
-    var lines = (await proc.StandardOutput.ReadToEndAsync()).Split('\n');
-    foreach (var line in lines)
-    {
-        if (line.Contains(":5000") && line.Contains("LISTENING"))
-        {
-            var parts = line.Trim().Split(new[]{' '}, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length > 0 && int.TryParse(parts[^1], out int pid) && pid > 0
-                && pid != System.Diagnostics.Process.GetCurrentProcess().Id)
-            {
-                Console.WriteLine($"[Startup] Freeing port 5000 (killing PID {pid})...");
-                try { System.Diagnostics.Process.GetProcessById(pid).Kill(entireProcessTree: true); }
-                catch { /* already gone */ }
-            }
-        }
-    }
-    await Task.Delay(800); // let OS release the socket
-}
-catch { /* netstat not available — continue anyway */ }
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Bind to port 5000 explicitly
-builder.WebHost.UseUrls("http://0.0.0.0:5000");
+// Bind URL (Render sets PORT, local dev uses 5000)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -114,5 +90,6 @@ app.MapGet("/Dashboard/Staff", (HttpContext context) =>
 app.MapRazorPages();
 app.MapControllers(); // Added for Mobile API
 
-Console.WriteLine("[Startup] Application running on http://0.0.0.0:5000 (all interfaces)");
-app.Run("http://0.0.0.0:5000");
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+Console.WriteLine($"[Startup] Application running on http://0.0.0.0:{port} (all interfaces)");
+app.Run();
