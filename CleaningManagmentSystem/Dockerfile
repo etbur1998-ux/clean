@@ -6,7 +6,7 @@ COPY ["CleaningManagmentSystem.csproj", "."]
 RUN dotnet restore "CleaningManagmentSystem.csproj"
 
 COPY . ./
-RUN dotnet publish -c Release -o /app/publish --no-restore
+RUN dotnet publish "CleaningManagmentSystem.csproj" -c Release -o /app/publish
 
 # ── Runtime stage ────────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
