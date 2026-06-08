@@ -34,9 +34,10 @@
         if (mRejected || sRejected)
         {
             var who = mRejected ? "Mahberat" : "Staff";
+            string level = mRejected ? "1" : "2";
             return $@"<div class=""d-flex align-items-center gap-2 py-1"">
                 <span class=""badge bg-danger px-3 py-2""><i class=""bi bi-x-circle me-1""></i>Rejected by {who}</span>
-                <small class=""text-muted"">This receipt was rejected at Level {(mRejected ? "1" : "2")} and closed.</small>
+                <small class=""text-muted"">This receipt was rejected at Level {level} and closed.</small>
             </div>";
         }
 
