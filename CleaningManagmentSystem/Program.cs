@@ -110,6 +110,5 @@ app.MapGet("/Dashboard/Staff", (HttpContext context) =>
 app.MapRazorPages();
 app.MapControllers(); // Added for Mobile API
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 Console.WriteLine($"[Startup] Application running on http://0.0.0.0:{port} (all interfaces)");
 app.Run();
