@@ -3,7 +3,6 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 COPY ["CleaningManagmentSystem.csproj", "."]
-COPY ["Models/Models.csproj", "Models/"]
 RUN dotnet restore "CleaningManagmentSystem.csproj"
 
 COPY . ./
