@@ -1,4 +1,5 @@
 services:
+  # ── .NET Web Application ─────────────────────────────────────────────────
   - type: web
     name: yeka-cleaning-web
     runtime: docker
@@ -8,5 +9,13 @@ services:
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
-      - key: ConnectionStrings__DefaultConnection
-        sync: false   # set manually in Render dashboard
+      - key: DB_HOST
+        value: mysql-2bfe5358-yekaclean.g.aivencloud.com
+      - key: DB_PORT
+        value: "17665"
+      - key: DB_NAME
+        value: defaultdb
+      - key: DB_USER
+        value: avnadmin
+      - key: DB_PASSWORD
+        sync: false  # set manually in Render dashboard with your Aiven password

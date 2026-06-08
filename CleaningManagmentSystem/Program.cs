@@ -8,6 +8,26 @@ var builder = WebApplication.CreateBuilder(args);
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
+// Build connection string from env vars (Render) or use appsettings (local)
+var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
+var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "3306";
+var dbName = Environment.GetEnvironmentVariable("DB_NAME")
+    ?? Environment.GetEnvironmentVariable("MYSQL_DATABASE")
+    ?? "yeka_cleaning";
+var dbUser = Environment.GetEnvironmentVariable("DB_USER")
+    ?? Environment.GetEnvironmentVariable("MYSQL_USER")
+    ?? "yeka_user";
+var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD")
+    ?? Environment.GetEnvironmentVariable("MYSQL_PASSWORD")
+    ?? "";
+
+if (!string.IsNullOrEmpty(dbHost))
+{
+    var connStr = $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};SslMode=Required;AllowPublicKeyRetrieval=true;";
+    builder.Configuration["ConnectionStrings:DefaultConnection"] = connStr;
+    Console.WriteLine($"[Startup] Using DB: {dbHost}:{dbPort}/{dbName}");
+}
+
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddControllers(); // Added for Mobile API
