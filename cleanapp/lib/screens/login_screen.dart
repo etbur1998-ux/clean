@@ -16,7 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscure = true;
   bool _loading = false;
 
-  final _quickLogins = [
+final _quickLogins = [
     {
       'label': 'Driver',
       'icon': Icons.local_shipping_rounded,
@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
       'pass': 'outsource123',
     },
     {
-      'label': 'Private',
+      'label': 'Private Co.',
       'icon': Icons.cleaning_services_rounded,
       'email': 'private@yeka.et',
       'pass': 'private123',
