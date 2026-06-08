@@ -1,11 +1,16 @@
 {
   "version": 2,
-  "dgSpecHash": "nG18iWv1H4g=",
+  "dgSpecHash": "BOJnEk5tjJo=",
   "success": true,
-  "projectFilePath": "C:\\Users\\mezig\\Music\\eccc\\yeka-main\\CleaningManagmentSystem\\CleaningManagmentSystem.csproj",
+  "projectFilePath": "C:\\Users\\mezig\\Downloads\\Telegram Desktop\\yeka-main\\yeka-main\\CleaningManagmentSystem\\CleaningManagmentSystem.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mezig\\.nuget\\packages\\dapper\\2.1.35\\dapper.2.1.35.nupkg.sha512",
-    "C:\\Users\\mezig\\.nuget\\packages\\mysqlconnector\\2.3.7\\mysqlconnector.2.3.7.nupkg.sha512"
+    "C:\\Users\\mezig\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\7.0.1\\microsoft.extensions.logging.abstractions.7.0.1.nupkg.sha512",
+    "C:\\Users\\mezig\\.nuget\\packages\\mysqlconnector\\2.3.7\\mysqlconnector.2.3.7.nupkg.sha512",
+    "C:\\Users\\mezig\\.nuget\\packages\\microsoft.netcore.app.ref\\9.0.16\\microsoft.netcore.app.ref.9.0.16.nupkg.sha512",
+    "C:\\Users\\mezig\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\9.0.16\\microsoft.windowsdesktop.app.ref.9.0.16.nupkg.sha512",
+    "C:\\Users\\mezig\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\9.0.16\\microsoft.aspnetcore.app.ref.9.0.16.nupkg.sha512",
+    "C:\\Users\\mezig\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\9.0.16\\microsoft.netcore.app.host.win-x64.9.0.16.nupkg.sha512"
   ],
   "logs": []
 }

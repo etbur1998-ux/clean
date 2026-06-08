@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mezig\\Music\\eccc\\yeka-main\\CleaningManagmentSystem\\Scripts\\RunDbMigration.csproj": {}
+    "C:\\Users\\mezig\\Downloads\\Telegram Desktop\\yeka-main\\yeka-main\\CleaningManagmentSystem\\Scripts\\RunDbMigration.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mezig\\Music\\eccc\\yeka-main\\CleaningManagmentSystem\\Scripts\\RunDbMigration.csproj": {
+    "C:\\Users\\mezig\\Downloads\\Telegram Desktop\\yeka-main\\yeka-main\\CleaningManagmentSystem\\Scripts\\RunDbMigration.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mezig\\Music\\eccc\\yeka-main\\CleaningManagmentSystem\\Scripts\\RunDbMigration.csproj",
+        "projectUniqueName": "C:\\Users\\mezig\\Downloads\\Telegram Desktop\\yeka-main\\yeka-main\\CleaningManagmentSystem\\Scripts\\RunDbMigration.csproj",
         "projectName": "RunDbMigration",
-        "projectPath": "C:\\Users\\mezig\\Music\\eccc\\yeka-main\\CleaningManagmentSystem\\Scripts\\RunDbMigration.csproj",
+        "projectPath": "C:\\Users\\mezig\\Downloads\\Telegram Desktop\\yeka-main\\yeka-main\\CleaningManagmentSystem\\Scripts\\RunDbMigration.csproj",
         "packagesPath": "C:\\Users\\mezig\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mezig\\Music\\eccc\\yeka-main\\CleaningManagmentSystem\\Scripts\\obj\\",
+        "outputPath": "C:\\Users\\mezig\\Downloads\\Telegram Desktop\\yeka-main\\yeka-main\\CleaningManagmentSystem\\Scripts\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\mezig\\AppData\\Roaming\\NuGet\\NuGet.Config"
